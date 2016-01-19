@@ -1,0 +1,6 @@
+https://codex.wordpress.org/Function_Reference/register_post_type
+https://www.airpair.com/wordpress/posts/developing-wordpress-plugin-from-scratch
+https://codex.wordpress.org/Post_Types
+https://codex.wordpress.org/Excerpt
+
+https://codex.wordpress.org/Function_Reference/register_taxonomy
