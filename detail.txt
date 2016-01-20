@@ -4,3 +4,28 @@ https://codex.wordpress.org/Post_Types
 https://codex.wordpress.org/Excerpt
 
 https://codex.wordpress.org/Function_Reference/register_taxonomy
+
+
+Hello,
+
+Today i have worked 3 hours on below tasks:
+1. Add field to forms 
+2. Add authentication table to wordpress.
+
+Can you please provide me live API link from where i can access API?
+
+I have below queries so please provide me brief details for that:
+
+1. Group meetings : We need to use shortcode to display meeting but where we have to store all meeetings? Means we have to create new post type for meeting or we have to fetch from API?
+
+2. For API authentication we have to store username/password in WP database or not?
+
+3. I have created new page for import course and other data. Is that fine or add it to autheticate page?
+
+4. For CRON job we need to use WP plugin for that or just make simple PHP script for that and you will set it from your side?
+
+5. I have to upload plugin to wordpress repository or client will do it?
+
+Waiting for your reply.
+
+

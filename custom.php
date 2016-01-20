@@ -171,5 +171,21 @@ function add_wmenu_page( $page_title, $menu_title, $capability, $menu_slug, $fun
 
 new WP_Adept_LMS();
 
+global $wpdb;
+
+$charset_collate = $wpdb->get_charset_collate();
+
+$table_name = 'api_crendential';
+
+$sql = "CREATE TABLE $table_name (
+  id mediumint(9) NOT NULL AUTO_INCREMENT,
+  email varchar(55) DEFAULT '' NOT NULL,
+  password varchar(55) DEFAULT '' NOT NULL,
+  addeddatetime datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  UNIQUE KEY id (id)
+) $charset_collate;";
+
+require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+dbDelta( $sql );
 
 ?>
