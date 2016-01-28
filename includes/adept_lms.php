@@ -20,7 +20,7 @@ $result = curl_exec($ch);
 //echo $result;
 $temp = json_decode($result);
 
-$table_name1 = "wp_term_taxonomy";
+/* $table_name1 = "wp_term_taxonomy";
 $table_name2 = "wp_term";
 
 foreach($temp as $_temp)
@@ -47,7 +47,7 @@ foreach($temp as $_temp)
 			)
 			);
 		}
-	}
+	} */
 	echo "<h3>Course category imported successfully</h3>";
 }
 
