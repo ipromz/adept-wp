@@ -48,7 +48,7 @@ foreach($temp as $_temp)
 			);
 		}
 	}
-	echo "Course category imported successfully";
+	echo "<h3>Course category imported successfully</h3>";
 }
 
 
