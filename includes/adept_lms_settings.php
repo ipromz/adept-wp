@@ -70,12 +70,12 @@ if ($temp->status==200 || $temp->status=='OK')
 			if ($email == $useremail)
 			{
 				$wpdb->query($wpdb->prepare("UPDATE $table_name SET access_token= '$access_token' WHERE email='$useremail'"));
-				echo "user already exists";
+				echo "user already exists in system";
 			}
 			else{
 		
 				$wpdb->query($wpdb->prepare("UPDATE $table_name SET email='$email',password='$password',access_token= '$access_token' WHERE email='$useremail'"));
-				echo "user details updated";
+				echo "user details are updated";
 	
 			}
 	}
