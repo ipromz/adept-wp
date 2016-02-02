@@ -294,6 +294,11 @@ function wpt_meeting_fields() {
 	echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' . 
 	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 	
+	// Get the comment data if its already been entered
+	$comment = get_post_meta($post->ID, '_comment', true);
+	// Echo out the field
+	echo '<b>Comment :</b> <textarea type="text" name="_comment" class="widefat">'.$comment.'</textarea><br/><br/>';
+	
 	// Get the date data if its already been entered
 	$date = get_post_meta($post->ID, '_date', true);
 	// Echo out the field
@@ -304,25 +309,42 @@ function wpt_meeting_fields() {
 	// Echo out the field
 	echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time  . '" class="widefat" /><br/><br/>';
 	
-	// Get the duration data if its already been entered
-	$duration = get_post_meta($post->ID, '_duration', true);
+	// Get the start_time data if its already been entered
+	$end_time = get_post_meta($post->ID, '_end_time', true);
 	// Echo out the field
-	echo '<b>Duration :</b> <input type="text" name="_duration" value="' . $duration  . '" class="widefat" /> <br/><br/>';
+	echo '<b>End Time : </b><input type="text" name="_end_time" value="' . $end_time  . '" class="widefat" /><br/><br/>';
 	
 	// Get the status data if its already been entered
 	$status = get_post_meta($post->ID, '_status', true);
 	// Echo out the field
 	echo '<b>Status :</b> <input type="text" name="_status" value="' . $status  . '" class="widefat" /><br/><br/>';
 	
-	// Get the instructor data if its already been entered
-	$instructor = get_post_meta($post->ID, '_instructor', true);
+	// Get the web_conference data if its already been entered
+	$web_conference = get_post_meta($post->ID, '_web_conference', true);
 	// Echo out the field
-	echo '<b>Instructor :</b> <input type="text" name="_instructor" value="' . $instructor  . '" class="widefat" /><br/><br/>';
+	echo '<b>Web Conference :</b> <input type="radio" name="_web_conference" value="true" class="widefat" /> True';
+	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_web_conference" value="false" class="widefat" /> False  <br/><br/>';
 	
-    // Get the instructor_desc data if its already been entered
-	$instructor_desc = get_post_meta($post->ID, '_instructor_desc', true);
+	// Get the address data if its already been entered
+	$address = get_post_meta($post->ID, '_address', true);
 	// Echo out the field
-	echo '<b>Instructor Description :</b><br/> <textarea  cols="53" name="_instructor_desc" class="widefat"> ' . $instructor_desc  . ' </textarea ><br/><br/>';
+	echo '<b>Address :</b> <textarea type="text" name="_address" class="widefat">'.$address.'</textarea><br/><br/>';
+	
+	// Get the class_id data if its already been entered
+	$class_id = get_post_meta($post->ID, '_class_id', true);
+	// Echo out the field
+	echo '<b>Class Id :</b> <input type="text" name="_class_id" value="' . $class_id  . '" class="widefat" /><br/><br/>';
+	
+	// Get the check_address data if its already been entered
+	$check_address = get_post_meta($post->ID, '_check_address', true);
+	// Echo out the field
+	echo '<b>Check Address :</b> <input type="radio" name="_check_address" value="true" class="widefat" /> True';
+	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_check_address" value="false" class="widefat" /> False  <br/><br/>';
+	
+	// Get the group_id data if its already been entered
+	$group_id = get_post_meta($post->ID, '_group_id', true);
+	// Echo out the field
+	echo '<b>Group Id:</b> <input type="text" name="_group_id" value="' . $group_id  . '" class="widefat" /><br/><br/>';
 
 }
 
@@ -341,12 +363,16 @@ function wpt_save_meeting_meta($post_id, $post) {
 	// OK, we're authenticated: we need to find and save the data
 	// We'll put it into an array to make it easier to loop though.
 	
+	$course_meta['_comment'] = $_POST['_comment'];
 	$course_meta['_date'] = $_POST['_date'];
 	$course_meta['_start_time'] = $_POST['_start_time'];
-	$course_meta['_duration'] = $_POST['_duration'];
+	$course_meta['_end_time'] = $_POST['_end_time'];
+	$course_meta['_web_conference'] = $_POST['_web_conference'];
+	$course_meta['_address'] = $_POST['_address'];
+	$course_meta['_class_id'] = $_POST['_class_id'];
 	$course_meta['_status'] = $_POST['_status'];
-	$course_meta['_instructor'] = $_POST['_instructor'];
-	$course_meta['_instructor_desc'] = $_POST['_instructor_desc'];
+	$course_meta['_group_id'] = $_POST['_group_id'];
+	$course_meta['_check_address'] = $_POST['_check_address'];
 
 	
 	// Add values of $course_meta as custom fields
@@ -389,7 +415,7 @@ function wp_meetings_shortcode(){
 		<li class="status">Status</li>
 		<li class="instructor">Instructor </li>
 		<li class="instructor_desc">Instructor description </li>
-				</ul>
+	    </ul>
 		';	
 	}
 	echo "</div>";

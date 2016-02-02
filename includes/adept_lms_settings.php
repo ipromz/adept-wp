@@ -36,23 +36,22 @@ $result = curl_exec($ch);
 $temp = json_decode($result);
 //print_r($temp->status);
 $access_token = $temp->access_token;
-echo $access_token;
+//echo $access_token;
 $date = date('Y-m-d h:i:s', time());
 //echo $date;
 
 if ($temp->status==200 || $temp->status=='OK')
 {
-		
+	
 	global $wpdb;
 	$table_name = "api_crendential";
 	$myrows = $wpdb->get_results( "SELECT email FROM ".$table_name );
 	$useremail = $myrows[0]->email;
-	$wpdb->get_results( 'SELECT COUNT(*) FROM '.$table_name );
-	$count = $wpdb->num_rows;
-	echo $count;
-
-
-	if($count==0)
+	
+	$data =  $wpdb->get_results( 'SELECT COUNT(*) as cnt FROM '.$table_name );
+	$count = $data[0]->cnt;
+	
+	if($count == '0')
 	{
 	$wpdb->insert( 
 	$table_name, 
@@ -65,17 +64,17 @@ if ($temp->status==200 || $temp->status=='OK')
 	 
 );
 	}
-	else if ($count == 1)
+	else if ($count == '1')
 	{
 			if ($email == $useremail)
 			{
 				$wpdb->query($wpdb->prepare("UPDATE $table_name SET access_token= '$access_token' WHERE email='$useremail'"));
-				echo "user already exists in system";
+				echo "user already exists";
 			}
 			else{
 		
 				$wpdb->query($wpdb->prepare("UPDATE $table_name SET email='$email',password='$password',access_token= '$access_token' WHERE email='$useremail'"));
-				echo "user details are updated";
+				echo "user details updated";
 	
 			}
 	}
