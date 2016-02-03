@@ -88,7 +88,8 @@ foreach($temp as $_temp)
 	foreach($_temp as $_temp1)
 	{
 		$lastid = $wpdb->get_col("SELECT ID FROM wp_posts ORDER BY ID DESC LIMIT 0 , 1" );
-		$latestid = $lastid[0]+1;	
+		$latestid = $lastid[0]+1;
+		$post_id = $_temp1->id;
 		$post_date = $_temp1->created_at;
 		$post_update_date = $_temp1->updated_at;
 		$post_title = $_temp1->course_title;
@@ -124,6 +125,16 @@ foreach($temp as $_temp)
 			
 		)); 
 		$id= $wpdb->insert_id;
+		
+		if($post_id != '')
+		{
+			$wpdb->insert("wp_postmeta", array(
+			"post_id" => $id,
+			"meta_key" => '_post_id',
+			"meta_value" => $post_id
+		   		
+		));
+		}
 		
 		
 		if($meta_teaser_value != '')
@@ -237,12 +248,12 @@ curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 $result = curl_exec($ch);
 
 $temp = json_decode($result);
-
+	
 foreach($temp as $_temp)
 {
-		
+
 	foreach($_temp as $_temp1)
-	{
+	{	
 		$post_id = $_temp1->id;
 		$post_date = $_temp1->created_at;
 		$post_update_date = $_temp1->updated_at;
@@ -259,8 +270,14 @@ foreach($temp as $_temp)
 		$meta_subscription_value = $_temp1->subscription;
 		$meta_booking_count_value = $_temp1->booking_count;
 		$meta_course_category_id_value = $_temp1->course_category_id;
-		
-						 
+			
+	$table_name = "wp_postmeta";
+	$myrows = $wpdb->get_results( "SELECT post_id FROM wp_postmeta where meta_key='_post_id' AND meta_value =".$post_id );
+	$courseid = $myrows[0]->post_id;
+	
+	
+		if($courseid)
+		{
 		$wpdb->update("wp_posts", array(
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
@@ -270,27 +287,27 @@ foreach($temp as $_temp)
 		   "post_modified" => $post_update_date,
 		   "post_modified_gmt" => $post_update_date,
 		   "post_type" => 'courses'
-		),array( 'ID' => $post_id )); 
+		),array( 'ID' => $courseid )); 
 		
 		if($meta_teaser_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
 			"meta_value" => $meta_teaser_value
-			),array("post_id" => $post_id,
+			),array("post_id" => $courseid,
 			"meta_key" => '_teaser'));
 		}
 		
 		if($meta_tags_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_tags_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_tags_value),array("post_id" => $courseid,
 			"meta_key" => '_tags'));
 		}
 		
 		if($meta_is_featured_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_is_featured_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_is_featured_value),array("post_id" => $courseid,
 			"meta_key" => '_is_featured'));
 		}
 		
@@ -298,7 +315,7 @@ foreach($temp as $_temp)
 		if($meta_course_fee_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_course_fee_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_course_fee_value),array("post_id" => $courseid,
 			"meta_key" => '_course_fee'));
 		}
 		
@@ -306,33 +323,34 @@ foreach($temp as $_temp)
 		if($meta_sku_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_sku_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_sku_value),array("post_id" => $courseid,
 			"meta_key" => '_sku'));
 		}
 		
 		if($meta_tax_category_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_tax_category_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_tax_category_value),array("post_id" => $courseid,
 			"meta_key" => '_tax_category'));
 		}
 
 		if($meta_allow_discounts_value != '')
 		{
 			$wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_allow_discounts_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_allow_discounts_value),array("post_id" => $courseid,
 			"meta_key" => '_allow_discounts'));
 		}
 
 		if($meta_subscription_value != '')
 		{
 		   $wpdb->update("wp_postmeta", array(
-		   "meta_value" => $meta_subscription_value),array("post_id" => $post_id,
+		   "meta_value" => $meta_subscription_value),array("post_id" => $courseid,
 			"meta_key" => '_subscription'));
 		}
 		
-		}
 	}
+	}
+}
 	echo "Courses Updated successfully";
 	}
 }
