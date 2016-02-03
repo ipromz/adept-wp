@@ -1,8 +1,8 @@
 <?php 
     /*
-    Plugin Name: Lingu Plugin
+    Plugin Name: Adept LMS Plugin
     Plugin URI: http://www.orangecreative.net
-    Description: Plugin for Lingu
+    Description: Plugin for Adept LMS
     Author: Viral Sonawala
     Version: 1.0
     */
@@ -18,7 +18,7 @@
         register_deactivation_hook( __FILE__, array( $this, 'wpa_uninstall' ) );
     }
 
-    /*
+     /*
       * Actions perform at loading of admin menu
       */
     function wpa_add_menu() {
@@ -67,7 +67,9 @@
      * Actions perform on de-activation of plugin
      */
     function wpa_uninstall() {
-
+		global $wpdb;
+		$wpdb->query( "DROP TABLE IF EXISTS api_crendential" );
+		
 
 
     }
@@ -406,17 +408,31 @@ function wp_meetings_shortcode(){
 	$meetings_array = get_posts( $args ); 
 	echo "<div class='meeting-loop'>";
 	foreach($meetings_array as $meeting){
-		echo '<ul class="meeting">
-		<li class="title"> Meeting title</li>
-		<li class="content"> Content </li>
-		<li class="date">Date</li>
-		<li class="start_time">Start_time</li>
-		<li class="duration">Duration </li>
-		<li class="status">Status</li>
-		<li class="instructor">Instructor </li>
-		<li class="instructor_desc">Instructor description </li>
-	    </ul>
-		';	
+			$date = get_post_meta( $meeting->ID, '_date' ); 
+			$start_time = get_post_meta( $meeting->ID, '_start_time' ); 
+			$end_time = get_post_meta( $meeting->ID, '_end_time' ); 
+			$status = get_post_meta( $meeting->ID, '_status' ); 
+			$web_conference = get_post_meta( $meeting->ID, '_web_conference' ); 
+			$address = get_post_meta( $meeting->ID, '_address' ); 
+			$class_id = get_post_meta( $meeting->ID, '_class_id' ); 
+			$group_id = get_post_meta( $meeting->ID, '_group_id' ); 
+			$check_address = get_post_meta( $meeting->ID, '_check_address' ); 
+	
+	
+			echo '<ul class="meeting">
+			<li class="title"> '.$meeting->post_title.'</li>
+			<li class="content"> '.$meeting->post_content.' </li>
+			<li class="date">'.$date[0].'</li>
+			<li class="start_time">'.$start_time[0].'</li>
+			<li class="end_time">'.$end_time[0].'</li>
+			<li class="status">'.$status[0].'</li>
+			<li class="web_conference">'.$web_conference[0].'</li>
+			<li class="address">'.$address[0].'</li>
+			<li class="class_id">'.$class_id[0].'</li>
+			<li class="group_id">'.$group_id[0].' </li>
+			<li class="check_address">'.$check_address[0].' </li>
+			</ul>
+			';	
 	}
 	echo "</div>";
 }

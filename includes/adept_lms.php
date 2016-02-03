@@ -6,7 +6,9 @@
 	$table_name = "api_crendential";
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
-	//echo $access_token;
+	if($access_token == ''){
+		echo "Please enter authentication detail";
+	}else{
 	$ch = curl_init('adeptlms.com/api/v1/course_categories_api?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -17,7 +19,7 @@
 curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 $result = curl_exec($ch);
-//echo $result;
+
 $temp = json_decode($result);
 
 $table_name1 = "wp_term_taxonomy";
@@ -51,6 +53,7 @@ foreach($temp as $_temp)
 		}
 	}
 	echo "Course category imported successfully";
+	}
 }
 
 
@@ -62,21 +65,23 @@ foreach($temp as $_temp)
 	$table_name = "api_crendential";
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
-	//echo $access_token;
+	if($access_token == ''){
+		echo "Please enter authentication detail";
+	}else{
+	
 	$ch = curl_init('adeptlms.com/api/v1/courses_api?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Content-Type: application/x-www-form-urlencoded',
     )
-);
+	);
 curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 $result = curl_exec($ch);
 
 $temp = json_decode($result);
-echo "<pre>";
-var_dump($temp);
+
 foreach($temp as $_temp)
 {
 		
@@ -206,6 +211,7 @@ foreach($temp as $_temp)
 		}
 	}
 	echo "Courses imported successfully";
+	}
 }
 
 //course update code 
@@ -216,7 +222,9 @@ foreach($temp as $_temp)
 	$table_name = "api_crendential";
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
-	//echo $access_token;
+	if($access_token == ''){
+		echo "Please enter authentication detail";
+	}else{
 	$ch = curl_init('adeptlms.com/api/v1/course_updates?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -326,6 +334,7 @@ foreach($temp as $_temp)
 		}
 	}
 	echo "Courses Updated successfully";
+	}
 }
 
 //meeting import code 
@@ -336,7 +345,9 @@ foreach($temp as $_temp)
 	$table_name = "api_crendential";
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
-	//echo $access_token;
+	if($access_token == ''){
+		echo "Please enter authentication detail";
+	}else{
 	$ch = curl_init('adeptlms.com/api/v1/group_meetings?access_token='.$access_token.'&id=1');
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -349,8 +360,7 @@ curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 $result = curl_exec($ch);
 
 $temp = json_decode($result);
-//echo "<pre>";
-//var_dump($temp);exit;
+
 foreach($temp as $_temp)
 {
 		
@@ -481,6 +491,7 @@ foreach($temp as $_temp)
 		}
 	}
 	echo "Meetings imported successfully";
+	}
 }
 
  ?>
@@ -512,6 +523,12 @@ foreach($temp as $_temp)
           <th width="115"><?php esc_html_e( 'Class Meeting:' )?></th>
               <td width="877">
                     <input type="submit" name="class_meeting" value="Class Meeting"/>
+              </td>
+        </tr>
+		<tr>
+          <th width="115"><?php esc_html_e( 'Short Code for Meeting:' )?></th>
+              <td width="877">
+                    <?php esc_html_e( 'meetings' )?>
               </td>
         </tr>
       </tbody>
