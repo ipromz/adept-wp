@@ -22,8 +22,8 @@ $result = curl_exec($ch);
 
 $temp = json_decode($result);
 
-$table_name1 = "wp_term_taxonomy";
-$table_name2 = "wp_term";
+$table_name1 = "wpmf_term_taxonomy";
+$table_name2 = "wpmf_term";
 
 foreach($temp as $_temp)
 {
@@ -32,7 +32,7 @@ foreach($temp as $_temp)
 		$name = $_temp1->name;
 		$description = $_temp1->description;
 		
-		$wpdb->insert("wp_terms", array(
+		$wpdb->insert("wpmf_terms", array(
 		   "name" => $name,
 			"slug" => $name
 		));
@@ -87,7 +87,7 @@ foreach($temp as $_temp)
 		
 	foreach($_temp as $_temp1)
 	{
-		$lastid = $wpdb->get_col("SELECT ID FROM wp_posts ORDER BY ID DESC LIMIT 0 , 1" );
+		$lastid = $wpdb->get_col("SELECT ID FROM wpmf_posts ORDER BY ID DESC LIMIT 0 , 1" );
 		$latestid = $lastid[0]+1;
 		$post_id = $_temp1->id;
 		$post_date = $_temp1->created_at;
@@ -107,7 +107,7 @@ foreach($temp as $_temp)
 		$meta_course_category_id_value = $_temp1->course_category_id;
 		
 						 
-		$wpdb->insert("wp_posts", array(
+		$wpdb->insert("wpmf_posts", array(
 		   "post_author" => '1',
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
@@ -128,7 +128,7 @@ foreach($temp as $_temp)
 		
 		if($post_id != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_post_id',
 			"meta_value" => $post_id
@@ -139,7 +139,7 @@ foreach($temp as $_temp)
 		
 		if($meta_teaser_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_teaser',
 			"meta_value" => $meta_teaser_value
@@ -149,7 +149,7 @@ foreach($temp as $_temp)
 		
 		if($meta_tags_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_tags',
 		   "meta_value" => $meta_tags_value,
@@ -159,7 +159,7 @@ foreach($temp as $_temp)
 		
 		if($meta_is_featured_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_is_featured',
 		   "meta_value" => $meta_is_featured_value,
@@ -170,7 +170,7 @@ foreach($temp as $_temp)
 		
 		if($meta_course_fee_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_course_fee',
 		   "meta_value" => $meta_course_fee_value,
@@ -181,7 +181,7 @@ foreach($temp as $_temp)
 		
 		if($meta_sku_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_sku',
 		   "meta_value" => $meta_sku_value,
@@ -191,7 +191,7 @@ foreach($temp as $_temp)
 		
 		if($meta_tax_category_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_tax_category',
 		   "meta_value" => $meta_tax_category_value,
@@ -201,7 +201,7 @@ foreach($temp as $_temp)
 
 		if($meta_allow_discounts_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_allow_discounts',
 		   "meta_value" => $meta_allow_discounts_value,
@@ -211,7 +211,7 @@ foreach($temp as $_temp)
 
 		if($meta_subscription_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 		   "post_id" => $id,
 		   "meta_key" => '_subscription',
 		   "meta_value" => $meta_subscription_value,
@@ -271,14 +271,14 @@ foreach($temp as $_temp)
 		$meta_booking_count_value = $_temp1->booking_count;
 		$meta_course_category_id_value = $_temp1->course_category_id;
 			
-	$table_name = "wp_postmeta";
-	$myrows = $wpdb->get_results( "SELECT post_id FROM wp_postmeta where meta_key='_post_id' AND meta_value =".$post_id );
+	$table_name = "wpmf_postmeta";
+	$myrows = $wpdb->get_results( "SELECT post_id FROM wpmf_postmeta where meta_key='_post_id' AND meta_value =".$post_id );
 	$courseid = $myrows[0]->post_id;
 	
 	
 		if($courseid)
 		{
-		$wpdb->update("wp_posts", array(
+		$wpdb->update("wpmf_posts", array(
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
 		   "post_content" => $description,
@@ -291,7 +291,7 @@ foreach($temp as $_temp)
 		
 		if($meta_teaser_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 			"meta_value" => $meta_teaser_value
 			),array("post_id" => $courseid,
 			"meta_key" => '_teaser'));
@@ -299,14 +299,14 @@ foreach($temp as $_temp)
 		
 		if($meta_tags_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_tags_value),array("post_id" => $courseid,
 			"meta_key" => '_tags'));
 		}
 		
 		if($meta_is_featured_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_is_featured_value),array("post_id" => $courseid,
 			"meta_key" => '_is_featured'));
 		}
@@ -314,7 +314,7 @@ foreach($temp as $_temp)
 		
 		if($meta_course_fee_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_course_fee_value),array("post_id" => $courseid,
 			"meta_key" => '_course_fee'));
 		}
@@ -322,28 +322,28 @@ foreach($temp as $_temp)
 		
 		if($meta_sku_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_sku_value),array("post_id" => $courseid,
 			"meta_key" => '_sku'));
 		}
 		
 		if($meta_tax_category_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_tax_category_value),array("post_id" => $courseid,
 			"meta_key" => '_tax_category'));
 		}
 
 		if($meta_allow_discounts_value != '')
 		{
-			$wpdb->update("wp_postmeta", array(
+			$wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_allow_discounts_value),array("post_id" => $courseid,
 			"meta_key" => '_allow_discounts'));
 		}
 
 		if($meta_subscription_value != '')
 		{
-		   $wpdb->update("wp_postmeta", array(
+		   $wpdb->update("wpmf_postmeta", array(
 		   "meta_value" => $meta_subscription_value),array("post_id" => $courseid,
 			"meta_key" => '_subscription'));
 		}
@@ -402,7 +402,7 @@ foreach($temp as $_temp)
 	
 		
 						 
-		$wpdb->insert("wp_posts", array(
+		$wpdb->insert("wpmf_posts", array(
 		   "post_author" => '1',
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
@@ -424,7 +424,7 @@ foreach($temp as $_temp)
 		
 		if($meta_date_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_date',
 			"meta_value" => $meta_date_value
@@ -434,7 +434,7 @@ foreach($temp as $_temp)
 		
 		if($meta_start_time_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_start_time',
 			"meta_value" => $meta_start_time_value
@@ -443,7 +443,7 @@ foreach($temp as $_temp)
 		
 		if($meta_end_time_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_end_time',
 			"meta_value" => $meta_end_time_value
@@ -452,7 +452,7 @@ foreach($temp as $_temp)
 		
 		if($meta_status_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_status',
 			"meta_value" => $meta_status_value
@@ -461,7 +461,7 @@ foreach($temp as $_temp)
 		
 		if($meta_web_conference_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_web_conference',
 			"meta_value" => $meta_web_conference_value
@@ -470,7 +470,7 @@ foreach($temp as $_temp)
 		
 		if($meta_address_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_address',
 			"meta_value" => $meta_address_value
@@ -479,7 +479,7 @@ foreach($temp as $_temp)
 		
 		if($meta_class_id_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_class_id',
 			"meta_value" => $meta_class_id_value
@@ -488,7 +488,7 @@ foreach($temp as $_temp)
 		
 		if($meta_check_address_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_check_address',
 			"meta_value" => $meta_check_address_value
@@ -497,7 +497,7 @@ foreach($temp as $_temp)
 		
 		if($meta_group_id_value != '')
 		{
-			$wpdb->insert("wp_postmeta", array(
+			$wpdb->insert("wpmf_postmeta", array(
 			"post_id" => $id,
 			"meta_key" => '_group_id_value',
 			"meta_value" => $meta_group_id_value

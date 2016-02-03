@@ -103,6 +103,14 @@ else{
  <form action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>" method="post" name="settings_form" id="settings_form">
     <table width="1004" class="form-table">
       <tbody>
+	  
+		<tr>
+			  <th width="115"><?php esc_html_e( 'URL:' )?></th>
+			  <td width="877">
+				<input type="text" name="url" value="<?php echo $url;?>" style="width:450px;"/>   
+			  </td>
+        </tr>
+		
         <tr>
 			  <th width="115"><?php esc_html_e( 'Email:' )?></th>
 			  <td width="877">
