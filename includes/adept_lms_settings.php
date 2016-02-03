@@ -3,8 +3,15 @@
   $wp_adept_lms = new WP_Adept_LMS();
 if(isset($_POST['save_code']))
 {
-$ch = curl_init('http://adeptlms.com/api/v1/authentication');
+$url = $_POST['url'];
+$ch = curl_init($url);
 if($_POST){
+	
+	if(trim($_POST['url']) == ''){
+		  $error = 'Please enter API URL';
+	  }else{
+		  $url = $_POST['url'];
+	  }
 	  if(trim($_POST['email']) == ''){
 		  $error = 'Please enter email';
 	  }else{
