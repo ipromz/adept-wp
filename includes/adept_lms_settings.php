@@ -1,16 +1,16 @@
 <?php
 
-  $wp_adept_lms = new WP_Adept_LMS();
+$wp_adept_lms = new WP_Adept_LMS();
 if(isset($_POST['save_code']))
 {
-$url = $_POST['url'];
-$ch = curl_init($url);
+$url = $_POST['api_url'];
+$ch = curl_init($url."authentication");
 if($_POST){
 	
-	if(trim($_POST['url']) == ''){
+	if(trim($_POST['api_url']) == ''){
 		  $error = 'Please enter API URL';
 	  }else{
-		  $url = $_POST['url'];
+		  $url = $_POST['api_url'];
 	  }
 	  if(trim($_POST['email']) == ''){
 		  $error = 'Please enter email';
@@ -52,7 +52,7 @@ if ($temp->status==200 || $temp->status=='OK')
 {
 	
 	global $wpdb;
-	$table_name = "api_crendential";
+	$table_name = $wpdb->prefix."api_crendential";
 	$myrows = $wpdb->get_results( "SELECT email FROM ".$table_name );
 	$useremail = $myrows[0]->email;
 	
@@ -61,16 +61,18 @@ if ($temp->status==200 || $temp->status=='OK')
 	
 	if($count == '0')
 	{
-	$wpdb->insert( 
+		
+	$data = $wpdb->insert( 
 	$table_name, 
 	array( 
+		'api_url' => $url, 
 		'email' => $email, 
 		'password' => $password,
 		'access_token' => $access_token,
 		'addeddatetime' => $date
 	) 
 	 
-);
+);  
 	}
 	else if ($count == '1')
 	{
@@ -81,7 +83,7 @@ if ($temp->status==200 || $temp->status=='OK')
 			}
 			else{
 		
-				$wpdb->query($wpdb->prepare("UPDATE $table_name SET email='$email',password='$password',access_token= '$access_token' WHERE email='$useremail'"));
+				$wpdb->query($wpdb->prepare("UPDATE $table_name SET api_url='$url',email='$email',password='$password',access_token= '$access_token' WHERE email='$useremail'"));
 				echo "user details updated";
 	
 			}
@@ -90,11 +92,6 @@ if ($temp->status==200 || $temp->status=='OK')
 	else{
 		echo "invalid credentials";
 	}
-	
-	//echo $useremail;
-	
-	
-	
 }
 else{
 	echo "invalid credentials";
@@ -112,9 +109,10 @@ else{
       <tbody>
 	  
 		<tr>
-			  <th width="115"><?php esc_html_e( 'URL:' )?></th>
+			  <th width="115"><?php esc_html_e( 'API URL:' )?></th>
 			  <td width="877">
-				<input type="text" name="url" value="<?php echo $url;?>" style="width:450px;"/>   
+				<input type="text" name="api_url" value="<?php echo $url;?>" style="width:450px;"/>  
+					i.e. adeptlms.com/api/v1/
 			  </td>
         </tr>
 		
@@ -137,6 +135,8 @@ else{
 				  <input type="submit" class="button-primary" value="Save Authentication" name="save_code" />
 				</p>
 			  </td>
+			  
+			  <br/><p>Only admin user accounts will be permitted</p>
         </tr>
       </tbody>
     </table>

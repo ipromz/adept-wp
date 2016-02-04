@@ -1,15 +1,26 @@
 <?php
   $wp_adept_lms = new WP_Adept_LMS();
+  
+ global $wpdb;
+$post_table = $wpdb->prefix."posts";
+$postmeta_table = $wpdb->prefix."postmeta";
+$table_name = $wpdb->prefix."api_crendential";
+$table_name1 = $wpdb->prefix."term_taxonomy";
+$table_name2 = $wpdb->prefix."terms";
+$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
+$access_token = $myrows[0]->access_token;
+$myapi_urlrows = $wpdb->get_results( "SELECT api_url FROM ".$table_name );
+$api_url = $myapi_urlrows[0]->api_url;
+$site_url = get_site_url();
   if(isset($_POST['import_categories']))
   {
-  global $wpdb;
-	$table_name = "api_crendential";
-	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
-	$access_token = $myrows[0]->access_token;
+  
+	
 	if($access_token == ''){
 		echo "Please enter authentication detail";
 	}else{
-	$ch = curl_init('adeptlms.com/api/v1/course_categories_api?access_token='.$access_token);
+	
+	$ch = curl_init($api_url .'course_categories_api?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -22,21 +33,18 @@ $result = curl_exec($ch);
 
 $temp = json_decode($result);
 
-$table_name1 = "wpmf_term_taxonomy";
-$table_name2 = "wpmf_term";
-
 foreach($temp as $_temp)
-{
+{	
 	foreach($_temp as $_temp1)
 	{
 		$name = $_temp1->name;
 		$description = $_temp1->description;
 		
-		$wpdb->insert("wpmf_terms", array(
+		$data = $wpdb->insert($table_name2, array(
 		   "name" => $name,
 			"slug" => $name
 		));
-
+		
 		$lastid = $wpdb->insert_id;
 		
 		
@@ -61,15 +69,14 @@ foreach($temp as $_temp)
 
  if(isset($_POST['import_course']))
   {
-  global $wpdb;
-	$table_name = "api_crendential";
+ 
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
 	if($access_token == ''){
 		echo "Please enter authentication detail";
 	}else{
 	
-	$ch = curl_init('adeptlms.com/api/v1/courses_api?access_token='.$access_token);
+	$ch = curl_init($api_url .'courses_api?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -87,7 +94,7 @@ foreach($temp as $_temp)
 		
 	foreach($_temp as $_temp1)
 	{
-		$lastid = $wpdb->get_col("SELECT ID FROM wpmf_posts ORDER BY ID DESC LIMIT 0 , 1" );
+		$lastid = $wpdb->get_col("SELECT ID FROM ".$post_table." ORDER BY ID DESC LIMIT 0 , 1" );
 		$latestid = $lastid[0]+1;
 		$post_id = $_temp1->id;
 		$post_date = $_temp1->created_at;
@@ -107,7 +114,7 @@ foreach($temp as $_temp)
 		$meta_course_category_id_value = $_temp1->course_category_id;
 		
 						 
-		$wpdb->insert("wpmf_posts", array(
+		$wpdb->insert($post_table, array(
 		   "post_author" => '1',
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
@@ -121,14 +128,14 @@ foreach($temp as $_temp)
 		   "post_modified_gmt" => $post_update_date,
 		   "menu_order" => '0',
 		   "post_type" => 'courses',
-		   "guid"=>'http://127.0.0.1/adeptlms/?post_type=courses&#038;p='.$latestid
+		   "guid"=>$site_url.'/?post_type=courses&#038;p='.$latestid
 			
 		)); 
 		$id= $wpdb->insert_id;
 		
 		if($post_id != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_post_id',
 			"meta_value" => $post_id
@@ -139,7 +146,7 @@ foreach($temp as $_temp)
 		
 		if($meta_teaser_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_teaser',
 			"meta_value" => $meta_teaser_value
@@ -149,7 +156,7 @@ foreach($temp as $_temp)
 		
 		if($meta_tags_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_tags',
 		   "meta_value" => $meta_tags_value,
@@ -159,7 +166,7 @@ foreach($temp as $_temp)
 		
 		if($meta_is_featured_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_is_featured',
 		   "meta_value" => $meta_is_featured_value,
@@ -170,7 +177,7 @@ foreach($temp as $_temp)
 		
 		if($meta_course_fee_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_course_fee',
 		   "meta_value" => $meta_course_fee_value,
@@ -181,7 +188,7 @@ foreach($temp as $_temp)
 		
 		if($meta_sku_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_sku',
 		   "meta_value" => $meta_sku_value,
@@ -191,7 +198,7 @@ foreach($temp as $_temp)
 		
 		if($meta_tax_category_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_tax_category',
 		   "meta_value" => $meta_tax_category_value,
@@ -201,7 +208,7 @@ foreach($temp as $_temp)
 
 		if($meta_allow_discounts_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_allow_discounts',
 		   "meta_value" => $meta_allow_discounts_value,
@@ -211,7 +218,7 @@ foreach($temp as $_temp)
 
 		if($meta_subscription_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 		   "post_id" => $id,
 		   "meta_key" => '_subscription',
 		   "meta_value" => $meta_subscription_value,
@@ -229,14 +236,13 @@ foreach($temp as $_temp)
 
  if(isset($_POST['course_update']))
   {
-  global $wpdb;
-	$table_name = "api_crendential";
+
 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
 	if($access_token == ''){
 		echo "Please enter authentication detail";
 	}else{
-	$ch = curl_init('adeptlms.com/api/v1/course_updates?access_token='.$access_token);
+	$ch = curl_init($api_url .'course_updates?access_token='.$access_token);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -271,14 +277,14 @@ foreach($temp as $_temp)
 		$meta_booking_count_value = $_temp1->booking_count;
 		$meta_course_category_id_value = $_temp1->course_category_id;
 			
-	$table_name = "wpmf_postmeta";
-	$myrows = $wpdb->get_results( "SELECT post_id FROM wpmf_postmeta where meta_key='_post_id' AND meta_value =".$post_id );
+	
+	$myrows = $wpdb->get_results( "SELECT post_id FROM ".$postmeta_table." where meta_key='_post_id' AND meta_value =".$post_id );
 	$courseid = $myrows[0]->post_id;
 	
 	
 		if($courseid)
 		{
-		$wpdb->update("wpmf_posts", array(
+		$wpdb->update($post_table, array(
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
 		   "post_content" => $description,
@@ -291,7 +297,7 @@ foreach($temp as $_temp)
 		
 		if($meta_teaser_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 			"meta_value" => $meta_teaser_value
 			),array("post_id" => $courseid,
 			"meta_key" => '_teaser'));
@@ -299,14 +305,14 @@ foreach($temp as $_temp)
 		
 		if($meta_tags_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_tags_value),array("post_id" => $courseid,
 			"meta_key" => '_tags'));
 		}
 		
 		if($meta_is_featured_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_is_featured_value),array("post_id" => $courseid,
 			"meta_key" => '_is_featured'));
 		}
@@ -314,7 +320,7 @@ foreach($temp as $_temp)
 		
 		if($meta_course_fee_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_course_fee_value),array("post_id" => $courseid,
 			"meta_key" => '_course_fee'));
 		}
@@ -322,28 +328,28 @@ foreach($temp as $_temp)
 		
 		if($meta_sku_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_sku_value),array("post_id" => $courseid,
 			"meta_key" => '_sku'));
 		}
 		
 		if($meta_tax_category_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_tax_category_value),array("post_id" => $courseid,
 			"meta_key" => '_tax_category'));
 		}
 
 		if($meta_allow_discounts_value != '')
 		{
-			$wpdb->update("wpmf_postmeta", array(
+			$wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_allow_discounts_value),array("post_id" => $courseid,
 			"meta_key" => '_allow_discounts'));
 		}
 
 		if($meta_subscription_value != '')
 		{
-		   $wpdb->update("wpmf_postmeta", array(
+		   $wpdb->update($postmeta_table, array(
 		   "meta_value" => $meta_subscription_value),array("post_id" => $courseid,
 			"meta_key" => '_subscription'));
 		}
@@ -359,14 +365,12 @@ foreach($temp as $_temp)
 
  if(isset($_POST['class_meeting']))
   {
-  global $wpdb;
-	$table_name = "api_crendential";
-	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
+ 	$myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
 	$access_token = $myrows[0]->access_token;
 	if($access_token == ''){
 		echo "Please enter authentication detail";
 	}else{
-	$ch = curl_init('adeptlms.com/api/v1/group_meetings?access_token='.$access_token.'&id=1');
+	$ch = curl_init($api_url .'group_meetings?access_token='.$access_token.'&id=1');
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -384,7 +388,7 @@ foreach($temp as $_temp)
 		
 	foreach($_temp as $_temp1)
 	{
-		$lastid = $wpdb->get_col("SELECT ID FROM wp_posts ORDER BY ID DESC LIMIT 0 , 1" );
+		$lastid = $wpdb->get_col("SELECT ID FROM ".$post_table." ORDER BY ID DESC LIMIT 0 , 1" );
 		$latestid = $lastid[0]+1;	
 		$post_date = $_temp1->created_at;
 		$post_update_date = $_temp1->updated_at;
@@ -402,7 +406,7 @@ foreach($temp as $_temp)
 	
 		
 						 
-		$wpdb->insert("wpmf_posts", array(
+		$wpdb->insert($post_table, array(
 		   "post_author" => '1',
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
@@ -416,7 +420,7 @@ foreach($temp as $_temp)
 		   "post_modified_gmt" => $post_update_date,
 		   "menu_order" => '0',
 		   "post_type" => 'meetings',
-		   "guid"=>'http://127.0.0.1/adeptlms/?post_type=meetings&#038;p='.$latestid
+		   "guid"=>$site_url.'/?post_type=meetings&#038;p='.$latestid
 			
 		)); 
 		$id= $wpdb->insert_id;
@@ -424,7 +428,7 @@ foreach($temp as $_temp)
 		
 		if($meta_date_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_date',
 			"meta_value" => $meta_date_value
@@ -434,7 +438,7 @@ foreach($temp as $_temp)
 		
 		if($meta_start_time_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_start_time',
 			"meta_value" => $meta_start_time_value
@@ -443,7 +447,7 @@ foreach($temp as $_temp)
 		
 		if($meta_end_time_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_end_time',
 			"meta_value" => $meta_end_time_value
@@ -452,7 +456,7 @@ foreach($temp as $_temp)
 		
 		if($meta_status_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_status',
 			"meta_value" => $meta_status_value
@@ -461,7 +465,7 @@ foreach($temp as $_temp)
 		
 		if($meta_web_conference_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_web_conference',
 			"meta_value" => $meta_web_conference_value
@@ -470,7 +474,7 @@ foreach($temp as $_temp)
 		
 		if($meta_address_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_address',
 			"meta_value" => $meta_address_value
@@ -479,7 +483,7 @@ foreach($temp as $_temp)
 		
 		if($meta_class_id_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_class_id',
 			"meta_value" => $meta_class_id_value
@@ -488,7 +492,7 @@ foreach($temp as $_temp)
 		
 		if($meta_check_address_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_check_address',
 			"meta_value" => $meta_check_address_value
@@ -497,7 +501,7 @@ foreach($temp as $_temp)
 		
 		if($meta_group_id_value != '')
 		{
-			$wpdb->insert("wpmf_postmeta", array(
+			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
 			"meta_key" => '_group_id_value',
 			"meta_value" => $meta_group_id_value
