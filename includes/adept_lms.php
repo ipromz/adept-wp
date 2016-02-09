@@ -4,7 +4,7 @@
  global $wpdb;
 $post_table = $wpdb->prefix."posts";
 $postmeta_table = $wpdb->prefix."postmeta";
-$table_name = $wpdb->prefix."api_crendential";
+$table_name = $wpdb->prefix."api_credential";
 $table_name1 = $wpdb->prefix."term_taxonomy";
 $table_name2 = $wpdb->prefix."terms";
 $myrows = $wpdb->get_results( "SELECT access_token FROM ".$table_name );
@@ -119,6 +119,7 @@ foreach($temp as $_temp)
 		   "post_date" => $post_date,
 		   "post_date_gmt" => $post_date,
 		   "post_content" => $description,
+		   "post_excerpt" => $meta_teaser_value,
 		   "post_title" => $post_title,
 		   "post_status" => 'publish',
 		   "comment_status" => 'closed',
@@ -128,7 +129,8 @@ foreach($temp as $_temp)
 		   "post_modified_gmt" => $post_update_date,
 		   "menu_order" => '0',
 		   "post_type" => 'courses',
-		   "guid"=>$site_url.'/?post_type=courses&#038;p='.$latestid
+		   "guid"=>'http://127.0.0.1/adeptlms/?post_type=courses&#038;p='.$latestid
+		   //"guid"=>$site_url.'/?post_type=courses&#038;p='.$latestid
 			
 		)); 
 		$id= $wpdb->insert_id;
@@ -144,7 +146,7 @@ foreach($temp as $_temp)
 		}
 		
 		
-		if($meta_teaser_value != '')
+		/*if($meta_teaser_value != '')
 		{
 			$wpdb->insert($postmeta_table, array(
 			"post_id" => $id,
@@ -152,7 +154,7 @@ foreach($temp as $_temp)
 			"meta_value" => $meta_teaser_value
 		   		
 		));
-		}
+		}*/
 		
 		if($meta_tags_value != '')
 		{
@@ -420,7 +422,7 @@ foreach($temp as $_temp)
 		   "post_modified_gmt" => $post_update_date,
 		   "menu_order" => '0',
 		   "post_type" => 'meetings',
-		   "guid"=>$site_url.'/?post_type=meetings&#038;p='.$latestid
+		   "guid"=>'http://127.0.0.1/adeptlms/?post_type=meetings&#038;p='.$latestid
 			
 		)); 
 		$id= $wpdb->insert_id;
@@ -517,7 +519,7 @@ foreach($temp as $_temp)
 }
 
  ?>
- 
+ <title>Adept LMS</title>
  <h1>Adept LMS</h1>
  <div class="wrap">
   <form action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>" method="post" name="settings_form" id="settings_form">

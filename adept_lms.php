@@ -23,12 +23,12 @@
       */
     function wpa_add_menu() {
 
-        add_wmenu_page( 'plugins.php', 'Adept LMS', 'manage_options', 'adept_lms', array(
+        add_wmenu_page( 'Adept LMS', 'Adept LMS', 'manage_options', 'adept_lms', array(
                           __CLASS__,
                          'wpa_page_file_path'
-                        ), plugins_url('images/wp-logo.png', __FILE__),'2.2.9');
+                        ), "",'2.2.9');
 
-        add_submenu_page( 'adept_lms', 'Adept LMS' . ' Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array(
+        add_submenu_page( 'adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array(
                               __CLASS__,
                              'wpa_page_file_path1'
                             ));
@@ -68,10 +68,51 @@
      */
     function wpa_uninstall() {
 		global $wpdb;
-		$wpdb->query( "DROP TABLE IF EXISTS api_crendential" );
+		$table_name = $wpdb->prefix.'api_credential';
+		$wpdb->query( "DROP TABLE IF EXISTS ".$table_name );
+		$args = array(
+			'numberposts' => 500000,
+			'post_type' =>'courses'
+		);
+		$posts = get_posts( $args );
+		if (is_array($posts)) {
+		   foreach ($posts as $post) {
+		// what you want to do;
+			   wp_delete_post( $post->ID, true);
+			   //delete_post_meta($post_id, $meta_key, $meta_value);
+		   }
+		}
+		$args = array(
+			'numberposts' => 500000,
+			'post_type' =>'meetings'
+		);
+		$posts = get_posts( $args );
+		if (is_array($posts)) {
+		   foreach ($posts as $post) {
+		// what you want to do;
+			   wp_delete_post( $post->ID, true);
+		   }
+		}
 		
-
-
+		$args = array(
+			'numberposts' => 500000,
+			'post_type' =>'instructors'
+		);
+		$posts = get_posts( $args );
+		if (is_array($posts)) {
+		   foreach ($posts as $post) {
+		// what you want to do;
+			   wp_delete_post( $post->ID, true);
+		   }
+		}
+		
+		//register_taxonomy('genre', array());
+		
+		$terms = get_terms( 'genre', array( 'fields' => 'ids', 'hide_empty' => false ) );
+          foreach ( $terms as $value ) {
+               wp_delete_term( $value, 'genre' );
+          }
+		
     }
 
 }
@@ -297,9 +338,9 @@ function wpt_meeting_fields() {
 	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 	
 	// Get the comment data if its already been entered
-	$comment = get_post_meta($post->ID, '_comment', true);
+	//$comment = get_post_meta($post->ID, '_comment', true);
 	// Echo out the field
-	echo '<b>Comment :</b> <textarea type="text" name="_comment" class="widefat">'.$comment.'</textarea><br/><br/>';
+	//echo '<b>Comment :</b> <textarea type="text" name="_comment" class="widefat">'.$comment.'</textarea><br/><br/>';
 	
 	// Get the date data if its already been entered
 	$date = get_post_meta($post->ID, '_date', true);
@@ -333,9 +374,9 @@ function wpt_meeting_fields() {
 	echo '<b>Address :</b> <textarea type="text" name="_address" class="widefat">'.$address.'</textarea><br/><br/>';
 	
 	// Get the class_id data if its already been entered
-	$class_id = get_post_meta($post->ID, '_class_id', true);
+	//$class_id = get_post_meta($post->ID, '_class_id', true);
 	// Echo out the field
-	echo '<b>Class Id :</b> <input type="text" name="_class_id" value="' . $class_id  . '" class="widefat" /><br/><br/>';
+	//echo '<b>Class Id :</b> <input type="text" name="_class_id" value="' . $class_id  . '" class="widefat" /><br/><br/>';
 	
 	// Get the check_address data if its already been entered
 	$check_address = get_post_meta($post->ID, '_check_address', true);
@@ -365,13 +406,13 @@ function wpt_save_meeting_meta($post_id, $post) {
 	// OK, we're authenticated: we need to find and save the data
 	// We'll put it into an array to make it easier to loop though.
 	
-	$course_meta['_comment'] = $_POST['_comment'];
+	//$course_meta['_comment'] = $_POST['_comment'];
 	$course_meta['_date'] = $_POST['_date'];
 	$course_meta['_start_time'] = $_POST['_start_time'];
 	$course_meta['_end_time'] = $_POST['_end_time'];
 	$course_meta['_web_conference'] = $_POST['_web_conference'];
 	$course_meta['_address'] = $_POST['_address'];
-	$course_meta['_class_id'] = $_POST['_class_id'];
+	//$course_meta['_class_id'] = $_POST['_class_id'];
 	$course_meta['_status'] = $_POST['_status'];
 	$course_meta['_group_id'] = $_POST['_group_id'];
 	$course_meta['_check_address'] = $_POST['_check_address'];
@@ -393,6 +434,128 @@ function wpt_save_meeting_meta($post_id, $post) {
 }
 
 add_action('save_post', 'wpt_save_meeting_meta', 1, 2); // save the custom fields
+
+
+add_action( 'init', 'create_instructors' );
+function create_instructors() {
+  register_post_type( 'instructors',
+	array(
+	  'labels' => array(
+		'name' => __( 'Instructors' ),
+		'singular_name' => __( 'Instructor' ),
+		'menu_name'          => _x( 'Instructors', 'admin menu', 'Instructor' ),
+		'name_admin_bar'     => _x( 'Instructor', 'add new on admin bar', 'Instructor' ),
+		'add_new'            => _x( 'Add New Instructor', 'Instructor', 'Instructor' ),
+		'add_new_item'       => __( 'Add New Instructor', 'Instructor' ),
+		'new_item'           => __( 'New Instructor', 'Instructor' ),
+		'edit_item'          => __( 'Edit Instructor', 'Instructor' ),
+		'view_item'          => __( 'View Instructor', 'Instructor' ),
+		'all_items'          => __( 'All Instructor', 'Instructor' ),
+		'search_items'       => __( 'Search Instructor', 'Instructor' ),
+		'parent_item_colon'  => __( 'Parent Instructor:', 'Instructor' ),
+		'not_found'          => __( 'No Instructor found.', 'Instructor' ),
+		'not_found_in_trash' => __( 'No Instructor found in Trash.', 'Instructor' )
+	  ),
+	  'public' => true,
+	  'has_archive' => true,
+	  'supports' => array( 'title', 'editor'),
+	  'register_meta_box_cb' => 'add_instructor_metaboxes'
+	)
+  );
+}
+
+add_action( 'add_meta_boxes', 'add_instructor_metaboxes' );
+
+// Add the Course Meta Boxes
+
+function add_instructor_metaboxes() {
+	add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'instructors', 'normal', 'high');
+}
+
+function wpt_instructor_fields() {
+	global $post;
+	
+	// Noncename needed to verify where the data originated
+	echo '<input type="hidden" name="instructormeta_noncename" id="instructormeta_noncename" value="' . 
+	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
+	
+	// Get the email data if its already been entered
+	$email = get_post_meta($post->ID, '_email', true);
+	// Echo out the field
+	echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' .$email.'" /><br/><br/>';
+	
+	// Get the privacy_policy data if its already been entered
+	$privacy_policy = get_post_meta($post->ID, '_privacy_policy', true);
+	// Echo out the field
+	echo '<b>Privacy Policy :</b> <input type="text" name="_privacy_policy" value="' . $privacy_policy  . '" class="widefat" /><br/><br/>';
+	
+	// Get the provider data if its already been entered
+	$provider = get_post_meta($post->ID, '_provider', true);
+	// Echo out the field
+	echo '<b>Provider : </b><input type="text" name="_provider" value="' . $provider  . '" class="widefat" /><br/><br/>';
+	
+	// Get the start_time data if its already been entered
+	$uid = get_post_meta($post->ID, '_uid', true);
+	// Echo out the field
+	echo '<b>User ID : </b><input type="text" name="_uid" value="' . $uid  . '" class="widefat" /><br/><br/>';
+	
+	// Get the system_admin data if its already been entered
+	$system_admin = get_post_meta($post->ID, '_system_admin', true);
+	// Echo out the field
+	echo '<b>System Admin :</b> <input type="text" name="_system_admin" value="' . $system_admin  . '" class="widefat" /><br/><br/>';
+	
+	// Get the created_at data if its already been entered
+	$created_at = get_post_meta($post->ID, '_created_at', true);
+	// Echo out the field
+	echo '<b>Created At :</b> <input type="text" name="_created_at" value="' . $created_at  . '" class="widefat" /><br/><br/>';
+	
+	// Get the updated_at data if its already been entered
+	$updated_at = get_post_meta($post->ID, '_updated_at', true);
+	// Echo out the field
+	echo '<b>Updated At :</b> <input type="text" name="_updated_at" value="' . $updated_at  . '" class="widefat" /><br/><br/>';
+	
+}
+
+function wpt_save_instructor_meta($post_id, $post) {
+	
+	// verify this came from the our screen and with proper authorization,
+	// because save_post can be triggered at other times
+	if ( !wp_verify_nonce( $_POST['meetingmeta_noncename'], plugin_basename(__FILE__) )) {
+	return $post->ID;
+	}
+
+	// Is the user allowed to edit the post or page?
+	if ( !current_user_can( 'edit_post', $post->ID ))
+		return $post->ID;
+
+	// OK, we're authenticated: we need to find and save the data
+	// We'll put it into an array to make it easier to loop though.
+	
+	$course_meta['_email'] = $_POST['_email'];
+	$course_meta['_privacy_policy'] = $_POST['_privacy_policy'];
+	$course_meta['_provider'] = $_POST['_provider'];
+	$course_meta['_uid'] = $_POST['_uid'];
+	$course_meta['_system_admin'] = $_POST['_system_admin'];
+	$course_meta['_created_at'] = $_POST['_created_at'];
+	$course_meta['_updated_at'] = $_POST['_updated_at'];
+
+	
+	// Add values of $course_meta as custom fields
+	
+	foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+		if( $post->post_type == 'revision' ) return; // Don't store custom data twice
+		$value = implode(',', (array)$value); // If $value is an array, make it a CSV (unlikely)
+		if(get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
+			update_post_meta($post->ID, $key, $value);
+		} else { // If the custom field doesn't have a value
+			add_post_meta($post->ID, $key, $value);
+		}
+		if(!$value) delete_post_meta($post->ID, $key); // Delete if blank
+	}
+
+}
+
+add_action('save_post', 'wpt_save_instructor_meta', 1, 2); // save the custom fields
 
 function wp_meetings_shortcode(){
 	$args = array(
@@ -483,10 +646,11 @@ global $wpdb;
 
 $charset_collate = $wpdb->get_charset_collate();
 
-$table_name = 'api_crendential';
+$table_name = $wpdb->prefix.'api_credential';
 
 $sql = "CREATE TABLE $table_name (
   id mediumint(9) NOT NULL AUTO_INCREMENT,
+  api_url varchar(255) DEFAULT '' NOT NULL,
   email varchar(55) DEFAULT '' NOT NULL,
   password varchar(55) DEFAULT '' NOT NULL,
   access_token varchar(255) DEFAULT '' NOT NULL,

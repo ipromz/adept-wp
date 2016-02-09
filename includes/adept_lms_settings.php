@@ -52,7 +52,7 @@ if ($temp->status==200 || $temp->status=='OK')
 {
 	
 	global $wpdb;
-	$table_name = $wpdb->prefix."api_crendential";
+	$table_name = $wpdb->prefix."api_credential";
 	$myrows = $wpdb->get_results( "SELECT email FROM ".$table_name );
 	$useremail = $myrows[0]->email;
 	
@@ -99,7 +99,7 @@ else{
 } 
   
 ?>
- 
+<title>Adept LMS Plugin Settings</title>
 <h1>Adept LMS Plugin Settings</h1>
 <div class="wrap">
 <span><?php echo $error;?></span>
