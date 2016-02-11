@@ -1,642 +1,749 @@
-<?php 
-    /*
-    Plugin Name: Adept LMS Plugin
-    Plugin URI: http://www.orangecreative.net
-    Description: Plugin for Adept LMS
-    Author: Viral Sonawala
-    Version: 1.0
-    */
+<?php
 
+/*
+  Plugin Name: Adept LMS Plugin
+  Plugin URI: http://www.orangecreative.net
+  Description: Plugin for Adept LMS
+  Author: Viral Sonawala
+  Version: 1.0
+ */
 
-	class WP_Adept_LMS{
+class WP_Adept_LMS {
 
-  // Constructor
+    // Constructor
     function __construct() {
 
-        add_action( 'admin_menu', array( $this, 'wpa_add_menu' ));
-        register_activation_hook( __FILE__, array( $this, 'wpa_install' ) );
-        register_deactivation_hook( __FILE__, array( $this, 'wpa_uninstall' ) );
-    }
-
-     /*
-      * Actions perform at loading of admin menu
-      */
-    function wpa_add_menu() {
-
-        add_wmenu_page( 'Adept LMS', 'Adept LMS', 'manage_options', 'adept_lms', array(
-                          __CLASS__,
-                         'wpa_page_file_path'
-                        ), "",'2.2.9');
-
-        add_submenu_page( 'adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array(
-                              __CLASS__,
-                             'wpa_page_file_path1'
-                            ));
-    }
-
-    /*
-     * Actions perform on loading of menu pages
-     */
-    function wpa_page_file_path() {
-
-		foreach ( glob( plugin_dir_path( __FILE__ ) . "includes/adept_lms.php" ) as $file ) {
-			include_once $file;
-		}
+        add_action('admin_menu', array($this, 'wpa_add_menu'));
+        register_activation_hook(__FILE__, array($this, 'wpa_install'));
+        register_deactivation_hook(__FILE__, array($this, 'wpa_uninstall'));
+        register_activation_hook(__FILE__, array($this, 'wpa_role_instructor'));
     }
 	
+	
+	
+	
+    /*
+     * Add role intructors
+     */
+
+    function wpa_role_instructor() {
+        add_role('instructor', 'Instructor', array('read' => true, 'level_0' => true));
+    }
+
+    /*
+     * Actions perform at loading of admin menu
+     */
+
+    function wpa_add_menu() {
+
+        add_wmenu_page('Adept LMS', 'Adept LMS', 'manage_options', 'adept_lms', array(
+            __CLASS__,
+            'wpa_page_file_path'
+                ), "", '2.2.9');
+
+        add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array(
+            __CLASS__,
+            'wpa_page_file_path1'
+        ));
+    }
+
     /*
      * Actions perform on loading of menu pages
      */
-    function wpa_page_file_path1(){
 
-		foreach ( glob( plugin_dir_path( __FILE__ ) . "includes/adept_lms_settings.php" ) as $file ) {
-			include_once $file;
-		}
+    function wpa_page_file_path() {
+
+        foreach (glob(plugin_dir_path(__FILE__) . "includes/adept_lms.php") as $file) {
+            include_once $file;
+        }
+    }
+
+    /*
+     * Actions perform on loading of menu pages
+     */
+
+    function wpa_page_file_path1() {
+
+        foreach (glob(plugin_dir_path(__FILE__) . "includes/adept_lms_settings.php") as $file) {
+            include_once $file;
+        }
     }
 
     /*
      * Actions perform on activation of plugin
      */
+
     function wpa_install() {
-
-
-
+        
     }
 
     /*
      * Actions perform on de-activation of plugin
      */
+
     function wpa_uninstall() {
-		global $wpdb;
-		$table_name = $wpdb->prefix.'api_credential';
-		$wpdb->query( "DROP TABLE IF EXISTS ".$table_name );
-		$args = array(
-			'numberposts' => 500000,
-			'post_type' =>'courses'
-		);
-		$posts = get_posts( $args );
-		if (is_array($posts)) {
-		   foreach ($posts as $post) {
-		// what you want to do;
-			   wp_delete_post( $post->ID, true);
-			   //delete_post_meta($post_id, $meta_key, $meta_value);
-		   }
-		}
-		$args = array(
-			'numberposts' => 500000,
-			'post_type' =>'meetings'
-		);
-		$posts = get_posts( $args );
-		if (is_array($posts)) {
-		   foreach ($posts as $post) {
-		// what you want to do;
-			   wp_delete_post( $post->ID, true);
-		   }
-		}
-		
-		$args = array(
-			'numberposts' => 500000,
-			'post_type' =>'instructors'
-		);
-		$posts = get_posts( $args );
-		if (is_array($posts)) {
-		   foreach ($posts as $post) {
-		// what you want to do;
-			   wp_delete_post( $post->ID, true);
-		   }
-		}
-		
-		//register_taxonomy('genre', array());
-		
-		$terms = get_terms( 'genre', array( 'fields' => 'ids', 'hide_empty' => false ) );
-          foreach ( $terms as $value ) {
-               wp_delete_term( $value, 'genre' );
-          }
-		
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'api_credential';
+        $wpdb->query("DROP TABLE IF EXISTS " . $table_name);
+        $args = array(
+            'numberposts' => 500000,
+            'post_type' => 'courses'
+        );
+        $posts = get_posts($args);
+        if (is_array($posts)) {
+            foreach ($posts as $post) {
+                // what you want to do;
+                wp_delete_post($post->ID, true);
+                //delete_post_meta($post_id, $meta_key, $meta_value);
+            }
+        }
+        $args = array(
+            'numberposts' => 500000,
+            'post_type' => 'meetings'
+        );
+        $posts = get_posts($args);
+        if (is_array($posts)) {
+            foreach ($posts as $post) {
+                // what you want to do;
+                wp_delete_post($post->ID, true);
+            }
+        }
+
+/*        $args = array(
+            'numberposts' => 500000,
+            'post_type' => 'instructors'
+        );
+        $posts = get_posts($args);
+        if (is_array($posts)) {
+            foreach ($posts as $post) {
+                // what you want to do;
+                wp_delete_post($post->ID, true);
+            }
+        }*/
+
+        //register_taxonomy('genre', array());
+
+        $terms = get_terms('genre', array('fields' => 'ids', 'hide_empty' => false));
+        foreach ($terms as $value) {
+            wp_delete_term($value, 'genre');
+        }
+        
+        remove_role( 'instructor' );
     }
+    
+    
 
 }
 
-add_action( 'admin_menu', array( $this, 'wpa_add_menu' ));
+//add_action('admin_menu', array($this, 'wpa_add_menu'));
 
-add_action( 'init', 'create_post_type' );
+add_action('init', 'create_post_type');
+
 function create_post_type() {
-  register_post_type( 'courses',
-	array(
-	  'labels' => array(
-		'name' => __( 'Courses' ),
-		'singular_name' => __( 'Course' ),
-		'menu_name'          => _x( 'Courses', 'admin menu', 'Course' ),
-		'name_admin_bar'     => _x( 'Course', 'add new on admin bar', 'Course' ),
-		'add_new'            => _x( 'Add New Course', 'Course', 'Course' ),
-		'add_new_item'       => __( 'Add New Course', 'Course' ),
-		'new_item'           => __( 'New Course', 'Course' ),
-		'edit_item'          => __( 'Edit Course', 'Course' ),
-		'view_item'          => __( 'View Course', 'Course' ),
-		'all_items'          => __( 'All Course', 'Course' ),
-		'search_items'       => __( 'Search Course', 'Course' ),
-		'parent_item_colon'  => __( 'Parent Course:', 'Course' ),
-		'not_found'          => __( 'No Course found.', 'Course' ),
-		'not_found_in_trash' => __( 'No Course found in Trash.', 'Course' )
-	  ),
-	  'public' => true,
-	  'has_archive' => true,
-	  'supports' => array( 'title', 'editor', 'excerpt' ),
-	  'register_meta_box_cb' => 'add_course_metaboxes'
-	)
-  );
+    register_post_type('courses', array(
+        'labels' => array(
+            'name' => __('Courses'),
+            'singular_name' => __('Course'),
+            'menu_name' => _x('Courses', 'admin menu', 'Course'),
+            'name_admin_bar' => _x('Course', 'add new on admin bar', 'Course'),
+            'add_new' => _x('Add New Course', 'Course', 'Course'),
+            'add_new_item' => __('Add New Course', 'Course'),
+            'new_item' => __('New Course', 'Course'),
+            'edit_item' => __('Edit Course', 'Course'),
+            'view_item' => __('View Course', 'Course'),
+            'all_items' => __('All Course', 'Course'),
+            'search_items' => __('Search Course', 'Course'),
+            'parent_item_colon' => __('Parent Course:', 'Course'),
+            'not_found' => __('No Course found.', 'Course'),
+            'not_found_in_trash' => __('No Course found in Trash.', 'Course')
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'supports' => array('title', 'editor', 'excerpt'),
+        'register_meta_box_cb' => 'add_course_metaboxes'
+            )
+    );
 }
 
-
-add_action( 'add_meta_boxes', 'add_course_metaboxes' );
+add_action('add_meta_boxes', 'add_course_metaboxes');
 
 // Add the Course Meta Boxes
 
 function add_course_metaboxes() {
-	add_meta_box('wpt_course_fields', 'Course Other details', 'wpt_course_fields', 'courses', 'normal', 'high');
+    add_meta_box('wpt_course_fields', 'Course Other details', 'wpt_course_fields', 'courses', 'normal', 'high');
 }
 
 function wpt_course_fields() {
-	global $post;
-	
-	// Noncename needed to verify where the data originated
-	echo '<input type="hidden" name="coursemeta_noncename" id="coursemeta_noncename" value="' . 
-	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
-	
-	// Get the teaser data if its already been entered
-	$teaser = get_post_meta($post->ID, '_teaser', true);
-	// Echo out the field
-	echo '<b>Teaser :</b> <input type="text" name="_teaser" value="' . $teaser  . '" class="widefat" /><br/><br/>';
-	
-	// Get the tags data if its already been entered
-	$tags = get_post_meta($post->ID, '_tags', true);
-	// Echo out the field
-	echo '<b>Tags : </b><input type="text" name="_tags" value="' . $tags  . '" class="widefat" /><br/><br/>';
-	
-	// Get the is_featured data if its already been entered
-	$is_featured = get_post_meta($post->ID, '_is_featured', true);
-	// Echo out the field
-	echo '<b>Is Featured :</b> <input type="radio" name="_is_featured" value="true" class="widefat" /> True ';
-	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_is_featured" value="false" class="widefat" /> False <br/><br/>';
-	
-	// Get the course_fee data if its already been entered
-	$course_fee = get_post_meta($post->ID, '_course_fee', true);
-	// Echo out the field
-	echo '<b>Course Fee :</b> <input type="text" name="_course_fee" value="' . $course_fee  . '" class="widefat" /><br/><br/>';
-	
-	// Get the sku data if its already been entered
-	$sku = get_post_meta($post->ID, '_sku', true);
-	// Echo out the field
-	echo '<b>SKU :</b> <input type="text" name="_sku" value="' . $sku  . '" class="widefat" /><br/><br/>';
-	
-    // Get the tax_category data if its already been entered
-	$tax_category = get_post_meta($post->ID, '_tax_category', true);
-	// Echo out the field
-	echo '<b>Tax Category :</b> <input type="text" name="_tax_category" value="' . $tax_category  . '" class="widefat" /><br/><br/>';
-	
-	// Get the allow_discounts data if its already been entered
-	$allow_discounts = get_post_meta($post->ID, '_allow_discounts', true);
-	// Echo out the field
-	echo '<b>Allow Discounts : </b><input type="radio" name="_allow_discounts" value="true" class="widefat" /> True ';
-	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_allow_discounts" value="false" class="widefat" /> False <br/><br/>';
-	
-	// Get the subscription data if its already been entered
-	$subscription = get_post_meta($post->ID, '_subscription', true);
-	// Echo out the field
-	echo '<b>Subscription :</b> <input type="radio" name="_subscription" value="true" class="widefat" /> True';
-	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_subscription" value="false" class="widefat" /> False  <br/><br/>';
-	
-	// Get the booking_count data if its already been entered
-	$booking_count = get_post_meta($post->ID, '_booking_count', true);
-	// Echo out the field
-	echo '<b>Booking Count :</b> <input type="text" name="_booking_count" value="' . $booking_count  . '" class="widefat" /><br/><br/>';
-	
-	// Get the created_by data if its already been entered
-	/*$created_by = get_post_meta($post->ID, '_created_by', true);
-	// Echo out the field
-	echo '<b>Created By :</b> <input type="text" name="_created_by" value="' . $created_by  . '" class="widefat" /><br/><br/>';
-	
-	// Get the modified_by data if its already been entered
-	$modified_by = get_post_meta($post->ID, '_modified_by', true);
-	// Echo out the field
-	echo '<b>Modified By :</b> <input type="text" name="_modified_by" value="' . $modified_by  . '" class="widefat" /><br/><br/>';*/
+    global $post;
 
+    // Noncename needed to verify where the data originated
+    echo '<input type="hidden" name="coursemeta_noncename" id="coursemeta_noncename" value="' .
+    wp_create_nonce(plugin_basename(__FILE__)) . '" />';
+
+    // Get the teaser data if its already been entered
+    $teaser = get_post_meta($post->ID, '_teaser', true);
+    // Echo out the field
+    echo '<b>Teaser :</b> <input type="text" name="_teaser" value="' . $teaser . '" class="widefat" /><br/><br/>';
+
+    // Get the tags data if its already been entered
+    $tags = get_post_meta($post->ID, '_tags', true);
+    // Echo out the field
+    echo '<b>Tags : </b><input type="text" name="_tags" value="' . $tags . '" class="widefat" /><br/><br/>';
+
+    // Get the is_featured data if its already been entered
+    $is_featured = get_post_meta($post->ID, '_is_featured', true);
+    // Echo out the field
+    echo '<b>Is Featured :</b> <input type="radio" name="_is_featured" value="true" class="widefat" /> True ';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_is_featured" value="false" class="widefat" /> False <br/><br/>';
+
+    // Get the course_fee data if its already been entered
+    $course_fee = get_post_meta($post->ID, '_course_fee', true);
+    // Echo out the field
+    echo '<b>Course Fee :</b> <input type="text" name="_course_fee" value="' . $course_fee . '" class="widefat" /><br/><br/>';
+
+    // Get the sku data if its already been entered
+    $sku = get_post_meta($post->ID, '_sku', true);
+    // Echo out the field
+    echo '<b>SKU :</b> <input type="text" name="_sku" value="' . $sku . '" class="widefat" /><br/><br/>';
+
+    // Get the tax_category data if its already been entered
+    $tax_category = get_post_meta($post->ID, '_tax_category', true);
+    // Echo out the field
+    echo '<b>Tax Category :</b> <input type="text" name="_tax_category" value="' . $tax_category . '" class="widefat" /><br/><br/>';
+
+    // Get the allow_discounts data if its already been entered
+    $allow_discounts = get_post_meta($post->ID, '_allow_discounts', true);
+    // Echo out the field
+    echo '<b>Allow Discounts : </b><input type="radio" name="_allow_discounts" value="true" class="widefat" /> True ';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_allow_discounts" value="false" class="widefat" /> False <br/><br/>';
+
+    // Get the subscription data if its already been entered
+    $subscription = get_post_meta($post->ID, '_subscription', true);
+    // Echo out the field
+    echo '<b>Subscription :</b> <input type="radio" name="_subscription" value="true" class="widefat" /> True';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_subscription" value="false" class="widefat" /> False  <br/><br/>';
+
+    // Get the booking_count data if its already been entered
+    $booking_count = get_post_meta($post->ID, '_booking_count', true);
+    // Echo out the field
+    echo '<b>Booking Count :</b> <input type="text" name="_booking_count" value="' . $booking_count . '" class="widefat" /><br/><br/>';
+
+    // Get the created_by data if its already been entered
+    /* $created_by = get_post_meta($post->ID, '_created_by', true);
+      // Echo out the field
+      echo '<b>Created By :</b> <input type="text" name="_created_by" value="' . $created_by  . '" class="widefat" /><br/><br/>';
+
+      // Get the modified_by data if its already been entered
+      $modified_by = get_post_meta($post->ID, '_modified_by', true);
+      // Echo out the field
+      echo '<b>Modified By :</b> <input type="text" name="_modified_by" value="' . $modified_by  . '" class="widefat" /><br/><br/>'; */
 }
 
 function wpt_save_course_meta($post_id, $post) {
-	
-	// verify this came from the our screen and with proper authorization,
-	// because save_post can be triggered at other times
-	if ( !wp_verify_nonce( $_POST['coursemeta_noncename'], plugin_basename(__FILE__) )) {
-	return $post->ID;
-	}
 
-	// Is the user allowed to edit the post or page?
-	if ( !current_user_can( 'edit_post', $post->ID ))
-		return $post->ID;
+    // verify this came from the our screen and with proper authorization,
+    // because save_post can be triggered at other times
+    if (!wp_verify_nonce($_POST['coursemeta_noncename'], plugin_basename(__FILE__))) {
+        return $post->ID;
+    }
 
-	// OK, we're authenticated: we need to find and save the data
-	// We'll put it into an array to make it easier to loop though.
-	
-	$course_meta['_teaser'] = $_POST['_teaser'];
-	$course_meta['_tags'] = $_POST['_tags'];
-	$course_meta['_is_featured'] = $_POST['_is_featured'];
-	$course_meta['_course_fee'] = $_POST['_course_fee'];
-	$course_meta['_sku'] = $_POST['_sku'];
-	$course_meta['_tax_category'] = $_POST['_tax_category'];
-	$course_meta['_allow_discounts'] = $_POST['_allow_discounts'];
-	$course_meta['_subscription'] = $_POST['_subscription'];
-	$course_meta['_booking_count'] = $_POST['_booking_count'];
-	//$course_meta['_created_by'] = $_POST['_created_by'];
-	//$course_meta['_modified_by'] = $_POST['_modified_by'];
-	
-	// Add values of $course_meta as custom fields
-	
-	foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
-		if( $post->post_type == 'revision' ) return; // Don't store custom data twice
-		$value = implode(',', (array)$value); // If $value is an array, make it a CSV (unlikely)
-		if(get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
-			update_post_meta($post->ID, $key, $value);
-		} else { // If the custom field doesn't have a value
-			add_post_meta($post->ID, $key, $value);
-		}
-		if(!$value) delete_post_meta($post->ID, $key); // Delete if blank
-	}
+    // Is the user allowed to edit the post or page?
+    if (!current_user_can('edit_post', $post->ID))
+        return $post->ID;
 
+    // OK, we're authenticated: we need to find and save the data
+    // We'll put it into an array to make it easier to loop though.
+
+    $course_meta['_teaser'] = $_POST['_teaser'];
+    $course_meta['_tags'] = $_POST['_tags'];
+    $course_meta['_is_featured'] = $_POST['_is_featured'];
+    $course_meta['_course_fee'] = $_POST['_course_fee'];
+    $course_meta['_sku'] = $_POST['_sku'];
+    $course_meta['_tax_category'] = $_POST['_tax_category'];
+    $course_meta['_allow_discounts'] = $_POST['_allow_discounts'];
+    $course_meta['_subscription'] = $_POST['_subscription'];
+    $course_meta['_booking_count'] = $_POST['_booking_count'];
+    //$course_meta['_created_by'] = $_POST['_created_by'];
+    //$course_meta['_modified_by'] = $_POST['_modified_by'];
+    // Add values of $course_meta as custom fields
+
+    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+        if ($post->post_type == 'revision')
+            return; // Don't store custom data twice
+        $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
+        if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
+            update_post_meta($post->ID, $key, $value);
+        } else { // If the custom field doesn't have a value
+            add_post_meta($post->ID, $key, $value);
+        }
+        if (!$value)
+            delete_post_meta($post->ID, $key); // Delete if blank
+    }
 }
 
 add_action('save_post', 'wpt_save_course_meta', 1, 2); // save the custom fields
 
-add_action( 'init', 'create_course_category' );
+add_action('init', 'create_course_category');
+
 function create_course_category() {
-	$labels = array(
-		'name'              => _x( 'Course Category', 'Course Category' ),
-		'singular_name'     => _x( 'Course Category', 'Course Category' ),
-		'search_items'      => __( 'Search Course Category' ),
-		'all_items'         => __( 'All Course Category' ),
-		'parent_item'       => __( 'Parent Course Category' ),
-		'parent_item_colon' => __( 'Parent Course Category:' ),
-		'edit_item'         => __( 'Edit Course Category' ),
-		'update_item'       => __( 'Update Course Category' ),
-		'add_new_item'      => __( 'Add New Course Category' ),
-		'new_item_name'     => __( 'New Course Category Name' ),
-		'menu_name'         => __( 'Course Category' ),
-	);
+    $labels = array(
+        'name' => _x('Course Category', 'Course Category'),
+        'singular_name' => _x('Course Category', 'Course Category'),
+        'search_items' => __('Search Course Category'),
+        'all_items' => __('All Course Category'),
+        'parent_item' => __('Parent Course Category'),
+        'parent_item_colon' => __('Parent Course Category:'),
+        'edit_item' => __('Edit Course Category'),
+        'update_item' => __('Update Course Category'),
+        'add_new_item' => __('Add New Course Category'),
+        'new_item_name' => __('New Course Category Name'),
+        'menu_name' => __('Course Category'),
+    );
 
-	$args = array(
-		'hierarchical'      => true,
-		'labels'            => $labels,
-		'show_ui'           => true,
-		'show_admin_column' => true,
-		'query_var'         => true,
-		'rewrite'           => array( 'slug' => 'genre' ),
-	);
-	register_taxonomy( 'genre', array( 'courses' ), $args );
+    $args = array(
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'genre'),
+    );
+    register_taxonomy('genre', array('courses'), $args);
 }
 
-add_action( 'init', 'create_meetings' );
+add_action('init', 'create_meetings');
+
 function create_meetings() {
-  register_post_type( 'meetings',
-	array(
-	  'labels' => array(
-		'name' => __( 'Meetings' ),
-		'singular_name' => __( 'Meeting' ),
-		'menu_name'          => _x( 'Meetings', 'admin menu', 'Meeting' ),
-		'name_admin_bar'     => _x( 'Meeting', 'add new on admin bar', 'Meeting' ),
-		'add_new'            => _x( 'Add New Meeting', 'Meeting', 'Meeting' ),
-		'add_new_item'       => __( 'Add New Meeting', 'Meeting' ),
-		'new_item'           => __( 'New Meeting', 'Meeting' ),
-		'edit_item'          => __( 'Edit Meeting', 'Meeting' ),
-		'view_item'          => __( 'View Meeting', 'Meeting' ),
-		'all_items'          => __( 'All Meeting', 'Meeting' ),
-		'search_items'       => __( 'Search Meeting', 'Meeting' ),
-		'parent_item_colon'  => __( 'Parent Meeting:', 'Meeting' ),
-		'not_found'          => __( 'No Meeting found.', 'Meeting' ),
-		'not_found_in_trash' => __( 'No Meeting found in Trash.', 'Meeting' )
-	  ),
-	  'public' => true,
-	  'has_archive' => true,
-	  'supports' => array( 'title', 'editor'),
-	  'register_meta_box_cb' => 'add_meeting_metaboxes'
-	)
-  );
+    register_post_type('meetings', array(
+        'labels' => array(
+            'name' => __('Meetings'),
+            'singular_name' => __('Meeting'),
+            'menu_name' => _x('Meetings', 'admin menu', 'Meeting'),
+            'name_admin_bar' => _x('Meeting', 'add new on admin bar', 'Meeting'),
+            'add_new' => _x('Add New Meeting', 'Meeting', 'Meeting'),
+            'add_new_item' => __('Add New Meeting', 'Meeting'),
+            'new_item' => __('New Meeting', 'Meeting'),
+            'edit_item' => __('Edit Meeting', 'Meeting'),
+            'view_item' => __('View Meeting', 'Meeting'),
+            'all_items' => __('All Meeting', 'Meeting'),
+            'search_items' => __('Search Meeting', 'Meeting'),
+            'parent_item_colon' => __('Parent Meeting:', 'Meeting'),
+            'not_found' => __('No Meeting found.', 'Meeting'),
+            'not_found_in_trash' => __('No Meeting found in Trash.', 'Meeting')
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'supports' => array('title', 'editor'),
+        'register_meta_box_cb' => 'add_meeting_metaboxes'
+            )
+    );
 }
 
-add_action( 'add_meta_boxes', 'add_meeting_metaboxes' );
+add_action('add_meta_boxes', 'add_meeting_metaboxes');
 
 // Add the Course Meta Boxes
 
 function add_meeting_metaboxes() {
-	add_meta_box('wpt_meeting_fields', 'Meetings Other details', 'wpt_meeting_fields', 'meetings', 'normal', 'high');
+    add_meta_box('wpt_meeting_fields', 'Meetings Other details', 'wpt_meeting_fields', 'meetings', 'normal', 'high');
 }
 
 function wpt_meeting_fields() {
-	global $post;
-	
-	// Noncename needed to verify where the data originated
-	echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' . 
-	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
-	
-	// Get the comment data if its already been entered
-	//$comment = get_post_meta($post->ID, '_comment', true);
-	// Echo out the field
-	//echo '<b>Comment :</b> <textarea type="text" name="_comment" class="widefat">'.$comment.'</textarea><br/><br/>';
-	
-	// Get the date data if its already been entered
-	$date = get_post_meta($post->ID, '_date', true);
-	// Echo out the field
-	echo '<b>Date :</b> <input type="text" name="_date" value="' . $date  . '" class="widefat" /><br/><br/>';
-	
-	// Get the start_time data if its already been entered
-	$start_time = get_post_meta($post->ID, '_start_time', true);
-	// Echo out the field
-	echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time  . '" class="widefat" /><br/><br/>';
-	
-	// Get the start_time data if its already been entered
-	$end_time = get_post_meta($post->ID, '_end_time', true);
-	// Echo out the field
-	echo '<b>End Time : </b><input type="text" name="_end_time" value="' . $end_time  . '" class="widefat" /><br/><br/>';
-	
-	// Get the status data if its already been entered
-	$status = get_post_meta($post->ID, '_status', true);
-	// Echo out the field
-	echo '<b>Status :</b> <input type="text" name="_status" value="' . $status  . '" class="widefat" /><br/><br/>';
-	
-	// Get the web_conference data if its already been entered
-	$web_conference = get_post_meta($post->ID, '_web_conference', true);
-	// Echo out the field
-	echo '<b>Web Conference :</b> <input type="radio" name="_web_conference" value="true" class="widefat" /> True';
-	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_web_conference" value="false" class="widefat" /> False  <br/><br/>';
-	
-	// Get the address data if its already been entered
-	$address = get_post_meta($post->ID, '_address', true);
-	// Echo out the field
-	echo '<b>Address :</b> <textarea type="text" name="_address" class="widefat">'.$address.'</textarea><br/><br/>';
-	
-	// Get the class_id data if its already been entered
-	//$class_id = get_post_meta($post->ID, '_class_id', true);
-	// Echo out the field
-	//echo '<b>Class Id :</b> <input type="text" name="_class_id" value="' . $class_id  . '" class="widefat" /><br/><br/>';
-	
-	// Get the check_address data if its already been entered
-	$check_address = get_post_meta($post->ID, '_check_address', true);
-	// Echo out the field
-	echo '<b>Check Address :</b> <input type="radio" name="_check_address" value="true" class="widefat" /> True';
-	echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_check_address" value="false" class="widefat" /> False  <br/><br/>';
-	
-	// Get the group_id data if its already been entered
-	$group_id = get_post_meta($post->ID, '_group_id', true);
-	// Echo out the field
-	echo '<b>Group Id:</b> <input type="text" name="_group_id" value="' . $group_id  . '" class="widefat" /><br/><br/>';
+    global $post;
 
+    // Noncename needed to verify where the data originated
+    echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' .
+    wp_create_nonce(plugin_basename(__FILE__)) . '" />';
+
+    // Get the comment data if its already been entered
+    //$comment = get_post_meta($post->ID, '_comment', true);
+    // Echo out the field
+    //echo '<b>Comment :</b> <textarea type="text" name="_comment" class="widefat">'.$comment.'</textarea><br/><br/>';
+    // Get the date data if its already been entered
+    $date = get_post_meta($post->ID, '_date', true);
+    // Echo out the field
+    echo '<b>Date :</b> <input type="text" name="_date" value="' . $date . '" class="widefat" /><br/><br/>';
+
+    // Get the start_time data if its already been entered
+    $start_time = get_post_meta($post->ID, '_start_time', true);
+    // Echo out the field
+    echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time . '" class="widefat" /><br/><br/>';
+
+    // Get the start_time data if its already been entered
+    $end_time = get_post_meta($post->ID, '_end_time', true);
+    // Echo out the field
+    echo '<b>End Time : </b><input type="text" name="_end_time" value="' . $end_time . '" class="widefat" /><br/><br/>';
+
+    // Get the status data if its already been entered
+    $status = get_post_meta($post->ID, '_status', true);
+    // Echo out the field
+    echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
+
+    // Get the web_conference data if its already been entered
+    $web_conference = get_post_meta($post->ID, '_web_conference', true);
+    // Echo out the field
+    echo '<b>Web Conference :</b> <input type="radio" name="_web_conference" value="true" class="widefat" /> True';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_web_conference" value="false" class="widefat" /> False  <br/><br/>';
+
+    // Get the address data if its already been entered
+    $address = get_post_meta($post->ID, '_address', true);
+    // Echo out the field
+    echo '<b>Address :</b> <textarea type="text" name="_address" class="widefat">' . $address . '</textarea><br/><br/>';
+
+    // Get the class_id data if its already been entered
+    //$class_id = get_post_meta($post->ID, '_class_id', true);
+    // Echo out the field
+    //echo '<b>Class Id :</b> <input type="text" name="_class_id" value="' . $class_id  . '" class="widefat" /><br/><br/>';
+    // Get the check_address data if its already been entered
+    $check_address = get_post_meta($post->ID, '_check_address', true);
+    // Echo out the field
+    echo '<b>Check Address :</b> <input type="radio" name="_check_address" value="true" class="widefat" /> True';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_check_address" value="false" class="widefat" /> False  <br/><br/>';
+
+    // Get the group_id data if its already been entered
+    $group_id = get_post_meta($post->ID, '_group_id', true);
+    // Echo out the field
+    echo '<b>Group Id:</b> <input type="text" name="_group_id" value="' . $group_id . '" class="widefat" /><br/><br/>';
 }
 
 function wpt_save_meeting_meta($post_id, $post) {
-	
-	// verify this came from the our screen and with proper authorization,
-	// because save_post can be triggered at other times
-	if ( !wp_verify_nonce( $_POST['meetingmeta_noncename'], plugin_basename(__FILE__) )) {
-	return $post->ID;
-	}
 
-	// Is the user allowed to edit the post or page?
-	if ( !current_user_can( 'edit_post', $post->ID ))
-		return $post->ID;
+    // verify this came from the our screen and with proper authorization,
+    // because save_post can be triggered at other times
+    if (!wp_verify_nonce($_POST['meetingmeta_noncename'], plugin_basename(__FILE__))) {
+        return $post->ID;
+    }
 
-	// OK, we're authenticated: we need to find and save the data
-	// We'll put it into an array to make it easier to loop though.
-	
-	//$course_meta['_comment'] = $_POST['_comment'];
-	$course_meta['_date'] = $_POST['_date'];
-	$course_meta['_start_time'] = $_POST['_start_time'];
-	$course_meta['_end_time'] = $_POST['_end_time'];
-	$course_meta['_web_conference'] = $_POST['_web_conference'];
-	$course_meta['_address'] = $_POST['_address'];
-	//$course_meta['_class_id'] = $_POST['_class_id'];
-	$course_meta['_status'] = $_POST['_status'];
-	$course_meta['_group_id'] = $_POST['_group_id'];
-	$course_meta['_check_address'] = $_POST['_check_address'];
+    // Is the user allowed to edit the post or page?
+    if (!current_user_can('edit_post', $post->ID))
+        return $post->ID;
 
-	
-	// Add values of $course_meta as custom fields
-	
-	foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
-		if( $post->post_type == 'revision' ) return; // Don't store custom data twice
-		$value = implode(',', (array)$value); // If $value is an array, make it a CSV (unlikely)
-		if(get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
-			update_post_meta($post->ID, $key, $value);
-		} else { // If the custom field doesn't have a value
-			add_post_meta($post->ID, $key, $value);
-		}
-		if(!$value) delete_post_meta($post->ID, $key); // Delete if blank
-	}
+    // OK, we're authenticated: we need to find and save the data
+    // We'll put it into an array to make it easier to loop though.
+    //$course_meta['_comment'] = $_POST['_comment'];
+    $course_meta['_date'] = $_POST['_date'];
+    $course_meta['_start_time'] = $_POST['_start_time'];
+    $course_meta['_end_time'] = $_POST['_end_time'];
+    $course_meta['_web_conference'] = $_POST['_web_conference'];
+    $course_meta['_address'] = $_POST['_address'];
+    $course_meta['_meeting_id'] = $_POST['_meeting_id'];
+    $course_meta['_status'] = $_POST['_status'];
+    $course_meta['_group_id'] = $_POST['_group_id'];
+    $course_meta['_check_address'] = $_POST['_check_address'];
 
+
+    // Add values of $course_meta as custom fields
+
+    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+        if ($post->post_type == 'revision')
+            return; // Don't store custom data twice
+        $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
+        if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
+            update_post_meta($post->ID, $key, $value);
+        } else { // If the custom field doesn't have a value
+            add_post_meta($post->ID, $key, $value);
+        }
+        if (!$value)
+            delete_post_meta($post->ID, $key); // Delete if blank
+    }
 }
 
 add_action('save_post', 'wpt_save_meeting_meta', 1, 2); // save the custom fields
 
+/*
+add_action('init', 'create_instructors');
 
-add_action( 'init', 'create_instructors' );
 function create_instructors() {
-  register_post_type( 'instructors',
-	array(
-	  'labels' => array(
-		'name' => __( 'Instructors' ),
-		'singular_name' => __( 'Instructor' ),
-		'menu_name'          => _x( 'Instructors', 'admin menu', 'Instructor' ),
-		'name_admin_bar'     => _x( 'Instructor', 'add new on admin bar', 'Instructor' ),
-		'add_new'            => _x( 'Add New Instructor', 'Instructor', 'Instructor' ),
-		'add_new_item'       => __( 'Add New Instructor', 'Instructor' ),
-		'new_item'           => __( 'New Instructor', 'Instructor' ),
-		'edit_item'          => __( 'Edit Instructor', 'Instructor' ),
-		'view_item'          => __( 'View Instructor', 'Instructor' ),
-		'all_items'          => __( 'All Instructor', 'Instructor' ),
-		'search_items'       => __( 'Search Instructor', 'Instructor' ),
-		'parent_item_colon'  => __( 'Parent Instructor:', 'Instructor' ),
-		'not_found'          => __( 'No Instructor found.', 'Instructor' ),
-		'not_found_in_trash' => __( 'No Instructor found in Trash.', 'Instructor' )
-	  ),
-	  'public' => true,
-	  'has_archive' => true,
-	  'supports' => array( 'title', 'editor'),
-	  'register_meta_box_cb' => 'add_instructor_metaboxes'
-	)
-  );
+    register_post_type('instructors', array(
+        'labels' => array(
+            'name' => __('Instructors'),
+            'singular_name' => __('Instructor'),
+            'menu_name' => _x('Instructors', 'admin menu', 'Instructor'),
+            'name_admin_bar' => _x('Instructor', 'add new on admin bar', 'Instructor'),
+            'add_new' => _x('Add New Instructor', 'Instructor', 'Instructor'),
+            'add_new_item' => __('Add New Instructor', 'Instructor'),
+            'new_item' => __('New Instructor', 'Instructor'),
+            'edit_item' => __('Edit Instructor', 'Instructor'),
+            'view_item' => __('View Instructor', 'Instructor'),
+            'all_items' => __('All Instructor', 'Instructor'),
+            'search_items' => __('Search Instructor', 'Instructor'),
+            'parent_item_colon' => __('Parent Instructor:', 'Instructor'),
+            'not_found' => __('No Instructor found.', 'Instructor'),
+            'not_found_in_trash' => __('No Instructor found in Trash.', 'Instructor')
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'supports' => array('title', 'editor'),
+        'register_meta_box_cb' => 'add_instructor_metaboxes'
+            )
+    );
 }
 
-add_action( 'add_meta_boxes', 'add_instructor_metaboxes' );
+add_action('add_meta_boxes', 'add_instructor_metaboxes');
 
 // Add the Course Meta Boxes
 
 function add_instructor_metaboxes() {
-	add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'instructors', 'normal', 'high');
+    add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'instructors', 'normal', 'high');
 }
 
 function wpt_instructor_fields() {
-	global $post;
-	
-	// Noncename needed to verify where the data originated
-	echo '<input type="hidden" name="instructormeta_noncename" id="instructormeta_noncename" value="' . 
-	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
-	
-	// Get the email data if its already been entered
-	$email = get_post_meta($post->ID, '_email', true);
-	// Echo out the field
-	echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' .$email.'" /><br/><br/>';
-	
-	// Get the privacy_policy data if its already been entered
-	$privacy_policy = get_post_meta($post->ID, '_privacy_policy', true);
-	// Echo out the field
-	echo '<b>Privacy Policy :</b> <input type="text" name="_privacy_policy" value="' . $privacy_policy  . '" class="widefat" /><br/><br/>';
-	
-	// Get the provider data if its already been entered
-	$provider = get_post_meta($post->ID, '_provider', true);
-	// Echo out the field
-	echo '<b>Provider : </b><input type="text" name="_provider" value="' . $provider  . '" class="widefat" /><br/><br/>';
-	
-	// Get the start_time data if its already been entered
-	$uid = get_post_meta($post->ID, '_uid', true);
-	// Echo out the field
-	echo '<b>User ID : </b><input type="text" name="_uid" value="' . $uid  . '" class="widefat" /><br/><br/>';
-	
-	// Get the system_admin data if its already been entered
-	$system_admin = get_post_meta($post->ID, '_system_admin', true);
-	// Echo out the field
-	echo '<b>System Admin :</b> <input type="text" name="_system_admin" value="' . $system_admin  . '" class="widefat" /><br/><br/>';
-	
-	// Get the created_at data if its already been entered
-	$created_at = get_post_meta($post->ID, '_created_at', true);
-	// Echo out the field
-	echo '<b>Created At :</b> <input type="text" name="_created_at" value="' . $created_at  . '" class="widefat" /><br/><br/>';
-	
-	// Get the updated_at data if its already been entered
-	$updated_at = get_post_meta($post->ID, '_updated_at', true);
-	// Echo out the field
-	echo '<b>Updated At :</b> <input type="text" name="_updated_at" value="' . $updated_at  . '" class="widefat" /><br/><br/>';
-	
+    global $post;
+
+    // Noncename needed to verify where the data originated
+    echo '<input type="hidden" name="instructormeta_noncename" id="instructormeta_noncename" value="' .
+    wp_create_nonce(plugin_basename(__FILE__)) . '" />';
+
+    // Get the email data if its already been entered
+    $email = get_post_meta($post->ID, '_email', true);
+    // Echo out the field
+    echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' . $email . '" /><br/><br/>';
+
+    // Get the privacy_policy data if its already been entered
+    $privacy_policy = get_post_meta($post->ID, '_privacy_policy', true);
+    // Echo out the field
+    echo '<b>Privacy Policy :</b> <input type="text" name="_privacy_policy" value="' . $privacy_policy . '" class="widefat" /><br/><br/>';
+
+    // Get the provider data if its already been entered
+    $provider = get_post_meta($post->ID, '_provider', true);
+    // Echo out the field
+    echo '<b>Provider : </b><input type="text" name="_provider" value="' . $provider . '" class="widefat" /><br/><br/>';
+
+    // Get the start_time data if its already been entered
+    $uid = get_post_meta($post->ID, '_uid', true);
+    // Echo out the field
+    echo '<b>User ID : </b><input type="text" name="_uid" value="' . $uid . '" class="widefat" /><br/><br/>';
+
+    // Get the system_admin data if its already been entered
+    $system_admin = get_post_meta($post->ID, '_system_admin', true);
+    // Echo out the field
+    echo '<b>System Admin :</b> <input type="text" name="_system_admin" value="' . $system_admin . '" class="widefat" /><br/><br/>';
+
+    // Get the created_at data if its already been entered
+    $created_at = get_post_meta($post->ID, '_created_at', true);
+    // Echo out the field
+    echo '<b>Created At :</b> <input type="text" name="_created_at" value="' . $created_at . '" class="widefat" /><br/><br/>';
+
+    // Get the updated_at data if its already been entered
+    $updated_at = get_post_meta($post->ID, '_updated_at', true);
+    // Echo out the field
+    echo '<b>Updated At :</b> <input type="text" name="_updated_at" value="' . $updated_at . '" class="widefat" /><br/><br/>';
 }
 
 function wpt_save_instructor_meta($post_id, $post) {
-	
-	// verify this came from the our screen and with proper authorization,
-	// because save_post can be triggered at other times
-	if ( !wp_verify_nonce( $_POST['meetingmeta_noncename'], plugin_basename(__FILE__) )) {
-	return $post->ID;
-	}
 
-	// Is the user allowed to edit the post or page?
-	if ( !current_user_can( 'edit_post', $post->ID ))
-		return $post->ID;
+    // verify this came from the our screen and with proper authorization,
+    // because save_post can be triggered at other times
+    if (!wp_verify_nonce($_POST['meetingmeta_noncename'], plugin_basename(__FILE__))) {
+        return $post->ID;
+    }
 
-	// OK, we're authenticated: we need to find and save the data
-	// We'll put it into an array to make it easier to loop though.
-	
-	$course_meta['_email'] = $_POST['_email'];
-	$course_meta['_privacy_policy'] = $_POST['_privacy_policy'];
-	$course_meta['_provider'] = $_POST['_provider'];
-	$course_meta['_uid'] = $_POST['_uid'];
-	$course_meta['_system_admin'] = $_POST['_system_admin'];
-	$course_meta['_created_at'] = $_POST['_created_at'];
-	$course_meta['_updated_at'] = $_POST['_updated_at'];
+    // Is the user allowed to edit the post or page?
+    if (!current_user_can('edit_post', $post->ID))
+        return $post->ID;
 
-	
-	// Add values of $course_meta as custom fields
-	
-	foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
-		if( $post->post_type == 'revision' ) return; // Don't store custom data twice
-		$value = implode(',', (array)$value); // If $value is an array, make it a CSV (unlikely)
-		if(get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
-			update_post_meta($post->ID, $key, $value);
-		} else { // If the custom field doesn't have a value
-			add_post_meta($post->ID, $key, $value);
-		}
-		if(!$value) delete_post_meta($post->ID, $key); // Delete if blank
-	}
+    // OK, we're authenticated: we need to find and save the data
+    // We'll put it into an array to make it easier to loop though.
 
+    $course_meta['_email'] = $_POST['_email'];
+    $course_meta['_privacy_policy'] = $_POST['_privacy_policy'];
+    $course_meta['_provider'] = $_POST['_provider'];
+    $course_meta['_uid'] = $_POST['_uid'];
+    $course_meta['_system_admin'] = $_POST['_system_admin'];
+    $course_meta['_created_at'] = $_POST['_created_at'];
+    $course_meta['_updated_at'] = $_POST['_updated_at'];
+
+
+    // Add values of $course_meta as custom fields
+
+    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+        if ($post->post_type == 'revision')
+            return; // Don't store custom data twice
+        $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
+        if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
+            update_post_meta($post->ID, $key, $value);
+        } else { // If the custom field doesn't have a value
+            add_post_meta($post->ID, $key, $value);
+        }
+        if (!$value)
+            delete_post_meta($post->ID, $key); // Delete if blank
+    }
 }
 
 add_action('save_post', 'wpt_save_instructor_meta', 1, 2); // save the custom fields
+*/
 
-function wp_meetings_shortcode(){
-	$args = array(
-		'offset'           => 0,
-		'category'         => '',
-		'category_name'    => '',
-		'orderby'          => 'date',
-		'order'            => 'DESC',
-		'post_type'        => 'meetings',
-		'post_status'      => 'publish',
-		'suppress_filters' => true 
-	);
-	$meetings_array = get_posts( $args ); 
-	echo "<div class='meeting-loop'>";
-	foreach($meetings_array as $meeting){
-			$date = get_post_meta( $meeting->ID, '_date' ); 
-			$start_time = get_post_meta( $meeting->ID, '_start_time' ); 
-			$end_time = get_post_meta( $meeting->ID, '_end_time' ); 
-			$status = get_post_meta( $meeting->ID, '_status' ); 
-			$web_conference = get_post_meta( $meeting->ID, '_web_conference' ); 
-			$address = get_post_meta( $meeting->ID, '_address' ); 
-			$class_id = get_post_meta( $meeting->ID, '_class_id' ); 
-			$group_id = get_post_meta( $meeting->ID, '_group_id' ); 
-			$check_address = get_post_meta( $meeting->ID, '_check_address' ); 
+function wp_add_custom_user_profile_fields( $user ) {
+?>
+	<h3><?php _e('Extra Instructor Information', 'your_textdomain'); ?></h3>
 	
+	<table class="form-table">
+		<tr>
+			<th>
+				<label for="intructor_id"><?php _e('Intructor Id', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="intructor_id" id="intructor_id" value="<?php echo esc_attr( get_the_author_meta( 'intructor_id', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your intructor id.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="privacy_policy"><?php _e('Privacy Policy', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="privacy_policy" id="privacy_policy" value="<?php echo esc_attr( get_the_author_meta( 'privacy_policy', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your Privacy Policy.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="provider"><?php _e('Provider', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="provider" id="provider" value="<?php echo esc_attr( get_the_author_meta( 'provider', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your provider.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="uid"><?php _e('U Id', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="uid" id="uid" value="<?php echo esc_attr( get_the_author_meta( 'uid', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your uid.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="system_admin"><?php _e('System Admin', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="system_admin" id="system_admin" value="<?php echo esc_attr( get_the_author_meta( 'system_admin', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your system admin.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="created_at"><?php _e('Created At', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="created_at" id="created_at" value="<?php echo esc_attr( get_the_author_meta( 'created_at', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your created at.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="updated_at"><?php _e('Updated At', 'your_textdomain'); ?>
+			</label></th>
+			<td>
+				<input type="text" name="updated_at" id="updated_at" value="<?php echo esc_attr( get_the_author_meta( 'updated_at', $user->ID ) ); ?>" class="regular-text" /><br />
+				<span class="description"><?php _e('Please enter your updated at.', 'your_textdomain'); ?></span>
+			</td>
+		</tr>
+	</table>
+<?php }
+
+function wp_save_custom_user_profile_fields( $user_id ) {
 	
-			echo '<ul class="meeting">
-			<li class="title"> '.$meeting->post_title.'</li>
-			<li class="content"> '.$meeting->post_content.' </li>
-			<li class="date">'.$date[0].'</li>
-			<li class="start_time">'.$start_time[0].'</li>
-			<li class="end_time">'.$end_time[0].'</li>
-			<li class="status">'.$status[0].'</li>
-			<li class="web_conference">'.$web_conference[0].'</li>
-			<li class="address">'.$address[0].'</li>
-			<li class="class_id">'.$class_id[0].'</li>
-			<li class="group_id">'.$group_id[0].' </li>
-			<li class="check_address">'.$check_address[0].' </li>
-			</ul>
-			';	
-	}
-	echo "</div>";
+	if ( !current_user_can( 'edit_user', $user_id ) )
+		return FALSE;
+	
+	update_usermeta( $user_id, 'intructor_id', $_POST['intructor_id'] );
+	update_usermeta( $user_id, 'privacy_policy', $_POST['privacy_policy'] );
+	update_usermeta( $user_id, 'provider', $_POST['provider'] );
+	update_usermeta( $user_id, 'uid', $_POST['uid'] );
+	update_usermeta( $user_id, 'system_admin', $_POST['system_admin'] );
+	update_usermeta( $user_id, 'created_at', $_POST['created_at'] );
+	update_usermeta( $user_id, 'updated_at', $_POST['updated_at'] );
 }
+
+add_action( 'show_user_profile', 'wp_add_custom_user_profile_fields' );
+add_action( 'edit_user_profile', 'wp_add_custom_user_profile_fields' );
+
+add_action( 'personal_options_update', 'wp_save_custom_user_profile_fields' );
+add_action( 'edit_user_profile_update', 'wp_save_custom_user_profile_fields' );
+
+function wp_meetings_shortcode() {
+    $args = array(
+        'offset' => 0,
+        'category' => '',
+        'category_name' => '',
+        'orderby' => 'date',
+        'order' => 'DESC',
+        'post_type' => 'meetings',
+        'post_status' => 'publish',
+        'suppress_filters' => true
+    );
+    $meetings_array = get_posts($args);
+    echo "<div class='meeting-loop'>";
+    foreach ($meetings_array as $meeting) {
+        $date = get_post_meta($meeting->ID, '_date');
+        $start_time = get_post_meta($meeting->ID, '_start_time');
+        $end_time = get_post_meta($meeting->ID, '_end_time');
+        $status = get_post_meta($meeting->ID, '_status');
+        $web_conference = get_post_meta($meeting->ID, '_web_conference');
+        $address = get_post_meta($meeting->ID, '_address');
+        $class_id = get_post_meta($meeting->ID, '_class_id');
+        $group_id = get_post_meta($meeting->ID, '_group_id');
+        $check_address = get_post_meta($meeting->ID, '_check_address');
+
+
+        echo '<ul class="meeting">
+			<li class="title"> ' . $meeting->post_title . '</li>
+			<li class="content"> ' . $meeting->post_content . ' </li>
+			<li class="date">' . $date[0] . '</li>
+			<li class="start_time">' . $start_time[0] . '</li>
+			<li class="end_time">' . $end_time[0] . '</li>
+			<li class="status">' . $status[0] . '</li>
+			<li class="web_conference">' . $web_conference[0] . '</li>
+			<li class="address">' . $address[0] . '</li>
+			<li class="class_id">' . $class_id[0] . '</li>
+			<li class="group_id">' . $group_id[0] . ' </li>
+			<li class="check_address">' . $check_address[0] . ' </li>
+			</ul>
+			';
+    }
+    echo "</div>";
+}
+
 add_shortcode('meetings', 'wp_meetings_shortcode');
 
-function add_wmenu_page( $page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null ) {
+function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null) {
     global $menu, $admin_page_hooks, $_registered_pages, $_parent_pages;
- 
-    $menu_slug = plugin_basename( $menu_slug );
- 
-    $admin_page_hooks[$menu_slug] = sanitize_title( $menu_title );
- 
-    $hookname = get_plugin_page_hookname( $menu_slug, '' );
- 
-    if ( !empty( $function ) && !empty( $hookname ) && current_user_can( $capability ) )
-        add_action( $hookname, $function );
- 
-    if ( empty($icon_url) ) {
+
+    $menu_slug = plugin_basename($menu_slug);
+
+    $admin_page_hooks[$menu_slug] = sanitize_title($menu_title);
+
+    $hookname = get_plugin_page_hookname($menu_slug, '');
+
+    if (!empty($function) && !empty($hookname) && current_user_can($capability))
+        add_action($hookname, $function);
+
+    if (empty($icon_url)) {
         $icon_url = 'dashicons-admin-generic';
         $icon_class = 'menu-icon-generic ';
     } else {
-        $icon_url = set_url_scheme( $icon_url );
+        $icon_url = set_url_scheme($icon_url);
         $icon_class = '';
     }
- 
-    $new_menu = array( $menu_title, $capability, $menu_slug, $page_title, 'menu-top ' . $icon_class . $hookname, $hookname, $icon_url );
- 
-    if ( null === $position ) {
+
+    $new_menu = array($menu_title, $capability, $menu_slug, $page_title, 'menu-top ' . $icon_class . $hookname, $hookname, $icon_url);
+
+    if (null === $position) {
         $menu[] = $new_menu;
-    } elseif ( isset( $menu[ "$position" ] ) ) {
-        $position = $position + substr( base_convert( md5( $menu_slug . $menu_title ), 16, 10 ) , -5 ) * 0.00001;
-        $menu[ "$position" ] = $new_menu;
+    } elseif (isset($menu["$position"])) {
+        $position = $position + substr(base_convert(md5($menu_slug . $menu_title), 16, 10), -5) * 0.00001;
+        $menu["$position"] = $new_menu;
     } else {
-        $menu[ $position ] = $new_menu;
+        $menu[$position] = $new_menu;
     }
- 
+
     $_registered_pages[$hookname] = true;
- 
+
     // No parent as top level
     $_parent_pages[$menu_slug] = false;
- 
+
     return $hookname;
 }
 
@@ -646,11 +753,12 @@ global $wpdb;
 
 $charset_collate = $wpdb->get_charset_collate();
 
-$table_name = $wpdb->prefix.'api_credential';
+$table_name = $wpdb->prefix . 'api_credential';
 
 $sql = "CREATE TABLE $table_name (
   id mediumint(9) NOT NULL AUTO_INCREMENT,
   api_url varchar(255) DEFAULT '' NOT NULL,
+  account_id varchar(255) DEFAULT '' NOT NULL,
   email varchar(55) DEFAULT '' NOT NULL,
   password varchar(55) DEFAULT '' NOT NULL,
   access_token varchar(255) DEFAULT '' NOT NULL,
@@ -659,6 +767,10 @@ $sql = "CREATE TABLE $table_name (
 ) $charset_collate;";
 
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-dbDelta( $sql );
 
+require plugin_dir_path(__FILE__) . "lib/lib.php";
+
+$adept = new WP_Lib();
+
+dbDelta($sql);
 ?>
