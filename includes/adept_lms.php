@@ -71,6 +71,18 @@ if (isset($_POST['class_meeting'])) {
     }
 }//meeting import code 
 
+if (isset($_POST['update_meeting'])) {
+
+    if ($adept_access_token_value == '') {
+        $error = "Please enter authentication detail";
+    } else {
+        $url = $adept_api_url_value . 'meeting_updates?access_token=' . $adept_access_token_value . '&id=1' . '&account_id=' . $adept_account_id_value;
+        $result = $adept->update_meeting($url);
+        $success = $result;
+    }
+}
+
+
 if (isset($_POST['class_group'])) {
 
     if ($adept_access_token_value == '') {
@@ -141,6 +153,12 @@ if (isset($_POST['import_instructors'])) {
                     <th width="115"><?php esc_html_e('Class Meeting:') ?></th>
                     <td width="877">
                         <input type="submit" name="class_meeting" value="Class Meeting"/>
+                    </td>
+                </tr>
+				<tr>
+                    <th width="115"><?php esc_html_e('Update Meeting:') ?></th>
+                    <td width="877">
+                        <input type="submit" name="update_meeting" value="Update Meeting"/>
                     </td>
                 </tr>
                 <tr>

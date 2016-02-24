@@ -1,1 +1,7 @@
+add language for user in wp-option  => Done
+add transilation for course category
+add transilation for course update
+add transilation for group update
+add transilation for meeting update
+update course to live site
 

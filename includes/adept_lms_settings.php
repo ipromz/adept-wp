@@ -6,11 +6,11 @@ $wp_adept_lms = new WP_Adept_LMS();
 if (isset($_POST['save_code'])) {
     if ($_POST) {
 
-        if (trim($_POST['api_url']) == '') {
+        /*if (trim($_POST['api_url']) == '') {
             $error = 'Please enter API URL';
         } else {
             $url = $_POST['api_url'];
-        }
+        }*/
         if (trim($_POST['email']) == '') {
             $error = 'Please enter email';
         } else {
@@ -39,12 +39,14 @@ if (isset($_POST['save_code'])) {
             $cron = $_POST['cron'];
         }
     }
-    $curl = $_POST['api_url'] . "authentication";
-    $data = "email=" . $email . "&password=" . $password . "&account_id=" . $account_id;
+	$url = $account_id.'.adeptlms.com/api/v1/'; 
+    $curl = $url . "authentication";
+    $data = "email=" . $email . "&password=" . $password;
     $temp = $adept->postdata($curl, $data);
     $access_token = $temp->access_token;
+    $language = $temp->language;
     $date = date('Y-m-d h:i:s', time());
-
+	
     if ($temp->status == 200 || $temp->status == 'OK') {
 
         $adept_access_token_value = get_option('adept_access_token');
@@ -56,6 +58,7 @@ if (isset($_POST['save_code'])) {
             add_option('adept_password', md5($password), '', 'yes');
             add_option('adept_account_id', $account_id, '', 'yes');
             add_option('adept_access_token', $access_token, '', 'yes');
+            add_option('adept_language', $language, '', 'yes');
             add_option('adept_author', $author, '', 'yes');
             add_option('adept_cron', $cron, '', 'yes');
 
@@ -67,6 +70,7 @@ if (isset($_POST['save_code'])) {
             update_option('adept_password', md5($password));
             update_option('adept_account_id', $account_id);
             update_option('adept_access_token', $access_token);
+            update_option('adept_language', $language);
             update_option('adept_author', $author);
             update_option('adept_cron', $cron);
             $success = "User details updated";
@@ -103,13 +107,13 @@ if ($cron == '0') {
         <table width="1004" class="form-table">
             <tbody>
 
-                <tr>
-                    <th width="115"><?php esc_html_e('API URL') ?></th>
+                <!-- <tr>
+                    <th width="115"><?php //esc_html_e('API URL') ?></th>
                     <td width="877">
-                        <input type="text" name="api_url" value="<?php echo $url; ?>" style="width:450px;"/>  
+                        <input type="text" name="api_url" value="<?php //echo $url; ?>" style="width:450px;"/>  
                         <br/> i.e. xxx.adeptlms.com/api/v1/
                     </td>
-                </tr>
+                </tr> -->
 
                 <tr>
                     <th width="115"><?php esc_html_e('Email') ?></th>
