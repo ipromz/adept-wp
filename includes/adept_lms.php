@@ -22,7 +22,7 @@ if (isset($_POST['import_categories'])) {
     if ($adept_access_token_value == '') {
         $error = "Please enter authentication detail";
     } else {
-        $url = $adept_api_url_value . 'course_categories_api?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+        $url = $adept_api_url_value . 'course_categories?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
         $result = $adept->import_category($url);
         if ($result) {
             $error = $result;
@@ -39,7 +39,7 @@ if (isset($_POST['import_course'])) {
     if ($adept_access_token_value == '') {
         $error = "Please enter authentication detail";
     } else {
-        $url = $adept_api_url_value . 'courses_api?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+        $url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
         $result = $adept->import_course($url);
         $success = $result;
     }

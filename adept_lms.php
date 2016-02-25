@@ -7,7 +7,6 @@
   Version: 1.0
  */
 
-
 class WP_Adept_LMS {
 
     // Constructor
@@ -237,30 +236,32 @@ function wpt_save_course_meta($post_id, $post) {
     if (!wp_verify_nonce($_POST['coursemeta_noncename'], plugin_basename(__FILE__))) {
         return $post->ID;
     }
-	var_dump($_POST);
-	$adept_account_id_value = get_option('adept_account_id');
-	$data = '
-&access_token='.$adept_account_id_value.'&course_title='.$_POST['post_title'].'
-&teaser='.$_POST['post_excerpt'].' 
-&description='.$_POST['content'].'
-&tags='.$_POST['_tags'].' 
-&sku='.$_POST['_sku'].'
-&taxable='.$_POST['_tax_category'].'
-&allow_discounts='.$_POST['_allow_discounts'].'
-&subscription='.$_POST['_subscription'].'
-&published='.$_POST['publish'].'
-&booking_count='.$_POST['_booking_count'].'
-&course_category_id='.$_POST['tax_input']['genre']['0'].'
-&created_at='.$_POST[''].' 
-&updated_at='.$_POST[''].'
-&categories='.$_POST[''];
 
-	
-	$adept->update_course_to_live($url,$data);
     // Is the user allowed to edit the post or page?
     if (!current_user_can('edit_post', $post->ID))
         return $post->ID;
 
+	
+	
+	/*$adept_account_id_value = get_option('adept_account_id');
+	$data = '
+		&access_token='.$adept_account_id_value.'&course_title='.$_POST['post_title'].'
+		&teaser='.$_POST['post_excerpt'].' 
+		&description='.$_POST['content'].'
+		&tags='.$_POST['_tags'].' 
+		&sku='.$_POST['_sku'].'
+		&taxable='.$_POST['_tax_category'].'
+		&allow_discounts='.$_POST['_allow_discounts'].'
+		&subscription='.$_POST['_subscription'].'
+		&published='.$_POST['publish'].'
+		&booking_count='.$_POST['_booking_count'].'
+		&course_category_id='.$_POST['tax_input']['genre']['0'].'
+		&created_at='.$_POST[''].' 
+		&updated_at='.$_POST[''].'
+		&categories='.$_POST[''];
+
+	
+	$adept->update_course_to_live($url,$data);*/
     // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
@@ -827,7 +828,7 @@ function wpt_group_fields() {
 }
 
 function wpt_save_group_meta($post_id, $post) {
-	//
+
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if (!wp_verify_nonce($_POST['groupmeta_noncename'], plugin_basename(__FILE__))) {
