@@ -243,25 +243,29 @@ function wpt_save_course_meta($post_id, $post) {
 
 	
 	
-	/*$adept_account_id_value = get_option('adept_account_id');
-	$data = '
-		&access_token='.$adept_account_id_value.'&course_title='.$_POST['post_title'].'
-		&teaser='.$_POST['post_excerpt'].' 
-		&description='.$_POST['content'].'
-		&tags='.$_POST['_tags'].' 
-		&sku='.$_POST['_sku'].'
-		&taxable='.$_POST['_tax_category'].'
-		&allow_discounts='.$_POST['_allow_discounts'].'
-		&subscription='.$_POST['_subscription'].'
-		&published='.$_POST['publish'].'
-		&booking_count='.$_POST['_booking_count'].'
-		&course_category_id='.$_POST['tax_input']['genre']['0'].'
-		&created_at='.$_POST[''].' 
-		&updated_at='.$_POST[''].'
-		&categories='.$_POST[''];
+	$adept_access_token_value = get_option('adept_access_token');
+    $postid = $post_id;
+    $course_title = $_POST['post_title'];
+    $teaser = $_POST['post_excerpt'];
+    $description = $_POST['content'];
+    $tags = $_POST['_tags'];
+    $sku = $_POST['_sku'];
+    $taxable = $_POST['_tax_category'];
+    $allow_discounts = $_POST['_allow_discounts'];
+    $subscription = $_POST['_allow_discounts'];
+    $course_category_id = $_POST['tax_input']['tax_input'][0];
+    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
+    include_once MY_PLUGIN_PATH . "lib/lib.php";
+    $adept = new WP_Lib();
+    $adept_api_url_value = get_option('adept_api_url');
+    $curl = $adept_api_url_value.'update_course/';
+    $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course_title=" . $course_title
+            . "&teaser=" . $teaser. "&description=" . $description
+            . "&tags=" . $tags."&sku=" . $sku. "&taxable=" . $taxable
+            . "&allow_discounts=" . $allow_discounts. "&subscription=" . $subscription
+            . "&course_category_id=" . $course_category_id;
 
-	
-	$adept->update_course_to_live($url,$data);*/
+    $temp = $adept->postdata($curl, $data);
     // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
@@ -417,6 +421,43 @@ function wpt_save_meeting_meta($post_id, $post) {
     // Is the user allowed to edit the post or page?
     if (!current_user_can('edit_post', $post->ID))
         return $post->ID;
+	
+	$adept_access_token_value = get_option('adept_access_token');
+    $postid = $post_id;
+    $course_title = $_POST['post_title'];
+    $description = $_POST['content'];
+    $date = $_POST['_date'];
+    $start_time = $_POST['_start_time'];
+    $end_time = $_POST['_end_time'];
+    $web_conference = $_POST['_web_conference'];
+    $address = $_POST['_address'];
+    $meeting_id = $_POST['_meeting_id'];
+    $status = $_POST['_status'];
+    $group_id = $_POST['_group_id'];
+    $check_address = $_POST['_check_address'];
+    $user_id = $_POST['_user_id'];
+    $kind = $_POST['_kind'];
+    $video_conference_account_id = $_POST['_video_conference_account_id'];
+    $video_conference_url = $_POST['_video_conference_url'];
+    $video_conference_uid = $_POST['_video_conference_uid'];
+
+    
+    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
+    include_once MY_PLUGIN_PATH . "lib/lib.php";
+    $adept = new WP_Lib();
+    $adept_api_url_value = get_option('adept_api_url');
+    $curl = $adept_api_url_value.'update_meeting/';
+    $data = "id=" . $post_id . "&access_token=" . $adept_access_token_value . "&title=" . $course_title
+            . "&comment=" . $description. "&date=" . $date
+            . "&start_time=" . $start_time."&end_time=" . $end_time
+            . "&address=" . $allow_discounts. "&class_id=" . $meeting_id
+            . "&created_by=" . $user_id. "&modified_by=" . $user_id
+            . "&check_address=" . $check_address. "&group_id=" . $group_id
+            . "&user_id=" . $user_id. "&kind=" . $kind
+            . "&video_conference_account_id=" . $video_conference_account_id. "&video_conference_url=" . $video_conference_url
+            . "&video_conference_uid=" . $video_conference_uid;
+
+    $temp = $adept->postdata($curl, $data);
 
     $course_meta['_date'] = $_POST['_date'];
     $course_meta['_start_time'] = $_POST['_start_time'];
@@ -682,7 +723,27 @@ function wpt_save_instructor_meta($post_id, $post) {
 
     // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
+	$adept_access_token_value = get_option('adept_access_token');
+    $postid = $post->ID;
+    $email = $_POST['_email'];
+    $privacy_policy = $_POST['_privacy_policy'];
+    $provider = $_POST['_provider'];
+    $uid = $_POST['_uid'];
+    $system_admin = $_POST['_system_admin'];
+    $created_at = $_POST['_created_at'];
+    $updated_at = $_POST['_updated_at'];
+    
+	define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
+    include_once MY_PLUGIN_PATH . "lib/lib.php";
+    $adept = new WP_Lib();
+    $adept_api_url_value = get_option('adept_api_url');
+    $curl = $adept_api_url_value.'update_instructor/';
+    $data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&email=" . $email
+            . "&privacy_policy=" . $privacy_policy. "&provider=" . $provider
+            . "&uid=" . $uid."&system_admin=" . $system_admin
+            . "&created_at=" . $created_at. "&updated_at=" . $updated_at;
 
+    $temp = $adept->postdata($curl, $data);
     $course_meta['_instructor_id'] = $_POST['_instructor_id'];
     $course_meta['_email'] = $_POST['_email'];
     $course_meta['_privacy_policy'] = $_POST['_privacy_policy'];
@@ -828,7 +889,7 @@ function wpt_group_fields() {
 }
 
 function wpt_save_group_meta($post_id, $post) {
-
+	global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if (!wp_verify_nonce($_POST['groupmeta_noncename'], plugin_basename(__FILE__))) {
@@ -839,6 +900,38 @@ function wpt_save_group_meta($post_id, $post) {
     if (!current_user_can('edit_post', $post->ID))
         return $post->ID;
 
+	$adept_access_token_value = get_option('adept_access_token');
+    $postid = $post->ID;
+    $group_title = $_POST['post_title'];
+    $description = $_POST['post_content'];
+    $tags = $_POST['_tags'];
+    $course_fee = $_POST['_course_fee'];
+    $taxable = $_POST['_taxable'];
+    $published = $_POST['_published'];
+    $allow_bookings = $_POST['_allow_bookings'];
+    $start_date = $_POST['_start_date'];
+    $end_date = $_POST['_end_date'];
+    $reg_date = $_POST['_reg_date'];
+    $seats = $_POST['_seats'];
+    $hide_if_full = $_POST['_hide_if_full'];
+    $show_seats_left = $_POST['_show_seats_left'];
+    $lessons = $_POST['_lessons'];
+    $status = $_POST['_status'];
+    
+	define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
+    include_once MY_PLUGIN_PATH . "lib/lib.php";
+    $adept = new WP_Lib();
+    $adept_api_url_value = get_option('adept_api_url');
+    $curl = $adept_api_url_value.'update_instructor/';
+    $data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&group_title=" . $group_title
+            . "&description=" . $description. "&tags=" . $tags
+            . "&course_fee=" . $course_fee."&taxable=" . $taxable
+            . "&published=" . $published."&allow_bookings=" . $allow_bookings
+            . "&start_date=" . $start_date."&end_date=" . $end_date
+            . "&reg_date=" . $reg_date."&seats=" . $seats
+            . "&hide_if_full=" . $hide_if_full."&show_seats_left=" . $show_seats_left
+            . "&lessons=" . $lessons. "&status=" . $status;
+	
     // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
@@ -856,6 +949,7 @@ function wpt_save_group_meta($post_id, $post) {
     $course_meta['_show_seats_left'] = $_POST['_show_seats_left'];
     $course_meta['_lessons'] = $_POST['_lessons'];
     $course_meta['_status'] = $_POST['_status'];
+	$course_language['_language'] = $_POST['_language']
 
 
     // Add values of $course_meta as custom fields

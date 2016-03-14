@@ -107,14 +107,7 @@ if ($cron == '0') {
         <table width="1004" class="form-table">
             <tbody>
 
-                <!-- <tr>
-                    <th width="115"><?php //esc_html_e('API URL') ?></th>
-                    <td width="877">
-                        <input type="text" name="api_url" value="<?php //echo $url; ?>" style="width:450px;"/>  
-                        <br/> i.e. xxx.adeptlms.com/api/v1/
-                    </td>
-                </tr> -->
-
+                
                 <tr>
                     <th width="115"><?php esc_html_e('Email') ?></th>
                     <td width="877">

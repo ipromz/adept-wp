@@ -94,6 +94,17 @@ if (isset($_POST['class_group'])) {
     }
 }
 
+if (isset($_POST['update_group'])) {
+
+    if ($adept_access_token_value == '') {
+        $error = "Please enter authentication detail";
+    } else {
+        $url = $adept_api_url_value . 'group_updates_cron?access_token=' . $adept_access_token_value;
+        $result = $adept->update_groups($url);
+        $success = $result;
+    }
+}
+
 //Import course instructors
 
 if (isset($_POST['import_instructors'])) {
@@ -106,6 +117,8 @@ if (isset($_POST['import_instructors'])) {
         $success = $result;
     }
 }
+
+
 ?>
 <title>Adept LMS</title>
 <h1>Adept LMS</h1>
@@ -147,6 +160,12 @@ if (isset($_POST['import_instructors'])) {
                     <th width="115"><?php esc_html_e('Import Group:') ?></th>
                     <td width="877">
                         <input type="submit" name="class_group" value="Class Group"/>
+                    </td>
+                </tr>
+				<tr>
+                    <th width="115"><?php esc_html_e('Update Group:') ?></th>
+                    <td width="877">
+                        <input type="submit" name="update_group" value="Update Group"/>
                     </td>
                 </tr>
                 <tr>
