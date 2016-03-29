@@ -2,7 +2,10 @@
 include_once MY_PLUGIN_PATH . "lib/lib.php";
 $adept = new WP_Lib();
 $wp_adept_lms = new WP_Adept_LMS();
+$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+$plugin2 = 'wpml-translation-management/plugin.php';
 
+//if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
 if (isset($_POST['save_code'])) {
     if ($_POST) {
 
@@ -61,7 +64,7 @@ if (isset($_POST['save_code'])) {
             add_option('adept_language', $language, '', 'yes');
             add_option('adept_author', $author, '', 'yes');
             add_option('adept_cron', $cron, '', 'yes');
-
+			register_activation_hook(__FILE__, 'my_activation');			// added for set cron start /*				function my_activation() {					wp_schedule_event(time(), 'hourly', 'my_hourly_event');				}				add_action('my_hourly_event', 'do_this_hourly');				function do_this_hourly() {					// do something every hour				}				register_deactivation_hook(__FILE__, 'my_deactivation');				function my_deactivation() {					wp_clear_scheduled_hook('my_hourly_event');				}*/// added for set cron end
             $success = "User details inserted successfully";
         } else {
             wp_cache_delete('alloptions', 'options');
@@ -79,6 +82,9 @@ if (isset($_POST['save_code'])) {
         $error = "Entered invalid credentials";
     }
 }
+/*}else{
+      $error = "Please Install  wpml-translation-management & sitepress-multilingual-cms Plugin to access this page";
+}*/
 $url = get_option('adept_api_url');
 $email = get_option('adept_email');
 $password = get_option('adept_password');
@@ -107,7 +113,14 @@ if ($cron == '0') {
         <table width="1004" class="form-table">
             <tbody>
 
-                
+                <!-- <tr>
+                    <th width="115"><?php //esc_html_e('API URL') ?></th>
+                    <td width="877">
+                        <input type="text" name="api_url" value="<?php //echo $url; ?>" style="width:450px;"/>  
+                        <br/> i.e. xxx.adeptlms.com/api/v1/
+                    </td>
+                </tr> -->
+
                 <tr>
                     <th width="115"><?php esc_html_e('Email') ?></th>
                     <td width="877">
