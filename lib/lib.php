@@ -64,6 +64,8 @@ Class WP_Lib {
 
     function import_category($url) {
         global $wpdb, $sitepress;
+		$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+		$plugin2 = 'wpml-translation-management/plugin.php';
         $temp = $this->getdata($url);
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
@@ -88,7 +90,7 @@ Class WP_Lib {
                     );
 
                     // Fetching WPML's trid
-                    if ($fi_category->errors['term_exists'][0] == '') {
+                    if ($fi_category->errors['term_exists'][0] == '' && is_plugin_active($plugin1) && is_plugin_active($plugin2)) {
 
                         $trid = $sitepress->get_element_trid($fi_category['term_taxonomy_id'], 'tax_' . $taxonomy);
 
@@ -1469,17 +1471,20 @@ Class WP_Lib {
         $adept_author_value = get_option('adept_author');
         foreach ($temp->data as $_temp1) {
             // Gather post data.
+			if($_temp1->bio == ''){
+				$_temp1->bio = ' ';
+			}
             $my_post = array(
                 "post_author" => $adept_author_value,
                 "post_date" => $_temp1->created_at,
                 "post_date_gmt" => $_temp1->created_at,
-                "post_content" => $_temp1->email,
-                "post_excerpt" => $_temp1->email,
-                "post_title" => $_temp1->email,
+                "post_content" => $_temp1->bio,
+                "post_excerpt" => $_temp1->bio,
+                "post_title" => $_temp1->full_name,
                 "post_status" => 'publish',
                 "comment_status" => 'closed',
                 "ping_status" => 'closed',
-                "post_name" => sanitize_title($_temp1->email),
+                "post_name" => sanitize_title($_temp1->full_name),
                 "post_modified" => $_temp1->updated_at,
                 "post_modified_gmt" => $_temp1->updated_at,
                 "menu_order" => '0',
@@ -1491,9 +1496,9 @@ Class WP_Lib {
 
             add_post_meta($post_id, '_instructor_id', $_temp1->id);
             add_post_meta($post_id, '_email', $_temp1->email);
-            add_post_meta($post_id, '_full_name', $_temp1->full_name);
+            //add_post_meta($post_id, '_full_name', $_temp1->full_name);
             add_post_meta($post_id, '_avatar', $_temp1->avatar);
-            add_post_meta($post_id, '_bio', $_temp1->bio);
+            //add_post_meta($post_id, '_bio', $_temp1->bio);
         }
         return "Instructors imported successfully";
     }
@@ -1508,5 +1513,18 @@ Class WP_Lib {
     }
 
 }
+
+function add_publish_confirmation(){ 
+    $confirmation_message = "Content will be updated on LMS,Are you sure?"; 
+ 
+    echo '<script type="text/javascript">';
+    echo '<!-- var publish = document.getElementById("publish");'; 
+    echo 'if (publish !== null){';
+    echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };'; 
+    echo '}'; 
+    echo '// --></script>'; 
+} 
+add_action('admin_footer', 'add_publish_confirmation');
+
 
 ?>

@@ -144,7 +144,7 @@ if (isset($_POST['map_language'])) {
 		global $wpdb, $sitepress, $sitepress_settings;
 		$langdata= $adept->get_languages();
 		//$lang_code = '';
-		unset($lang_codes);
+		unset($lang_codes);		if(count($langdata->data) > 0){
 		foreach($langdata->data as $k => $d){
 			if($k == 'pt'){
 				$k = 'pt-PT';
@@ -154,9 +154,9 @@ if (isset($_POST['map_language'])) {
 		//$lang_code = implode(',',$lang_codes);
 		//$lang_codes = explode(',',$lang_codes);
 		$setup_instance = wpml_get_setup_instance();
-		$setup_instance->set_active_languages ( $lang_codes ) ;
+		$setup_instance->set_active_languages ( $lang_codes ) ;		}
         $success = 'Languages Map successfully';
-}
+}$plugin1 = 'sitepress-multilingual-cms/sitepress.php';$plugin2 = 'wpml-translation-management/plugin.php';
 ?>
 <title>Adept LMS</title>
 <h1>Adept LMS</h1>
@@ -169,13 +169,13 @@ if (isset($_POST['map_language'])) {
             <div class="updated notice notice-error error is-dismissible" id="message"><p><?php echo $error; ?></p><button class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>
         <?php } ?>
         <table width="1004" class="form-table">
-            <tbody>
+            <tbody>			<?php if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){ ?>
 				<tr>
                     <th width="115"><?php esc_html_e('Map Language:') ?></th>
                     <td width="877">
                         <input type="submit" name="map_language" value="Map Language"/>
                     </td>
-                </tr>
+                </tr>			<?php } ?>
                 <tr>
                     <th width="115"><?php esc_html_e('Import Categories:') ?></th>
                     <td width="877">

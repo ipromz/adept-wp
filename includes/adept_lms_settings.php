@@ -65,7 +65,7 @@ if (isset($_POST['save_code'])) {
             add_option('adept_author', $author, '', 'yes');
             add_option('adept_cron', $cron, '', 'yes');
 			register_activation_hook(__FILE__, 'my_activation');			// added for set cron start /*				function my_activation() {					wp_schedule_event(time(), 'hourly', 'my_hourly_event');				}				add_action('my_hourly_event', 'do_this_hourly');				function do_this_hourly() {					// do something every hour				}				register_deactivation_hook(__FILE__, 'my_deactivation');				function my_deactivation() {					wp_clear_scheduled_hook('my_hourly_event');				}*/// added for set cron end
-            $success = "User details inserted successfully";
+            $success = "My api authenticated succeeded";
         } else {
             wp_cache_delete('alloptions', 'options');
             update_option('adept_api_url', $url);
@@ -79,7 +79,7 @@ if (isset($_POST['save_code'])) {
             $success = "User details updated";
         }
     } else {
-        $error = "Entered invalid credentials";
+        $error = "My api authenticated failed";
     }
 }
 /*}else{

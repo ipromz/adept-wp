@@ -1,41 +1,41 @@
-add language for user in wp-option  => Done
-add transilation for course category 
-add transilation for course update => Done
-add transilation for meeting update => Done
-update course to live site
-update api names => done
-
-
-8:11
-
-7:30 5:40
-
-UPDATE wp_posts SET guid = REPLACE(guid,"http://localhost/adept_lms,"http://192.168.10.210/adept_lms");
-UPDATE wp_posts SET post_content = REPLACE(post_content,'localhost/adept_lms','http://192.168.10.210/adept_lms');
-UPDATE wp_posts SET post_content = REPLACE(post_content,'http://localhost/adept_lms','http://192.168.10.210/adept_lms');
-UPDATE wp_posts SET post_excerpt     = REPLACE(post_excerpt    ,'localhost/adept_lms','http://192.168.10.210/adept_lms');
-UPDATE wp_options SET option_value = replace(option_value, 'http://localhost/adept_lms', 'http://192.168.10.210/adept_lms') WHERE option_name = 'home' OR option_name = 'siteurl';
-UPDATE wp_options SET option_value = replace(option_value, 'http://localhost/adept_lms/', 'http://192.168.10.210/adept_lms/') ;
-UPDATE wp_postmeta SET meta_value  = replace(meta_value, 'http://localhost/adept_lms', 'http://192.168.10.210/adept_lms');
-
-
-https://wpml.org/forums/topic/feeding-translated-versions-for-categories-with-wp_insert_term/
-$_POST['icl_tax_' . $taxonomy . '_language'] = 'nl';
-$fi_category = wp_insert_term( 'Category name in dutch', $taxonomy);
-
-// Fetching WPML's trid
-global $sitepress;
-$trid = $sitepress->get_element_trid($fi_category['term_taxonomy_id'], 'tax_' . $taxonomy);
-
-// Updating icl_translations table to connect the two terms
-
-$updates = array(
-    'trid' => $trid,
-    'language_code' => 'nl'
-);
-$where = array(
-    'element_type' => 'tax_' . $taxonomy,
-    'element_id' => $fi_category['term_taxonomy_id']
-);
-
+add language for user in wp-option  => Done
+add transilation for course category 
+add transilation for course update => Done
+add transilation for meeting update => Done
+update course to live site
+update api names => done
+
+
+8:11
+
+7:30 5:40
+
+UPDATE wp_posts SET guid = REPLACE(guid,"http://localhost/adept_lms,"http://192.168.10.210/adept_lms");
+UPDATE wp_posts SET post_content = REPLACE(post_content,'localhost/adept_lms','http://192.168.10.210/adept_lms');
+UPDATE wp_posts SET post_content = REPLACE(post_content,'http://localhost/adept_lms','http://192.168.10.210/adept_lms');
+UPDATE wp_posts SET post_excerpt     = REPLACE(post_excerpt    ,'localhost/adept_lms','http://192.168.10.210/adept_lms');
+UPDATE wp_options SET option_value = replace(option_value, 'http://localhost/adept_lms', 'http://192.168.10.210/adept_lms') WHERE option_name = 'home' OR option_name = 'siteurl';
+UPDATE wp_options SET option_value = replace(option_value, 'http://localhost/adept_lms/', 'http://192.168.10.210/adept_lms/') ;
+UPDATE wp_postmeta SET meta_value  = replace(meta_value, 'http://localhost/adept_lms', 'http://192.168.10.210/adept_lms');
+
+
+https://wpml.org/forums/topic/feeding-translated-versions-for-categories-with-wp_insert_term/
+$_POST['icl_tax_' . $taxonomy . '_language'] = 'nl';
+$fi_category = wp_insert_term( 'Category name in dutch', $taxonomy);
+
+// Fetching WPML's trid
+global $sitepress;
+$trid = $sitepress->get_element_trid($fi_category['term_taxonomy_id'], 'tax_' . $taxonomy);
+
+// Updating icl_translations table to connect the two terms
+
+$updates = array(
+    'trid' => $trid,
+    'language_code' => 'nl'
+);
+$where = array(
+    'element_type' => 'tax_' . $taxonomy,
+    'element_id' => $fi_category['term_taxonomy_id']
+);
+
 $wpdb->update($wpdb->prefix . 'icl_translations', $updates, $where);

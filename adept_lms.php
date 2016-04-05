@@ -379,7 +379,7 @@ function create_meetings() {
         'public' => true,
         'has_archive' => true,
         'supports' => array('title', 'editor'),
-        'register_meta_box_cb' => 'add_me	eting_metaboxes'
+        'register_meta_box_cb' => 'add_meeting_metaboxes'
             )
     );
 }
@@ -728,9 +728,9 @@ function wpt_instructor_fields() {
     echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' . $email . '" /><br/><br/>';
 
     // Get the full_name data if its already been entered
-    $full_name = get_post_meta($post->ID, '_full_name', true);
+    //$full_name = get_post_meta($post->ID, '_full_name', true);
     // Echo out the field
-    echo '<b>Full Name :</b> <input type="text" name="_full_name" value="' . $full_name . '" class="widefat" /><br/><br/>';
+    //echo '<b>Full Name :</b> <input type="text" name="_full_name" value="' . $full_name . '" class="widefat" /><br/><br/>';
 
     // Get the avatar data if its already been entered
     $avatar = get_post_meta($post->ID, '_avatar', true);
@@ -738,9 +738,9 @@ function wpt_instructor_fields() {
     echo '<b>Avatar : </b><input type="text" name="_avatar" value="' . $avatar . '" class="widefat" /><br/><br/>';
 
     // Get the Bio data if its already been entered
-    $uid = get_post_meta($post->ID, '_bio', true);
+    //$uid = get_post_meta($post->ID, '_bio', true);
     // Echo out the field
-    echo '<b>Bio : </b><input type="text" name="_bio" value="' . $bio . '" class="widefat" /><br/><br/>';
+    //echo '<b>Bio : </b><input type="text" name="_bio" value="' . $bio . '" class="widefat" /><br/><br/>';
 
     
 }
@@ -781,9 +781,9 @@ function wpt_save_instructor_meta($post_id, $post) {
     $temp = $adept->putdata($curl, $data);
     $course_meta['_instructor_id'] = $_POST['_instructor_id'];
     $course_meta['_email'] = $_POST['_email'];
-    $course_meta['_full_name'] = $_POST['_full_name'];
+    //$course_meta['_full_name'] = $_POST['_full_name'];
     $course_meta['_avatar'] = $_POST['_avatar'];
-    $course_meta['_bio'] = $_POST['_bio'];
+    //$course_meta['_bio'] = $_POST['_bio'];
 
     // Add values of $course_meta as custom fields
 
