@@ -7,7 +7,7 @@
   Author: Viral Sonawala
   Version: 1.0
  */
-
+  
 class WP_Adept_LMS {
 
     // Constructor
