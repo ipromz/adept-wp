@@ -168,30 +168,28 @@ Class WP_Lib {
         return "Update course to live site";
     }
 
-    function import_course($url) {
+    function import_course($url) {		
         global $wpdb, $sitepress;
 
         //$sitepress->set_element_language_details($ru_post_id, 'post_post', $def_trid, 'ru');
         // Static entry for the course 18 - 2 -2016//
 
-        $all_courses_list = $this->getdata($url);		
-
+        $all_courses_list = $this->getdata($url);					
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
 
         if (!empty($all_courses_list->data)) {
 
             foreach ($all_courses_list->data as $k => $v) {
-
-                $adept_author_value = get_option('adept_author');
-                $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE '" . $v->course_category_id . "_%'");
+				$adept_author_value = get_option('adept_author');
+                $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE '" . $v->course_category_id . "_%'");								//print_r($check_term_id_slug); 
                 if ($v->teaser == '') {
                     $v->teaser = $v->description;
                 }
 
                 $get_existing_post_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND meta_value ='" . $site_default_language . "_" . $v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
                 $postid = $get_existing_post_id[0]->post_id;
-
+				
                 if (trim($postid) == "") {
 
                     $my_post = array(
@@ -240,7 +238,7 @@ Class WP_Lib {
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                     // Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+					$plugin2 = 'wpml-translation-management/plugin.php';
 
 				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
@@ -1513,7 +1511,7 @@ Class WP_Lib {
     }
 
 }
-
+/*
 function add_publish_confirmation(){ 
     $confirmation_message = "Content will be updated on LMS,Are you sure?"; 
  
@@ -1525,6 +1523,6 @@ function add_publish_confirmation(){
     echo '// --></script>'; 
 } 
 add_action('admin_footer', 'add_publish_confirmation');
-
+*/
 
 ?>

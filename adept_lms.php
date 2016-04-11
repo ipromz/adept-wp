@@ -7,7 +7,7 @@
   Author: Viral Sonawala
   Version: 1.0
  */
-  
+
 class WP_Adept_LMS {
 
     // Constructor
@@ -1037,7 +1037,7 @@ function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $func
 
     return $hookname;
 }
-
+function add_publish_confirmation(){     $confirmation_message = "Content will be updated on LMS,Are you sure?";      echo '<script type="text/javascript">';    echo ' var publish = document.getElementById("publish");';     echo 'if (publish !== null){';    echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };';     echo '}';     echo '</script>'; } add_action('admin_footer', 'add_publish_confirmation');
 new WP_Adept_LMS();
 
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));

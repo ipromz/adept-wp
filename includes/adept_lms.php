@@ -142,7 +142,7 @@ if (isset($_POST['import_instructors'])) {
 if (isset($_POST['map_language'])) {
 		
 		global $wpdb, $sitepress, $sitepress_settings;
-		$langdata= $adept->get_languages();
+		$langdata= $adept->get_languages();		echo "<pre>";print_r($langdata);		
 		//$lang_code = '';
 		unset($lang_codes);		if(count($langdata->data) > 0){
 		foreach($langdata->data as $k => $d){
