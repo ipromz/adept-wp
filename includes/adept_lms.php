@@ -233,7 +233,7 @@ if (isset($_POST['map_language'])) {
                 <tr>
                     <th width="115"><?php esc_html_e('Short Code for Meeting:') ?></th>
                     <td width="877">
-                        <?php esc_html_e('meetings') ?>
+                        <?php esc_html_e('[meetings group_id=1]') ?>
                     </td>
                 </tr>
             </tbody>

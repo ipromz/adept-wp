@@ -400,6 +400,12 @@ function wpt_meeting_fields() {
     echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' .
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
 	
+	// Get the group_id data if its already been entered
+	$meeting_id = get_post_meta($post->ID, '_meeting_id', true);
+    // Echo out the field
+    echo '<input type="hidden" name="_meeting_id" value="' . $meeting_id . '" class="widefat" /><br/><br/>';
+
+	
 	// Get the date data if its already been entered
     $date = get_post_meta($post->ID, '_date', true);
     // Echo out the field
@@ -727,6 +733,12 @@ function wpt_instructor_fields() {
     // Echo out the field
     echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' . $email . '" /><br/><br/>';
 
+	// Get the group_id data if its already been entered
+	$instructor_id = get_post_meta($post->ID, '_instructor_id', true);
+    // Echo out the field
+    echo '<input type="hidden" name="_instructor_id" value="' . $instructor_id . '" class="widefat" /><br/><br/>';
+
+	
     // Get the full_name data if its already been entered
     //$full_name = get_post_meta($post->ID, '_full_name', true);
     // Echo out the field
@@ -773,8 +785,8 @@ function wpt_save_instructor_meta($post_id, $post) {
 	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");		$oripostidStr = $get_existing_post_id[0]->meta_value;
 	$oripostidArray = explode('_',$oripostidStr);
 	$originalPostId = $oripostidArray[1];
-        $curl = $adept_api_url_value . 'update_instructor/'.$originalPostId;
-    $data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&instructor[email]=" . $email
+    $curl = $adept_api_url_value . 'update_instructor/'.$originalPostId;
+	$data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&instructor[email]=" . $email
             . "&instructor[full_name]=" . $full_name . "&instructor[avatar]=" . $avatar
             . "&instructor[bio]=" . $bio;
 
@@ -851,6 +863,12 @@ function wpt_group_fields() {
     $email = get_post_meta($post->ID, '_tags', true);
     // Echo out the field
     echo '<b>Tags :</b> <input type="text" name="_tags" class="widefat" value="' . $tags . '" /><br/><br/>';
+	
+	// Get the group_id data if its already been entered
+	$group_id = get_post_meta($post->ID, '_group_id', true);
+    // Echo out the field
+    echo '<input type="hidden" name="_group_id" value="' . $group_id . '" class="widefat" /><br/><br/>';
+
 
     // Get the course_fee data if its already been entered
     $course_fee = get_post_meta($post->ID, '_course_fee', true);
@@ -952,19 +970,45 @@ function wpt_save_group_meta($post_id, $post) {
     include_once MY_PLUGIN_PATH . "lib/lib.php";
     $adept = new WP_Lib();
     $adept_api_url_value = get_option('adept_api_url');
-    $curl = $adept_api_url_value . 'update_instructor/';
-    $data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&group[group_title]=" . $group_title
-            . "&group[description]=" . $description . "&group[tags]=" . $tags
-            . "&group[course_fee]=" . $course_fee . "&group[taxable]=" . $taxable
-            . "&group[published]=" . $published . "&group[allow_bookings]=" . $allow_bookings
-            . "&group[start_date]=" . $start_date . "&group[end_date]=" . $end_date
-            . "&group[reg_date=" . $reg_date . "&seats=" . $seats
+	
+	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_group_id'");
+	//var_dump($get_existing_post_id);
+	$oripostidStr = $get_existing_post_id[0]->meta_value;
+	$oripostidArray = explode('_',$oripostidStr);
+	$originalPostId = $oripostidArray[1];
+    $curl = $adept_api_url_value . 'update_course/' .$originalPostId;
+    $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course[group_title]=" . $group_title
+            . "&course[description]=" . $description . "&course[tags]=" . $tags
+            . "&course[course_fee]=" . $course_fee . "&course[taxable]=" . $taxable
+            . "&course[published]=" . $published . "&course[allow_bookings]=" . $allow_bookings
+            . "&course[start_date]=" . $start_date . "&course[end_date]=" . $end_date
+            . "&course[reg_date=" . $reg_date . "&seats=" . $seats
             . "&hide_if_full=" . $hide_if_full . "&show_seats_left=" . $show_seats_left
             . "&lessons=" . $lessons . "&status=" . $status;
 
-    // OK, we're authenticated: we need to find and save the data
+	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
+//echo $data; die();
+   // $temp = $adept->postdata($curl, $data);
+	$ch = curl_init($curl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		'Content-Type: application/x-www-form-urlencoded',
+		'Content-Length: ' . strlen($data))
+	);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+	$result = curl_exec($ch);
+//var_dump($result); die();
+	
+	$resultdata = json_decode($result);
+//var_dump($resultdata); die();
+	
+	// OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
-
+	
+	
     $course_meta['_group_id'] = $_POST['_group_id'];
     $course_meta['_tags'] = $_POST['_tags'];
     $course_meta['_course_fee'] = $_POST['_course_fee'];

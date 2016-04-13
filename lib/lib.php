@@ -170,6 +170,8 @@ Class WP_Lib {
 
     function import_course($url) {		
         global $wpdb, $sitepress;
+		//echo $url;
+		//$url="http://2eefb5a3.ngrok.io/api/v1/courses?access_token=59a368f75dd2dd5b0cb0cd0d29e801a7";
 
         //$sitepress->set_element_language_details($ru_post_id, 'post_post', $def_trid, 'ru');
         // Static entry for the course 18 - 2 -2016//
@@ -316,7 +318,7 @@ Class WP_Lib {
 
     function update_course($url) {
         global $wpdb;
-
+		//$url = "http://f17fe227.ngrok.io/api/v1/recent_course_updates?access_token=59a368f75dd2dd5b0cb0cd0d29e801a7";
         $adept_author_value = get_option('adept_author');
 
         $all_courses_list = $this->getdata($url);
@@ -649,7 +651,7 @@ Class WP_Lib {
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                     // Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+					$plugin2 = 'wpml-translation-management/plugin.php';
 
 				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
@@ -1084,6 +1086,7 @@ Class WP_Lib {
     }
 
     function import_groups($url) {
+		//echo $url; exit;
         global $wpdb,$sitepress;
 
         $all_courses_list = $this->getdata($url);
@@ -1141,7 +1144,7 @@ Class WP_Lib {
                     add_post_meta($post_id, '_subscription_plan_id', $v->subscription_plan_id);
                     $_POST['icl_post_language'] = $language_code = $site_default_language;
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
-                    // Multi translations
+						// Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 				$plugin2 = 'wpml-translation-management/plugin.php';
 
@@ -1443,8 +1446,9 @@ Class WP_Lib {
     }
 
     function import_instructors($url) {
+		
         $temp = $this->getdata($url);
-        // Delete posts from post type Intructors
+		// Delete posts from post type Intructors
         $args = array(
             'numberposts' => 50,
             'post_type' => 'instructors'
