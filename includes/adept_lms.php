@@ -142,7 +142,7 @@ if (isset($_POST['import_instructors'])) {
 if (isset($_POST['map_language'])) {
 		
 		global $wpdb, $sitepress, $sitepress_settings;
-		$langdata= $adept->get_languages();		echo "<pre>";print_r($langdata);		
+		$langdata= $adept->get_languages();		//echo "<pre>";print_r($langdata);		
 		//$lang_code = '';
 		unset($lang_codes);		if(count($langdata->data) > 0){
 		foreach($langdata->data as $k => $d){
@@ -233,7 +233,7 @@ if (isset($_POST['map_language'])) {
                 <tr>
                     <th width="115"><?php esc_html_e('Short Code for Meeting:') ?></th>
                     <td width="877">
-                        <?php esc_html_e('[meetings group_id=1]') ?>
+                        <?php esc_html_e('[meetings group_id=id]') ?>
                     </td>
                 </tr>
             </tbody>

@@ -194,24 +194,47 @@ function wpt_course_fields() {
     // Echo out the field
     echo '<b>SKU :</b> <input type="text" name="_sku" value="' . $sku . '" class="widefat" /><br/><br/>';
 
+	echo '<b>Course Groups :</b><br/><br/>';	
+	$all_groups = get_all_of_post_type( 'groups' );
+
+  	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids' ) ;
+
+        if ( 0 == count($all_groups) ) {
+            $choice_block = '<p>No Group found in the system.</p>';
+        } else {
+            $choices = array();
+            foreach ( $all_groups as $group ) {
+                $checked = ( in_array( $group->ID, $linked_group_ids ) ) ? ' checked="checked"' : '';
+
+                $display_name = esc_attr( $group->post_title );
+                $choices[] = <<<HTML
+<label><input type="checkbox" name="group_ids[]" value="{$group->ID}" {$checked}/> {$display_name}</label><br/><br/>
+HTML;
+
+            }
+            $choice_block = implode("\r\n", $choices);
+        }
+
+        echo $choice_block."</br></br>";
     // Get the tax_category data if its already been entered
-    $tax_category = get_post_meta($post->ID, '_tax_category', true);
+    /* $tax_category = get_post_meta($post->ID, '_tax_category', true);
     // Echo out the field
     echo '<b>Taxable :</b> <input type="text" name="_tax_category" value="' . $tax_category . '" class="widefat" /><br/><br/>';
-
+    */
 
     // Get the allow_discounts data if its already been entered
-    $allow_discounts = get_post_meta($post->ID, '_allow_discounts', true);
+    /* $allow_discounts = get_post_meta($post->ID, '_allow_discounts', true);
 
     if ($allow_discounts == '1') {
         $checked = "checked='checked'";
     } else {
         $unchecked = "checked='checked'";
     }
+    
     // Echo out the field
     echo '<b>Allow Discounts : </b><input type="radio" name="_allow_discounts" ' . $checked . ' value="true" class="widefat" /> True ';
     echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_allow_discounts" ' . $unchecked . ' value="false" class="widefat" /> False <br/><br/>';
-
+    */
     // Get the subscription data if its already been entered
     $subscription = get_post_meta($post->ID, '_subscription', true);
     // Echo out the field
@@ -225,10 +248,10 @@ function wpt_course_fields() {
     echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_subscription" ' . $unchecked . ' value="false" class="widefat" /> False  <br/><br/>';
 
     // Get the booking_count data if its already been entered
-    $booking_count = get_post_meta($post->ID, '_booking_count', true);
+    /* $booking_count = get_post_meta($post->ID, '_booking_count', true);
     // Echo out the field
     echo '<b>Booking Count :</b> <input type="text" name="_booking_count" value="' . $booking_count . '" class="widefat" /><br/><br/>';
-	
+    */
 	// Get Image url 
     $image_url = get_post_meta($post->ID, '_image_url', true);
     // Echo out the field
@@ -236,8 +259,28 @@ function wpt_course_fields() {
 	
 }
 
+function get_all_of_post_type( $type_name = '') {
+        $items = array();
+        if ( !empty( $type_name ) ) {
+            $args = array(
+                'post_type' => "{$type_name}",
+                'posts_per_page' => -1,
+                'order' => 'ASC',
+                'orderby' => 'title'
+            );
+            $results = new \WP_Query( $args );
+            if ( $results->have_posts() ) {
+                while ( $results->have_posts() ) {
+                    $items[] = $results->next_post();
+                }
+            }
+        }
+        return $items;
+    }
+
 function wpt_save_course_meta($post_id, $post) {
 	global $wpdb;
+	
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if (!wp_verify_nonce($_POST['coursemeta_noncename'], plugin_basename(__FILE__))) {
@@ -258,9 +301,9 @@ function wpt_save_course_meta($post_id, $post) {
     $tags = $_POST['_tags'];
 	$course_fee = $_POST['_course_fee'];
     $sku = $_POST['_sku'];
-    $taxable = $_POST['_tax_category'];
-    $allow_discounts = $_POST['_allow_discounts'];
-    $subscription = $_POST['_allow_discounts'];
+    //$taxable = $_POST['_tax_category'];
+    //$allow_discounts = $_POST['_allow_discounts'];
+    $subscription = $_POST['_subscription'];
     $course_category_id = $_POST['tax_input']['tax_input'][0];
     define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
     include_once MY_PLUGIN_PATH . "lib/lib.php";
@@ -275,8 +318,8 @@ function wpt_save_course_meta($post_id, $post) {
     $curl = $adept_api_url_value . 'update_course/' .$originalPostId;
     $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course[course_title]=" . $course_title
             . "&course[teaser]=" . $teaser . "&course[description]=" . $description
-            . "&course[tags]=" . $tags . "&course[course_fee]=" . $course_fee ."&course[sku]=" . $sku . "&course[taxable]=" . $taxable
-            . "&course[allow_discounts]=" . $allow_discounts . "&course[subscription]=" . $subscription
+            . "&course[tags]=" . $tags . "&course[course_fee]=" . $course_fee ."&course[sku]=" . $sku 
+            . "&course[subscription]=" . $subscription
             . "&course[course_category_id]=" . $course_category_id;
 	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
 //echo $data; die();
@@ -304,13 +347,22 @@ function wpt_save_course_meta($post_id, $post) {
     $course_meta['_is_featured'] = $_POST['_is_featured'];
     $course_meta['_course_fee'] = $_POST['_course_fee'];
     $course_meta['_sku'] = $_POST['_sku'];
-    $course_meta['_tax_category'] = $_POST['_tax_category'];
-    $course_meta['_allow_discounts'] = $_POST['_allow_discounts'];
+    //$course_meta['_tax_category'] = $_POST['_tax_category'];
+    //$course_meta['_allow_discounts'] = $_POST['_allow_discounts'];
     $course_meta['_subscription'] = $_POST['_subscription'];
-    $course_meta['_booking_count'] = $_POST['_booking_count'];
+    //$course_meta['_booking_count'] = $_POST['_booking_count'];
 	$course_meta['_image_url'] = $_POST['_image_url'];
+	$groups = $_POST['group_ids'];
 	
+	delete_post_meta( $post->ID , '_group_ids');
+    
     // Add values of $course_meta as custom fields
+	if ( 0 < count($groups) ) {
+            foreach ( $groups as $group_id ) {
+                # We use add post meta with 4th parameter false to let us link
+                # books to as many authors as we want.				add_post_meta( $post->ID, '_group_ids',$group_id );				
+            }
+        }
 
     foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
@@ -500,7 +552,24 @@ function wpt_save_meeting_meta($post_id, $post) {
             . "&meeting[user_id]=" . $user_id . "&meeting[kind]=" . $kind
             . "&meeting[video_conference_account_id]=" . $video_conference_account_id . "&meeting[video_conference_url]=" . $video_conference_url. "&meeting[video_conference_uid]=" . $video_conference_uid;
 
-    $temp = $adept->putdata($curl, $data);
+    $ch = curl_init($curl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		'Content-Type: application/x-www-form-urlencoded',
+		'Content-Length: ' . strlen($data))
+	);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+	$result = curl_exec($ch);
+//var_dump($result); die();
+	
+	$resultdata = json_decode($result);
+//var_dump($resultdata); die();
+	
+	// OK, we're authenticated: we need to find and save the data
+    // We'll put it into an array to make it easier to loop though.
 
     $course_meta['_date'] = $_POST['_date'];
     $course_meta['_start_time'] = $_POST['_start_time'];
@@ -785,12 +854,31 @@ function wpt_save_instructor_meta($post_id, $post) {
 	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");		$oripostidStr = $get_existing_post_id[0]->meta_value;
 	$oripostidArray = explode('_',$oripostidStr);
 	$originalPostId = $oripostidArray[1];
+	//echo $originalPostId; die;
     $curl = $adept_api_url_value . 'update_instructor/'.$originalPostId;
 	$data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&instructor[email]=" . $email
             . "&instructor[full_name]=" . $full_name . "&instructor[avatar]=" . $avatar
             . "&instructor[bio]=" . $bio;
 
-    $temp = $adept->putdata($curl, $data);
+	$ch = curl_init($curl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+		'Content-Type: application/x-www-form-urlencoded',
+		'Content-Length: ' . strlen($data))
+	);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+	$result = curl_exec($ch);
+	//var_dump($result); die();
+	
+	$resultdata = json_decode($result);
+	//var_dump($resultdata); die();
+	
+	// OK, we're authenticated: we need to find and save the data
+    // We'll put it into an array to make it easier to loop though.
+
     $course_meta['_instructor_id'] = $_POST['_instructor_id'];
     $course_meta['_email'] = $_POST['_email'];
     //$course_meta['_full_name'] = $_POST['_full_name'];
@@ -874,7 +962,31 @@ function wpt_group_fields() {
     $course_fee = get_post_meta($post->ID, '_course_fee', true);
     // Echo out the field
     echo '<b>Course Fee :</b> <input type="text" name="_course_fee" value="' . $course_fee . '" class="widefat" /><br/><br/>';
+	
+	echo '<b>Group Courses :</b><br/><br/>';	
+	$all_courses = get_all_of_post_type( 'courses' );
 
+    $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' ) ;;
+
+        if ( 0 == count($all_courses) ) {
+            $choice_block = '<p>No Course found in the system.</p>';
+        } else {
+            $choices = array();
+            foreach ( $all_courses as $course ) {
+                $checked = ( in_array( $course->ID, $linked_group_ids ) ) ? ' checked="checked"' : '';
+
+                $display_name = esc_attr( $course->post_title );
+                $choices[] = <<<HTML
+<label><input type="checkbox" name="course_ids[]" value="{$course->ID}" {$checked}/> {$display_name}</label><br/>
+HTML;
+
+            }
+            $choice_block = implode("\r\n", $choices);
+        }
+
+        
+        echo $choice_block."</br></br>";
+    /*
     // Get the taxable data if its already been entered
     $taxable = get_post_meta($post->ID, '_taxable', true);
     // Echo out the field
@@ -889,7 +1001,7 @@ function wpt_group_fields() {
     $allow_bookings = get_post_meta($post->ID, '_allow_bookings', true);
     // Echo out the field
     echo '<b>Allow Bookings :</b> <input type="text" name="_allow_bookings" value="' . $allow_bookings . '" class="widefat" /><br/><br/>';
-
+    */
     // Get the start_date data if its already been entered
     $start_date = get_post_meta($post->ID, '_start_date', true);
     // Echo out the field
@@ -909,7 +1021,7 @@ function wpt_group_fields() {
     $seats = get_post_meta($post->ID, '_seats', true);
     // Echo out the field
     echo '<b>Seats :</b> <input type="text" name="_seats" value="' . $seats . '" class="widefat" /><br/><br/>';
-
+/*
     // Get the hide_if_full data if its already been entered
     $hide_if_full = get_post_meta($post->ID, '_hide_if_full', true);
     // Echo out the field
@@ -919,7 +1031,7 @@ function wpt_group_fields() {
     $show_seats_left = get_post_meta($post->ID, '_show_seats_left', true);
     // Echo out the field
     echo '<b>Show seats left :</b> <input type="text" name="_show_seats_left" value="' . $show_seats_left . '" class="widefat" /><br/><br/>';
-
+    */
     // Get the lessons data if its already been entered
     $lessons = get_post_meta($post->ID, '_lessons', true);
     // Echo out the field
@@ -929,12 +1041,15 @@ function wpt_group_fields() {
     $status = get_post_meta($post->ID, '_status', true);
     // Echo out the field
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
-
+    /*
     // Get the subscription_plan_id data if its already been entered
     $subscription_plan_id = get_post_meta($post->ID, '_subscription_plan_id', true);
     // Echo out the field
     echo '<b>Subscription plan id :</b> <input type="text" name="_subscription_plan_id" value="' . $subscription_plan_id . '" class="widefat" /><br/><br/>';
+     * 
+     */
 }
+
 
 function wpt_save_group_meta($post_id, $post) {
 	global $wpdb;
@@ -954,15 +1069,20 @@ function wpt_save_group_meta($post_id, $post) {
     $description = $_POST['post_content'];
     $tags = $_POST['_tags'];
     $course_fee = $_POST['_course_fee'];
+    /*
     $taxable = $_POST['_taxable'];
     $published = $_POST['_published'];
     $allow_bookings = $_POST['_allow_bookings'];
+     */
     $start_date = $_POST['_start_date'];
     $end_date = $_POST['_end_date'];
     $reg_date = $_POST['_reg_date'];
     $seats = $_POST['_seats'];
+    /*
     $hide_if_full = $_POST['_hide_if_full'];
     $show_seats_left = $_POST['_show_seats_left'];
+     * 
+     */
     $lessons = $_POST['_lessons'];
     $status = $_POST['_status'];
 
@@ -979,11 +1099,8 @@ function wpt_save_group_meta($post_id, $post) {
     $curl = $adept_api_url_value . 'update_course/' .$originalPostId;
     $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course[group_title]=" . $group_title
             . "&course[description]=" . $description . "&course[tags]=" . $tags
-            . "&course[course_fee]=" . $course_fee . "&course[taxable]=" . $taxable
-            . "&course[published]=" . $published . "&course[allow_bookings]=" . $allow_bookings
-            . "&course[start_date]=" . $start_date . "&course[end_date]=" . $end_date
+            . "&course[course_fee]=". "&course[start_date]=" . $start_date . "&course[end_date]=" . $end_date
             . "&course[reg_date=" . $reg_date . "&seats=" . $seats
-            . "&hide_if_full=" . $hide_if_full . "&show_seats_left=" . $show_seats_left
             . "&lessons=" . $lessons . "&status=" . $status;
 
 	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
@@ -1012,19 +1129,34 @@ function wpt_save_group_meta($post_id, $post) {
     $course_meta['_group_id'] = $_POST['_group_id'];
     $course_meta['_tags'] = $_POST['_tags'];
     $course_meta['_course_fee'] = $_POST['_course_fee'];
+    /*
     $course_meta['_taxable'] = $_POST['_taxable'];
     $course_meta['_published'] = $_POST['_published'];
     $course_meta['_allow_bookings'] = $_POST['_allow_bookings'];
+     * 
+     */
     $course_meta['_start_date'] = $_POST['_start_date'];
     $course_meta['_end_date'] = $_POST['_end_date'];
     $course_meta['_reg_date'] = $_POST['_reg_date'];
     $course_meta['_seats'] = $_POST['_seats'];
+    /*
     $course_meta['_hide_if_full'] = $_POST['_hide_if_full'];
     $course_meta['_show_seats_left'] = $_POST['_show_seats_left'];
+     * 
+     */
     $course_meta['_lessons'] = $_POST['_lessons'];
     $course_meta['_status'] = $_POST['_status'];
 
-
+	$courses = $_POST['course_ids'];
+		delete_post_meta( $post->ID , '_course_ids');
+    // Add values of $course_meta as custom fields
+	if ( 0 < count($courses) ) {
+            foreach ( $courses as $course_id ) {
+                # We use add post meta with 4th parameter false to let us link
+                # books to as many authors as we want.
+                add_post_meta( $post->ID , '_course_ids', $course_id );
+            }
+        }
     // Add values of $course_meta as custom fields
 
     foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!

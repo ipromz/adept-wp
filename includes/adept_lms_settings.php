@@ -42,7 +42,8 @@ if (isset($_POST['save_code'])) {
             $cron = $_POST['cron'];
         }
     }
-	$url = $account_id.'.adeptlms.com/api/v1/'; 
+	$url = $account_id.'.adeptlms.com/api/v1/';
+        
     $curl = $url . "authentication";
     $data = "email=" . $email . "&password=" . $password;
     $temp = $adept->postdata($curl, $data);
