@@ -171,7 +171,7 @@ Class WP_Lib {
 
     function import_course($url) {		
         global $wpdb, $sitepress;
-		echo $url; die();
+		//echo $url; die();
         //$sitepress->set_element_language_details($ru_post_id, 'post_post', $def_trid, 'ru');
         // Static entry for the course 18 - 2 -2016//
 
@@ -230,10 +230,12 @@ Class WP_Lib {
 					
 					if(count($v->instructors)>0){
 						foreach($v->instructors as $key => $value){
-							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_ids' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+							//print_r($value->instructor_id);
                             $instructorid = $get_instructor_id[0]->post_id;
-							add_post_meta( $post_id , '_instructor_ids', $groupid );
+							add_post_meta( $post_id , '_instructor_ids', $instructorid );
 						}
+						
 					}
 					
 
@@ -315,7 +317,7 @@ Class WP_Lib {
 										foreach($b->instructors as $key => $value){
 											$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_ids' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
 											$instructorid = $get_instructor_id[0]->post_id;
-											add_post_meta( $post_id , '_instructor_ids', $groupid );
+											add_post_meta( $post_id , '_instructor_ids', $instructorid );
 										}
 									}
                                     add_post_meta($post_id, '_post_id', $b->locale . '_' . $b->course_id . '_' . $b->id);
@@ -408,6 +410,14 @@ Class WP_Lib {
 							add_post_meta( $post_id , '_group_ids', $groupid );
 						}
 					}
+					
+					if(count($v->instructors)>0){
+						foreach($v->instructors as $key => $value){
+							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_ids' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+                            $instructorid = $get_instructor_id[0]->post_id;
+							add_post_meta( $post_id , '_instructor_ids', $instructorid );
+						}
+					}
 
                     $data = wp_set_post_terms($post_id, $check_term_id_slug[0]->term_id, 'genre');
                     add_post_meta($post_id, '_post_id', $site_default_language . "_" . $v->id);
@@ -481,6 +491,7 @@ Class WP_Lib {
 											add_post_meta( $post_id , '_group_ids', $groupid );
 										}
 									}
+									
                                     add_post_meta($post_id, '_post_id', $b->locale . '_' . $b->course_id . '_' . $b->id);
                                     add_post_meta($post_id, '_tags', $b->tags);
                                     add_post_meta($post_id, '_is_featured', $v->is_featured);
