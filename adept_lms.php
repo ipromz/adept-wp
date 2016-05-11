@@ -344,7 +344,7 @@ function wpt_save_course_meta($post_id, $post) {
             . "&course[subscription]=" . $subscription
             . "&course[course_category_id]=" . $course_category_id;
 	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
-//echo $data; die();
+	//echo $data; die();
    // $temp = $adept->postdata($curl, $data);
 	$ch = curl_init($curl);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -1134,20 +1134,10 @@ function wpt_save_group_meta($post_id, $post) {
     $description = $_POST['post_content'];
     $tags = $_POST['_tags'];
     $course_fee = $_POST['_course_fee'];
-    /*
-    $taxable = $_POST['_taxable'];
-    $published = $_POST['_published'];
-    $allow_bookings = $_POST['_allow_bookings'];
-     */
     $start_date = $_POST['_start_date'];
     $end_date = $_POST['_end_date'];
     $reg_date = $_POST['_reg_date'];
     $seats = $_POST['_seats'];
-    /*
-    $hide_if_full = $_POST['_hide_if_full'];
-    $show_seats_left = $_POST['_show_seats_left'];
-     * 
-     */
     $lessons = $_POST['_lessons'];
     $status = $_POST['_status'];
 
@@ -1161,12 +1151,14 @@ function wpt_save_group_meta($post_id, $post) {
 	$oripostidStr = $get_existing_post_id[0]->meta_value;
 	$oripostidArray = explode('_',$oripostidStr);
 	$originalPostId = $oripostidArray[1];
-    $curl = $adept_api_url_value . 'update_course/' .$originalPostId;
-    $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course[group_title]=" . $group_title
-            . "&course[description]=" . $description . "&course[tags]=" . $tags
-            . "&course[course_fee]=". "&course[start_date]=" . $start_date . "&course[end_date]=" . $end_date
-            . "&course[reg_date=" . $reg_date .  "&course[address]=" . $address . "&seats=" . $seats
-            . "&lessons=" . $lessons . "&status=" . $status;
+	//echo $originalPostId; die();
+    $curl = $adept_api_url_value . 'update_group/' .$originalPostId;
+	//echo $curl; die(); 
+    $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&group[group_title]=" . $group_title
+            . "&group[description]=" . $description . "&group[tags]=" . $tags
+            . "&group[course_fee]=". "&group[start_date]=" . $start_date . "&group[end_date]=" . $end_date
+            . "&group[reg_date]=" . $reg_date .  "&group[address]=" . $address . "&group[seats]=" . $seats
+            . "&group[lessons]=" . $lessons . "&group[status]=" . $status;
 
 	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
 //echo $data; die();
@@ -1186,7 +1178,6 @@ function wpt_save_group_meta($post_id, $post) {
 	
 	$resultdata = json_decode($result);
 //var_dump($resultdata); die();
-	
 	// OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 	
@@ -1279,8 +1270,19 @@ function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $func
 
     return $hookname;
 }
-function add_publish_confirmation(){     $confirmation_message = "Content will be updated on LMS,Are you sure?";      echo '<script type="text/javascript">';    echo ' var publish = document.getElementById("publish");';     echo 'if (publish !== null){';    echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };';     echo '}';     echo '</script>'; } add_action('admin_footer', 'add_publish_confirmation');
-new WP_Adept_LMS();
+function add_publish_confirmation(){
+	 global $post;
+	if ( 'courses' === $post->post_type  ||  'groups' === $post->post_type ||  'instructors' === $post->post_type ||  'meetings' === $post->post_type ) {     
+	$confirmation_message = "Content will be updated on LMS,Are you sure?";      
+	echo '<script type="text/javascript">';    
+	echo 'var publish = document.getElementById("publish");';     
+	echo 'if (publish !== null){';    
+	echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };';     
+	echo '}';     
+	echo '</script>'; } } 
+	add_action('admin_footer', 'add_publish_confirmation');
+
+	new WP_Adept_LMS();
 
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 

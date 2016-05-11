@@ -219,7 +219,6 @@ Class WP_Lib {
 					if(count($v->groups)>0){
 						foreach($v->groups as $key => $value){
 							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='en_" . $value->group_id."' LIMIT 0,1 ");
-							
 							//print_r($get_group_id); 
 							$groupid = $get_group_id[0]->post_id;
 							//print_r($groupid);
@@ -405,7 +404,7 @@ Class WP_Lib {
 					if(count($v->groups)>0){
 						delete_post_meta( $post_id , '_group_ids');
 						foreach($v->groups as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_ids' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
                             $groupid = $get_group_id[0]->post_id;
 							add_post_meta( $post_id , '_group_ids', $groupid );
 						}
@@ -413,7 +412,7 @@ Class WP_Lib {
 					
 					if(count($v->instructors)>0){
 						foreach($v->instructors as $key => $value){
-							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_ids' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
                             $instructorid = $get_instructor_id[0]->post_id;
 							add_post_meta( $post_id , '_instructor_ids', $instructorid );
 						}
@@ -486,9 +485,18 @@ Class WP_Lib {
 									if(count($v->groups)>0){
 										delete_post_meta( $post_id , '_group_ids');
 										foreach($v->groups as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_ids' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
 											$groupid = $get_group_id[0]->post_id;
 											add_post_meta( $post_id , '_group_ids', $groupid );
+										}
+									}
+									
+									if(count($v->instructors)>0){
+										delete_post_meta( $post_id , '_instructor_ids');
+										foreach($v->instructors as $key => $value){
+											$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+											$instructorid = $get_group_id[0]->post_id;
+											add_post_meta( $post_id , '_instructor_ids', $instructorid );
 										}
 									}
 									
@@ -545,11 +553,22 @@ Class WP_Lib {
 					if(count($v->groups)>0){
 						delete_post_meta( $post_id , '_group_ids');
 						foreach($v->groups as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_ids' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
 							$groupid = $get_group_id[0]->post_id;
 							add_post_meta( $post_id , '_group_ids', $groupid );
 						}
 					}
+					
+					if(count($v->instructors)>0){
+						delete_post_meta( $post_id , '_instructor_ids');
+						foreach($v->instructors as $key => $value){
+							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+							$instructorid = $get_instructor_id[0]->post_id;
+							add_post_meta( $post_id , '_instructor_ids', $instructorid );
+						}
+					}
+					
+					
 
                     $data = wp_set_post_terms($post_id, $check_term_id_slug[0]->term_id, 'genre');
                     update_post_meta($post_id, '_post_id', $site_default_language . "_" . $v->id);
@@ -617,12 +636,21 @@ Class WP_Lib {
 									if(count($b->groups)>0){
 										delete_post_meta( $post_id , '_group_ids');
 										foreach($b->groups as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_ids' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
 											$groupid = $get_group_id[0]->post_id;
 											add_post_meta( $post_id , '_group_ids', $groupid );
 										}
 									}
-
+									
+									if(count($b->instructors)>0){
+										delete_post_meta( $post_id , '_instructor_ids');
+										foreach($b->instructors as $key => $value){
+											$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+											$instructorid = $get_instructor_id[0]->post_id;
+											add_post_meta( $post_id , '_instructor_ids', $instructorid );
+										}
+									}
+									
                                     $data = wp_set_post_terms($post_id, $check_term_id_slug[0]->term_id, 'genre');
 
                                     update_post_meta($post_id, '_post_id', $b->locale . '_' . $b->course_id . '_' . $b->id);
@@ -1196,11 +1224,16 @@ Class WP_Lib {
 
                     // Insert the post into the database.
                     $post_id = wp_insert_post($my_post, $wp_error);
+					echo "<pre>";
+					//print_r($v->courses); die();
 					if(count($v->courses)>0){
+						
 						foreach($v->courses as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-                            $groupid = $get_group_id[0]->post_id;
-							add_post_meta( $post_id , '_course_ids', $groupid );
+							$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='en_" . $value->course_id."' LIMIT 0,1 ");
+							//echo $value->course_id; die();	
+						$courseid = $get_course_id[0]->post_id;
+						
+							add_post_meta( $post_id , '_course_ids', $courseid );
 						}
 					}
                     add_post_meta($post_id, '_group_id', $site_default_language . "_" . $v->id);
@@ -1260,9 +1293,9 @@ Class WP_Lib {
                                     $post_id = wp_insert_post($my_post, $wp_error);
 									if(count($b->courses)>0){
 										foreach($b->courses as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-											$groupid = $get_group_id[0]->post_id;
-											add_post_meta( $post_id , '_course_ids', $groupid );
+											$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+											$courseid = $get_course_id[0]->post_id;
+											add_post_meta( $post_id , '_course_ids', $courseid );
 										}
 									}
 
@@ -1339,13 +1372,13 @@ Class WP_Lib {
                     // Insert the post into the database.
                     $post_id = wp_insert_post($my_post, $wp_error);
 					if(count($v->courses)>0){
+						delete_post_meta( $post_id , '_course_ids');
 						foreach($v->courses as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-                            $groupid = $get_group_id[0]->post_id;
-							add_post_meta( $post_id , '_course_ids', $groupid );
+							$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+                            $courseid = $get_course_id[0]->post_id;
+							add_post_meta( $post_id , '_course_ids', $courseid );
 						}
 					}
-
 
                     add_post_meta($post_id, '_group_id', $site_default_language . "_" . $v->id);
                     add_post_meta($post_id, '_tags', $v->tags);
@@ -1366,7 +1399,7 @@ Class WP_Lib {
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                     // Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+					$plugin2 = 'wpml-translation-management/plugin.php';
 
 				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
@@ -1401,11 +1434,12 @@ Class WP_Lib {
 
                                     // Insert the post into the database.
                                     $post_id = wp_insert_post($my_post, $wp_error);
-									if(count($b->courses)>0){
-										foreach($b->courses as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-											$groupid = $get_group_id[0]->post_id;
-											add_post_meta( $post_id , '_course_ids', $groupid );
+									if(count($v->courses)>0){
+										delete_post_meta( $post_id , '_course_ids');
+										foreach($v->courses as $key => $value){
+											$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+											$courseid = $get_course_id[0]->post_id;
+											add_post_meta( $post_id , '_course_ids', $courseid );
 										}
 									}
 
@@ -1458,9 +1492,9 @@ Class WP_Lib {
 					if(count($v->courses)>0){
 						delete_post_meta( $post_id , '_course_ids');
 						foreach($v->courses as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-                            $groupid = $get_group_id[0]->post_id;
-							add_post_meta( $post_id , '_course_ids', $groupid );
+							$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+                            $courseid = $get_course_id[0]->post_id;
+							add_post_meta( $post_id , '_course_ids', $courseid );
 						}
 					}
 
@@ -1519,12 +1553,12 @@ Class WP_Lib {
 
                                     // Insert the post into the database.
                                     $post_id = wp_update_post($my_post, $wp_error);
-									if(count($b->courses)>0){
+									if(count($v->courses)>0){
 										delete_post_meta( $post_id , '_course_ids');
-										foreach($b->courses as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-											$groupid = $get_group_id[0]->post_id;
-											add_post_meta( $post_id , '_course_ids', $groupid );
+										foreach($v->courses as $key => $value){
+											$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+											$courseid = $get_course_id[0]->post_id;
+											add_post_meta( $post_id , '_course_ids', $courseid );
 										}
 									}
                                     update_post_meta($post_id, '_group_id', $b->locale . '_' . $b->_group_id . '_' . $b->id);
