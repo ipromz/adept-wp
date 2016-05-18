@@ -17,7 +17,9 @@ $adept_api_url_value = get_option('adept_api_url');
 $adept_account_id_value = get_option('adept_account_id');
 
 $langdata= $adept->get_languages();
-$default_language = $langdata->default_language;//course unpublish code if (isset($_POST['unpublish_courses'])) {    if ($adept_access_token_value == '') {        $error = "Please enter authentication detail";    } else {       $url = $adept_api_url_value . 'unpublished_courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;        $result = $adept->unpublished_courses($url);        $success = $result;    }}
+$default_language = $langdata->default_language;
+//course unpublish code if (isset($_POST['unpublish_courses'])) {    if ($adept_access_token_value == '') {        $error = "Please enter authentication detail";    } else {       $url = $adept_api_url_value . 'unpublished_courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;        $result = $adept->unpublished_courses($url);        $success = $result;    }}
+
 if (isset($_POST['import_categories'])) {
 
     if ($adept_access_token_value == '') {
@@ -141,22 +143,34 @@ if (isset($_POST['import_instructors'])) {
 
 if (isset($_POST['map_language'])) {
 		
+		$languages = icl_get_languages('skip_missing=1');
+		//echo "<pre>";
+		//print_r($languages); 
 		global $wpdb, $sitepress, $sitepress_settings;
-		$langdata= $adept->get_languages();		//echo "<pre>";print_r($langdata);		
-		//$lang_code = '';
-		unset($lang_codes);		if(count($langdata->data) > 0){
+		$langdata= $adept->get_languages();		
+		//echo "<pre>";
+		//print_r($langdata); die();
+		unset($lang_codes);	
+		
+		if(count($langdata->data) > 0){
 		foreach($langdata->data as $k => $d){
 			if($k == 'pt'){
 				$k = 'pt-PT';
 			}
 			$lang_codes[] = $k;
 		}
+		
 		//$lang_code = implode(',',$lang_codes);
+		
 		//$lang_codes = explode(',',$lang_codes);
+		// print_r($lang_codes); die();
 		$setup_instance = wpml_get_setup_instance();
-		$setup_instance->set_active_languages ( $lang_codes ) ;		}
+		$setup_instance->set_active_languages ( $lang_codes ) ;		
+		}
         $success = 'Languages Map successfully';
-}$plugin1 = 'sitepress-multilingual-cms/sitepress.php';$plugin2 = 'wpml-translation-management/plugin.php';
+}
+		$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+		$plugin2 = 'wpml-translation-management/plugin.php';
 ?>
 <title>Adept LMS</title>
 <h1>Adept LMS</h1>

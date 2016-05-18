@@ -171,13 +171,17 @@ Class WP_Lib {
 
     function import_course($url) {		
         global $wpdb, $sitepress;
+		//echo $sitepress; die();
 		//echo $url; die();
         //$sitepress->set_element_language_details($ru_post_id, 'post_post', $def_trid, 'ru');
         // Static entry for the course 18 - 2 -2016//
 
         $all_courses_list = $this->getdata($url);					
         $get_all_languages = $this->get_languages();
-        $site_default_language = $get_all_languages->default_language;
+        //echo "<pre>";
+		//print_r($get_all_languages); die();
+		$site_default_language = $get_all_languages->default_language;
+		//echo $site_default_language; die();
 		//echo "<pre>";
 		//print_r($all_courses_list); die();
 		if (!empty($all_courses_list->data)) {
@@ -307,7 +311,7 @@ Class WP_Lib {
                                     $data = wp_set_post_terms($post_id, $check_term_id_slug[0]->term_id, 'genre');
 									if(count($b->groups)>0){
 										foreach($b->groups as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_ids' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $site_default_language . "_" . $value->group_id."' LIMIT 0,1 ");
 											$groupid = $get_group_id[0]->post_id;
 											add_post_meta( $post_id , '_group_ids', $groupid );
 										}
@@ -315,7 +319,7 @@ Class WP_Lib {
 									
 									if(count($b->instructors)>0){
 										foreach($b->instructors as $key => $value){
-											$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_ids' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+											$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
 											$instructorid = $get_instructor_id[0]->post_id;
 											add_post_meta( $post_id , '_instructor_ids', $instructorid );
 										}
@@ -443,7 +447,7 @@ Class WP_Lib {
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                     // Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+					$plugin2 = 'wpml-translation-management/plugin.php';
 
 				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
@@ -486,7 +490,7 @@ Class WP_Lib {
 									if(count($v->groups)>0){
 										delete_post_meta( $post_id , '_group_ids');
 										foreach($v->groups as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $site_default_language . "_"  . $value->group_id."' LIMIT 0,1 ");
 											$groupid = $get_group_id[0]->post_id;
 											add_post_meta( $post_id , '_group_ids', $groupid );
 										}
@@ -637,7 +641,7 @@ Class WP_Lib {
 									if(count($b->groups)>0){
 										delete_post_meta( $post_id , '_group_ids');
 										foreach($b->groups as $key => $value){
-											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $value->group_id."' LIMIT 0,1 ");
+											$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='" . $site_default_language . "_" . $value->group_id."' LIMIT 0,1 ");
 											$groupid = $get_group_id[0]->post_id;
 											add_post_meta( $post_id , '_group_ids', $groupid );
 										}
@@ -843,7 +847,8 @@ Class WP_Lib {
 	  global $wpdb;
         $adept_author_value = get_option('adept_author');
         $all_meeting_list = $this->getdata($url);
-        //print_r($all_meeting_list);
+        //echo "<pre>";
+		//print_r($all_meeting_list);
 		//exit();
         
         
@@ -1168,7 +1173,7 @@ Class WP_Lib {
 
                     // Insert the post into the database.
                     $post_id = wp_insert_post($my_post, $wp_error);
-					echo "<pre>";
+			//		echo "<pre>";
 					//print_r($v->courses); die();
 					if(count($v->courses)>0){
 						
@@ -1213,7 +1218,7 @@ Class WP_Lib {
                                 $postid = $get_existing_post_id[0]->post_id;
 
                                 if (trim($postid) == "") {
-
+									
                                     $my_post = array(
                                         "post_author" => $adept_author_value,
                                         "post_date" => $b->created_at,
@@ -1461,7 +1466,7 @@ Class WP_Lib {
                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                     // Multi translations
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+				    $plugin2 = 'wpml-translation-management/plugin.php';
 
 				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {

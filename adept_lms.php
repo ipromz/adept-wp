@@ -823,15 +823,15 @@ function wpt_save_instructor_meta($post_id, $post) {
 	// OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
-    $course_meta['_instructor_id'] = $_POST['_instructor_id'];
-    $course_meta['_email'] = $_POST['_email'];
+    $instructor_meta['_instructor_id'] = $_POST['_instructor_id'];
+    $instructor_meta['_email'] = $_POST['_email'];
 
-    $course_meta['_avatar'] = $_POST['_avatar'];
+    $instructor_meta['_avatar'] = $_POST['_avatar'];
   
 
     // Add values of $course_meta as custom fields
 	
-    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+    foreach ($instructor_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
         $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
@@ -1035,27 +1035,27 @@ function wpt_save_group_meta($post_id, $post) {
     // We'll put it into an array to make it easier to loop though.
 	
 	
-    $course_meta['_group_id'] = $_POST['_group_id'];
-    $course_meta['_tags'] = $_POST['_tags'];
-    $course_meta['_course_fee'] = $_POST['_course_fee'];
+    $group_meta['_group_id'] = $_POST['_group_id'];
+    $group_meta['_tags'] = $_POST['_tags'];
+    $group_meta['_course_fee'] = $_POST['_course_fee'];
     /*
     $course_meta['_taxable'] = $_POST['_taxable'];
     $course_meta['_published'] = $_POST['_published'];
     $course_meta['_allow_bookings'] = $_POST['_allow_bookings'];
      * 
      */
-    $course_meta['_start_date'] = $_POST['_start_date'];
-    $course_meta['_end_date'] = $_POST['_end_date'];
-    $course_meta['_reg_date'] = $_POST['_reg_date'];
-	$course_meta['_address'] = $_POST['_address'];
-    $course_meta['_seats'] = $_POST['_seats'];
+    $group_meta['_start_date'] = $_POST['_start_date'];
+    $group_meta['_end_date'] = $_POST['_end_date'];
+    $group_meta['_reg_date'] = $_POST['_reg_date'];
+	$group_meta['_address'] = $_POST['_address'];
+    $group_meta['_seats'] = $_POST['_seats'];
     /*
     $course_meta['_hide_if_full'] = $_POST['_hide_if_full'];
     $course_meta['_show_seats_left'] = $_POST['_show_seats_left'];
      * 
      */
-    $course_meta['_lessons'] = $_POST['_lessons'];
-    $course_meta['_status'] = $_POST['_status'];
+    $group_meta['_lessons'] = $_POST['_lessons'];
+    $group_meta['_status'] = $_POST['_status'];
 
 	$courses = $_POST['course_ids'];
 		delete_post_meta( $post->ID , '_course_ids');
@@ -1069,7 +1069,7 @@ function wpt_save_group_meta($post_id, $post) {
         }
     // Add values of $course_meta as custom fields
 
-    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+    foreach ($group_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
         $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
