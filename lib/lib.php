@@ -215,7 +215,8 @@ Class WP_Lib {
                     $_POST['icl_post_language'] = $language_code = $site_default_language;
                     // Insert the post into the database.
                     $post_id = wp_insert_post($my_post, $wp_error);
-					//print_r($v->groups); die();
+				
+				//print_r($v->groups); die();
 					if(count($v->groups)>0){
 						foreach($v->groups as $key => $value){
 							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND  meta_value ='en_" . $value->group_id."' LIMIT 0,1 ");
@@ -855,110 +856,53 @@ Class WP_Lib {
                 
                 
                 $adept_author_value = get_option('adept_author');
-                $get_existing_post_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_meeting_id' AND meta_value ='" . $site_default_language . "_" . $v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
-                $postid = $get_existing_post_id[0]->post_id;
+                $get_existing_post_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_meeting_id' AND meta_value ='". $v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
+				
+				$postid = $get_existing_post_id[0]->post_id;
 	
                 if (trim($postid) == "") {
-
-                    $my_post = array(
+				//	echo "<pre>";
+				//	print_r($v->meetings);
+					foreach ($v->meetings as $key => $value) 
+					{
+					$my_post = array(
                         "post_author" => $adept_author_value,
-                        "post_date" => $v->created_at,
-                        "post_date_gmt" => $v->created_at,
-                        "post_content" => $v->comment,
-                        "post_excerpt" => $v->comment,
-                        "post_title" => $v->title,
+                        "post_content" => $value->description,
+                        "post_excerpt" => $value->description,
+                        "post_title" => $value->title,
                         "post_status" => 'publish',
                         "comment_status" => 'closed',
                         "ping_status" => 'closed',
-                        "post_name" => sanitize_title($v->title),
-                        "post_modified" => $v->updated_at,
-                        "post_modified_gmt" => $v->updated_at,
+                        "post_name" => sanitize_title($value->title),
+                        "post_modified" => $value->updated_at,
+                        "post_modified_gmt" => $value->updated_at,
                         "menu_order" => '0',
                         "post_type" => 'meetings',
                         'guid' => ''
                     );
-
-
+					//echo "<pre>";
+					//print_r($my_post); die();
                     // Insert the post into the database.
-                    $post_id = wp_insert_post($my_post, $wp_error);
-
-                    add_post_meta($post_id, '_meeting_id', $site_default_language . "_" . $v->id);
-                    add_post_meta($post_id, '_date', $v->date);
-                    add_post_meta($post_id, '_start_time', $v->start_time);
-                    add_post_meta($post_id, '_end_time', $v->end_time);
-                    add_post_meta($post_id, '_status', $v->status);
-                    add_post_meta($post_id, '_web_conference', $v->web_conference);
-                    add_post_meta($post_id, '_address', $v->address);
-                    add_post_meta($post_id, '_check_address', $v->check_address);
-                    add_post_meta($post_id, '_group_id', $v->group_id);
-                    add_post_meta($post_id, '_user_id', $v->user_id);
-                    add_post_meta($post_id, '_kind', $v->kind);
-                    add_post_meta($post_id, '_video_conference_account_id', $v->video_conference_account_id);
-                    add_post_meta($post_id, '_video_conference_url', $v->video_conference_url);
-                    add_post_meta($post_id, '_video_conference_uid', $v->video_conference_uid);
-                    $_POST['icl_post_language'] = $language_code = $site_default_language;
-                    //wpml_add_translatable_content('post_post', $post_id, $language_code);
-                    // Multi translations
-					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
-
-				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
-                    if (!empty($v->translation)) {
-                        foreach ($v->translation as $a => $b) {
-                            if ($b->locale != $site_default_language) {
-
-                                $adept_author_value = get_option('adept_author');
-
-                                $get_existing_post_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_meeting_id' AND  meta_value ='" . $b->locale . '_' . $b->meeting_id . '_' . $b->id . "'  ORDER BY post_id DESC LIMIT 0,1 ");
-                                $postid = $get_existing_post_id[0]->post_id;
-
-                                if (trim($postid) == "") {
-
-                                    $my_post = array(
-                                        "post_author" => $adept_author_value,
-                                        "post_date" => $b->created_at,
-                                        "post_date_gmt" => $b->created_at,
-                                        "post_content" => $b->comment,
-                                        "post_excerpt" => $b->comment,
-                                        "post_title" => $b->title,
-                                        "post_status" => 'publish',
-                                        "comment_status" => 'closed',
-                                        "ping_status" => 'closed',
-                                        "post_name" => sanitize_title($b->title),
-                                        "post_modified" => $b->updated_at,
-                                        "post_modified_gmt" => $b->updated_at,
-                                        "menu_order" => '0',
-                                        "post_type" => 'meetings',
-                                        'guid' => ''
-                                    );
-
-
-                                    // Insert the post into the database.
-                                    $post_id = wp_insert_post($my_post, $wp_error);
-
-                                    add_post_meta($post_id, '_meeting_id', $b->locale . '_' . $b->meeting_id . '_' . $b->id);
-                                    add_post_meta($post_id, '_date', $b->date);
-                                    add_post_meta($post_id, '_start_time', $b->start_time);
-                                    add_post_meta($post_id, '_end_time', $b->end_time);
-                                    add_post_meta($post_id, '_status', $b->status);
-                                    add_post_meta($post_id, '_web_conference', $b->web_conference);
-                                    add_post_meta($post_id, '_address', $b->address);
-                                    add_post_meta($post_id, '_check_address', $b->check_address);
-                                    add_post_meta($post_id, '_group_id', $b->group_id);
-                                    add_post_meta($post_id, '_user_id', $b->user_id);
-                                    add_post_meta($post_id, '_kind', $b->kind);
-                                    add_post_meta($post_id, '_video_conference_account_id', $b->video_conference_account_id);
-                                    add_post_meta($post_id, '_video_conference_url', $b->video_conference_url);
-                                    add_post_meta($post_id, '_video_conference_uid', $b->video_conference_uid);
-
-                                    $_POST['icl_post_language'] = $language_code = $b->locale;
-                                    //wpml_add_translatable_content('post_post', $post_id, $language_code);
-                                }
-                            }
-                        }
-                    }
-				}
+                    $post_id = wp_insert_post($my_post);
+					//echo $post_id; die();
+				
+                    add_post_meta($post_id, '_meeting_id', $value->id);
+                    add_post_meta($post_id, '_start_time', $value->start_time);
+                    add_post_meta($post_id, '_duration', $value->duration);
+					add_post_meta($post_id, '_end_time', $value->end_time);
+                    add_post_meta($post_id, '_status', $value->status);
+                    add_post_meta($post_id, '_web_conference', $value->web_conference);
+                    add_post_meta($post_id, '_address', $value->address);
+                    add_post_meta($post_id, '_check_address', $value->check_address);
+                    add_post_meta($post_id, '_group_id', $value->group_id);
+                    add_post_meta($post_id, '_user_id', $value->user_id);
+                    add_post_meta($post_id, '_kind', $value->kind);
+                    add_post_meta($post_id, '_video_conference_account_id', $value->video_conference_account_id);
+                    add_post_meta($post_id, '_video_conference_url', $value->video_conference_url);
+                    add_post_meta($post_id, '_video_conference_uid', $value->video_conference_uid);
+                 
                 }
+				}
             }
             return "Meetings imported successfully";
         }
@@ -1669,18 +1613,5 @@ Class WP_Lib {
     }
 
 }
-/*
-function add_publish_confirmation(){ 
-    $confirmation_message = "Content will be updated on LMS,Are you sure?"; 
- 
-    echo '<script type="text/javascript">';
-    echo '<!-- var publish = document.getElementById("publish");'; 
-    echo 'if (publish !== null){';
-    echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };'; 
-    echo '}'; 
-    echo '// --></script>'; 
-} 
-add_action('admin_footer', 'add_publish_confirmation');
-*/
 
 ?>

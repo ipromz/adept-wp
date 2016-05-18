@@ -240,26 +240,8 @@ HTML;
         }
 
         echo $choice_block."</br></br>";
-    // Get the tax_category data if its already been entered
-    /* $tax_category = get_post_meta($post->ID, '_tax_category', true);
-    // Echo out the field
-    echo '<b>Taxable :</b> <input type="text" name="_tax_category" value="' . $tax_category . '" class="widefat" /><br/><br/>';
-    */
-
-    // Get the allow_discounts data if its already been entered
-    /* $allow_discounts = get_post_meta($post->ID, '_allow_discounts', true);
-
-    if ($allow_discounts == '1') {
-        $checked = "checked='checked'";
-    } else {
-        $unchecked = "checked='checked'";
-    }
     
-    // Echo out the field
-    echo '<b>Allow Discounts : </b><input type="radio" name="_allow_discounts" ' . $checked . ' value="true" class="widefat" /> True ';
-    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_allow_discounts" ' . $unchecked . ' value="false" class="widefat" /> False <br/><br/>';
-    */
-    // Get the subscription data if its already been entered
+	// Get the subscription data if its already been entered
     $subscription = get_post_meta($post->ID, '_subscription', true);
     // Echo out the field
 
@@ -548,7 +530,7 @@ function wpt_save_meeting_meta($post_id, $post) {
 
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post_id;
-    $course_title = $_POST['post_title'];
+    $meeting_title = $_POST['post_title'];
     $description = $_POST['content'];
     $date = $_POST['_date'];
     $start_time = $_POST['_start_time'];
@@ -570,12 +552,12 @@ function wpt_save_meeting_meta($post_id, $post) {
     include_once MY_PLUGIN_PATH . "lib/lib.php";
     $adept = new WP_Lib();
     $adept_api_url_value = get_option('adept_api_url');
+	
     $get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_meeting_id'");
-	//var_dump($get_existing_post_id);
-	$oripostidStr = $get_existing_post_id[0]->meta_value;
-	$oripostidArray = explode('_',$oripostidStr);
-	$originalPostId = $oripostidArray[1];
+	// var_dump($get_existing_post_id); die();
+	$originalPostId = $get_existing_post_id[0]->meta_value;;
     $curl = $adept_api_url_value . 'update_meeting/'.$originalPostId;
+	//echo $curl; die();
 	$data = "id=" . $post_id . "&access_token=" . $adept_access_token_value . "&meeting[title]=" . $course_title
             . "&meeting[comment]=" . $description . "&meeting[date]=" . $date
             . "&meeting[start_time]=" . $start_time . "&meeting[end_time]=" . $end_time
@@ -584,7 +566,7 @@ function wpt_save_meeting_meta($post_id, $post) {
             . "&meeting[check_address]=" . $check_address . "&meeting[group_id]=" . $group_id
             . "&meeting[user_id]=" . $user_id . "&meeting[kind]=" . $kind
             . "&meeting[video_conference_account_id]=" . $video_conference_account_id . "&meeting[video_conference_url]=" . $video_conference_url. "&meeting[video_conference_uid]=" . $video_conference_uid;
-
+	
     $ch = curl_init($curl);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -604,25 +586,25 @@ function wpt_save_meeting_meta($post_id, $post) {
 	// OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
-    $course_meta['_date'] = $_POST['_date'];
-    $course_meta['_start_time'] = $_POST['_start_time'];
-    $course_meta['_end_time'] = $_POST['_end_time'];
-    $course_meta['_web_conference'] = $_POST['_web_conference'];
-    $course_meta['_address'] = $_POST['_address'];
-    $course_meta['_meeting_id'] = $_POST['_meeting_id'];
-    $course_meta['_status'] = $_POST['_status'];
-    $course_meta['_group_id'] = $_POST['_group_id'];
-    $course_meta['_check_address'] = $_POST['_check_address'];
-    $course_meta['_user_id'] = $_POST['_user_id'];
-    $course_meta['_kind'] = $_POST['_kind'];
-    $course_meta['_video_conference_account_id'] = $_POST['_video_conference_account_id'];
-    $course_meta['_video_conference_url'] = $_POST['_video_conference_url'];
-    $course_meta['_video_conference_uid'] = $_POST['_video_conference_uid'];
+    $meeting_meta['_date'] = $_POST['_date'];
+    $meeting_meta['_start_time'] = $_POST['_start_time'];
+    $meeting_meta['_end_time'] = $_POST['_end_time'];
+    $meeting_meta['_web_conference'] = $_POST['_web_conference'];
+    $meeting_meta['_address'] = $_POST['_address'];
+    $meeting_meta['_meeting_id'] = $_POST['_meeting_id'];
+    $meeting_meta['_status'] = $_POST['_status'];
+    $meeting_meta['_group_id'] = $_POST['_group_id'];
+    $meeting_meta['_check_address'] = $_POST['_check_address'];
+    $meeting_meta['_user_id'] = $_POST['_user_id'];
+    $meeting_meta['_kind'] = $_POST['_kind'];
+    $meeting_meta['_video_conference_account_id'] = $_POST['_video_conference_account_id'];
+    $meeting_meta['_video_conference_url'] = $_POST['_video_conference_url'];
+    $meeting_meta['_video_conference_uid'] = $_POST['_video_conference_uid'];
 
 
     // Add values of $course_meta as custom fields
 
-    foreach ($course_meta as $key => $value) { // Cycle through the $course_meta array!
+    foreach ($meeting_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
         $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
@@ -637,99 +619,7 @@ function wpt_save_meeting_meta($post_id, $post) {
 }
 
 add_action('save_post', 'wpt_save_meeting_meta', 1, 2); // save the custom fields
-/*
-  function wp_add_custom_user_profile_fields($user) {
-  ?>
-  <h3><?php _e('Extra Instructor Information', 'your_textdomain'); ?></h3>
 
-  <table class="form-table">
-  <tr>
-  <th>
-  <label for="intructor_id"><?php _e('Intructor Id', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="intructor_id" id="intructor_id" value="<?php echo esc_attr(get_the_author_meta('intructor_id', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your intructor id.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="privacy_policy"><?php _e('Privacy Policy', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="privacy_policy" id="privacy_policy" value="<?php echo esc_attr(get_the_author_meta('privacy_policy', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your Privacy Policy.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="provider"><?php _e('Provider', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="provider" id="provider" value="<?php echo esc_attr(get_the_author_meta('provider', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your provider.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="uid"><?php _e('U Id', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="uid" id="uid" value="<?php echo esc_attr(get_the_author_meta('uid', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your uid.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="system_admin"><?php _e('System Admin', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="system_admin" id="system_admin" value="<?php echo esc_attr(get_the_author_meta('system_admin', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your system admin.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="created_at"><?php _e('Created At', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="created_at" id="created_at" value="<?php echo esc_attr(get_the_author_meta('created_at', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your created at.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  <tr>
-  <th>
-  <label for="updated_at"><?php _e('Updated At', 'your_textdomain'); ?>
-  </label></th>
-  <td>
-  <input type="text" name="updated_at" id="updated_at" value="<?php echo esc_attr(get_the_author_meta('updated_at', $user->ID)); ?>" class="regular-text" /><br />
-  <span class="description"><?php _e('Please enter your updated at.', 'your_textdomain'); ?></span>
-  </td>
-  </tr>
-  </table>
-  <?php
-  }
-
-  function wp_save_custom_user_profile_fields($user_id) {
-
-  if (!current_user_can('edit_user', $user_id))
-  return FALSE;
-
-  update_usermeta($user_id, 'intructor_id', $_POST['intructor_id']);
-  update_usermeta($user_id, 'privacy_policy', $_POST['privacy_policy']);
-  update_usermeta($user_id, 'provider', $_POST['provider']);
-  update_usermeta($user_id, 'uid', $_POST['uid']);
-  update_usermeta($user_id, 'system_admin', $_POST['system_admin']);
-  update_usermeta($user_id, 'created_at', $_POST['created_at']);
-  update_usermeta($user_id, 'updated_at', $_POST['updated_at']);
-  }
-
-  add_action('show_user_profile', 'wp_add_custom_user_profile_fields');
-  add_action('edit_user_profile', 'wp_add_custom_user_profile_fields');
-
-  add_action('personal_options_update', 'wp_save_custom_user_profile_fields');
-  add_action('edit_user_profile_update', 'wp_save_custom_user_profile_fields');
- */
 
 function wp_meetings_shortcode($atts) {
 	$pull_quote_atts = shortcode_atts( array(
@@ -841,11 +731,6 @@ function wpt_instructor_fields() {
     echo '<input type="hidden" name="_instructor_id" value="' . $instructor_id . '" class="widefat" /><br/><br/>';
 
 	
-    // Get the full_name data if its already been entered
-    //$full_name = get_post_meta($post->ID, '_full_name', true);
-    // Echo out the field
-    //echo '<b>Full Name :</b> <input type="text" name="_full_name" value="' . $full_name . '" class="widefat" /><br/><br/>';
-
     // Get the avatar data if its already been entered
     $avatar = get_post_meta($post->ID, '_avatar', true);
     // Echo out the field
@@ -940,9 +825,9 @@ function wpt_save_instructor_meta($post_id, $post) {
 
     $course_meta['_instructor_id'] = $_POST['_instructor_id'];
     $course_meta['_email'] = $_POST['_email'];
-    //$course_meta['_full_name'] = $_POST['_full_name'];
+
     $course_meta['_avatar'] = $_POST['_avatar'];
-    //$course_meta['_bio'] = $_POST['_bio'];
+  
 
     // Add values of $course_meta as custom fields
 	
@@ -1045,22 +930,7 @@ HTML;
 
         
         echo $choice_block."</br></br>";
-    /*
-    // Get the taxable data if its already been entered
-    $taxable = get_post_meta($post->ID, '_taxable', true);
-    // Echo out the field
-    echo '<b>Taxable : </b><input type="text" name="_taxable" value="' . $taxable . '" class="widefat" /><br/><br/>';
-
-    // Get the published data if its already been entered
-    $published = get_post_meta($post->ID, '_published', true);
-    // Echo out the field
-    echo '<b>Published : </b><input type="text" name="_published" value="' . $published . '" class="widefat" /><br/><br/>';
-
-    // Get the allow_bookings data if its already been entered
-    $allow_bookings = get_post_meta($post->ID, '_allow_bookings', true);
-    // Echo out the field
-    echo '<b>Allow Bookings :</b> <input type="text" name="_allow_bookings" value="' . $allow_bookings . '" class="widefat" /><br/><br/>';
-    */
+    
     // Get the start_date data if its already been entered
     $start_date = get_post_meta($post->ID, '_start_date', true);
     // Echo out the field
@@ -1086,17 +956,6 @@ HTML;
     // Echo out the field
     echo '<b>Address :</b> <input type="text" name="_address" value="' . $address . '" class="widefat" /><br/><br/>';
 
-/*	
-	// Get the hide_if_full data if its already been entered
-    $hide_if_full = get_post_meta($post->ID, '_hide_if_full', true);
-    // Echo out the field
-    echo '<b>Hide if full :</b> <input type="text" name="_hide_if_full" value="' . $hide_if_full . '" class="widefat" /><br/><br/>';
-
-    // Get the show_seats_left data if its already been entered
-    $show_seats_left = get_post_meta($post->ID, '_show_seats_left', true);
-    // Echo out the field
-    echo '<b>Show seats left :</b> <input type="text" name="_show_seats_left" value="' . $show_seats_left . '" class="widefat" /><br/><br/>';
-    */
     // Get the lessons data if its already been entered
     $lessons = get_post_meta($post->ID, '_lessons', true);
     // Echo out the field
@@ -1106,13 +965,7 @@ HTML;
     $status = get_post_meta($post->ID, '_status', true);
     // Echo out the field
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
-    /*
-    // Get the subscription_plan_id data if its already been entered
-    $subscription_plan_id = get_post_meta($post->ID, '_subscription_plan_id', true);
-    // Echo out the field
-    echo '<b>Subscription plan id :</b> <input type="text" name="_subscription_plan_id" value="' . $subscription_plan_id . '" class="widefat" /><br/><br/>';
-     * 
-     */
+   
 }
 
 
@@ -1174,10 +1027,10 @@ function wpt_save_group_meta($post_id, $post) {
 	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 	$result = curl_exec($ch);
-//var_dump($result); die();
+	//var_dump($result); die();
 	
 	$resultdata = json_decode($result);
-//var_dump($resultdata); die();
+	//var_dump($resultdata); die();
 	// OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 	
