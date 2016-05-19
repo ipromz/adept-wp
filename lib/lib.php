@@ -113,7 +113,7 @@ Class WP_Lib {
 				$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 				$plugin2 = 'wpml-translation-management/plugin.php';
 
-				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
+				/* if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                 foreach ($_temp1->translation as $_lang) {
                     if ($site_default_language != $_lang->locale) {
 
@@ -158,7 +158,7 @@ Class WP_Lib {
                         }
                     }
                 }
-				}
+				} */
             }
             return $fi_category->errors['term_exists'][0];
         } return "No Categories for import";
@@ -271,7 +271,7 @@ Class WP_Lib {
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 					$plugin2 = 'wpml-translation-management/plugin.php';
 
-				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
+				/* if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
                         foreach ($v->translation as $a => $b) {
 
@@ -350,7 +350,7 @@ Class WP_Lib {
                             }
                         }
                     }
-				}
+				} */
                 }
             }
             return "Courses imported successfully";
@@ -1141,7 +1141,7 @@ Class WP_Lib {
         $adept_author_value = get_option('adept_author');
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
-
+		//echo $site_default_language; exit();
         if (!empty($all_courses_list->data)) {
 
             foreach ($all_courses_list->data as $k => $v) {
