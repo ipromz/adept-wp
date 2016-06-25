@@ -1137,6 +1137,27 @@ function add_publish_confirmation(){
 
 	new WP_Adept_LMS();
 
+
+//code added by Pramod Jodhani (https://www.upwork.com/freelancers/~0154a1d243606b6603)
+add_action("init" , "adept_sitepress_plugin_notice");
+function adept_sitepress_plugin_notice() {
+    $plugins = get_option( "active_plugins"  );
+    if(!in_array("sitepress-multilingual-cms/sitepress.php", $plugins))
+    {
+
+        add_action( 'admin_notices', 'adept_sitepress_plugin_notice_nag' );
+    }
+}
+
+function adept_sitepress_plugin_notice_nag() {
+    ?>
+    <div class="notice notice-error ">
+        <p>Adept LMS Plugin require WPML Multilingual CMS. Please install WPML Multilingual CMS</p>
+    </div>
+    <?php
+}
+
+
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 include_once MY_PLUGIN_PATH . "lib/lib.php";
