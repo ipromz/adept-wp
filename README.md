@@ -8,8 +8,18 @@ Adept LMS has key content types such as courses, groups, meetings and instructor
 
 ## List meetings from array of group ids 
 The plugin should generate a shortcode where user can enter an array of group ids, and it will fetch the group_meetings from Adept, and show as unordered list, with classes so a designer can easily apply styling for the user interface.
-`GET /api/group_meetings?group_ids[]=1&group_ids[]=2`
 
+Sample shortcode:
+```
+[list_meetings group_ids=123,124,125]
+```
+
+Sample api call:
+```
+GET /api/group_meetings?group_ids[]=1&group_ids[]=2
+```
+
+Sample output:
 ```
 <ul>
   <li>Meeting title</li>
