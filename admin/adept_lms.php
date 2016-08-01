@@ -17,6 +17,7 @@ $adept_api_url_value = get_option('adept_api_url');
 $adept_account_id_value = get_option('adept_account_id');
 
 $langdata= $adept->get_languages();
+
 $default_language = $langdata->default_language;
 //course unpublish code if (isset($_POST['unpublish_courses'])) {    if ($adept_access_token_value == '') {        $error = "Please enter authentication detail";    } else {       $url = $adept_api_url_value . 'unpublished_courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;        $result = $adept->unpublished_courses($url);        $success = $result;    }}
 

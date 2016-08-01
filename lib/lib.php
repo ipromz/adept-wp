@@ -14,10 +14,15 @@ Class WP_Lib {
             'Content-Type: application/x-www-form-urlencoded',
             'Content-Length: ' . strlen($data))
         );
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 50);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 50);
+        
+        //because of https
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        
+        
         $result = curl_exec($ch);
-		
+		//echo $result; exit;
         $resultdata = json_decode($result);
 		//echo $resultdata; die();
 
@@ -34,6 +39,8 @@ Class WP_Lib {
             'Content-Type: application/x-www-form-urlencoded',
             'Content-Length: ' . strlen($data))
         );
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         $result = curl_exec($ch);
@@ -56,8 +63,11 @@ Class WP_Lib {
         );
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
         $result = curl_exec($ch);
         $resultdata = json_decode($result);
+        //pre($resultdata); exit;
 		//print_r($resultdata);
         return $resultdata;
     }
@@ -68,6 +78,7 @@ Class WP_Lib {
 		$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 		$plugin2 = 'wpml-translation-management/plugin.php';
         $temp = $this->getdata($url);
+        //pre($temp); exit;
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
         $taxonomy = 'genre';

@@ -38,10 +38,9 @@ class WP_Adept_LMS {
             'wpa_page_file_path'
                 ), "", '2.2.9');
 
-        add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array(
-            __CLASS__,
-            'wpa_page_file_path1'
-        ));
+        add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array( $this, 'wpa_page_file_path1')
+        );        
+
     }
 
     /*
@@ -50,7 +49,7 @@ class WP_Adept_LMS {
 
     function wpa_page_file_path() {
 
-        foreach (glob(plugin_dir_path(__FILE__) . "includes/adept_lms.php") as $file) {
+        foreach (glob(plugin_dir_path(__FILE__) . "admin/adept_lms.php") as $file) {
             include_once $file;
         }
     }
@@ -61,7 +60,7 @@ class WP_Adept_LMS {
 
     function wpa_page_file_path1() {
 
-        foreach (glob(plugin_dir_path(__FILE__) . "includes/adept_lms_settings.php") as $file) {
+        foreach (glob(plugin_dir_path(__FILE__) . "admin/adept_lms_settings.php") as $file) {
             include_once $file;
         }
     }
@@ -1123,22 +1122,29 @@ function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $func
 
     return $hookname;
 }
+
 function add_publish_confirmation(){
-	 global $post;
-	if ( 'courses' === $post->post_type  ||  'groups' === $post->post_type ||  'instructors' === $post->post_type ||  'meetings' === $post->post_type ) {     
-	$confirmation_message = "Content will be updated on LMS,Are you sure?";      
-	echo '<script type="text/javascript">';    
-	echo 'var publish = document.getElementById("publish");';     
-	echo 'if (publish !== null){';    
-	echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };';     
-	echo '}';     
-	echo '</script>'; } } 
-	add_action('admin_footer', 'add_publish_confirmation');
+	global $post;
+
+    if(is_object($post)) {
+        
+        if ( 'courses' === $post->post_type  ||  'groups' === $post->post_type ||  'instructors' === $post->post_type ||  'meetings' === $post->post_type ) {     
+        $confirmation_message = "Content will be updated on LMS,Are you sure?";      
+        echo '<script type="text/javascript">';    
+        echo 'var publish = document.getElementById("publish");';     
+        echo 'if (publish !== null){';    
+        echo 'publish.onclick = function(){ return confirm("'.$confirmation_message.'"); };';     
+        echo '}';     
+        echo '</script>'; } 
+    }
+} 
+
+add_action('admin_footer', 'add_publish_confirmation');
 
 	new WP_Adept_LMS();
 
 
-//code added by Pramod Jodhani (https://www.upwork.com/freelancers/~0154a1d243606b6603)
+//error nag for sitepress plugin
 add_action("init" , "adept_sitepress_plugin_notice");
 function adept_sitepress_plugin_notice() {
     $plugins = get_option( "active_plugins"  );
@@ -1157,10 +1163,33 @@ function adept_sitepress_plugin_notice_nag() {
     <?php
 }
 
+//enqueing styles and scripts
+function wpa_custom_wp_admin_style() {
+      wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
+      wp_enqueue_style("adept" , plugins_url("css/style.css" , __FILE__) );
+}
+add_action( 'admin_enqueue_scripts', 'wpa_custom_wp_admin_style' );
+
+
+//adding necesary js variables in the footer
+add_action("admin_footer" , "wpa_footer_js");
+
+function wpa_footer_js() {
+    echo "<script>
+        var ADEPT_SITE_URL = '".site_url()."';
+    </script>";
+}
+
+
 
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
+
+
+
 include_once MY_PLUGIN_PATH . "lib/lib.php";
+include_once MY_PLUGIN_PATH . "admin/admin_sync_page.php";
+include_once MY_PLUGIN_PATH . "includes/general_functions.php";
 
 $adept = new WP_Lib();
 ?>

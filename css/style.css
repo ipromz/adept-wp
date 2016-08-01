@@ -1,0 +1,18 @@
+.adept_btn_wrap .button {
+  display: block;
+  height: auto;
+  margin: 50px auto;
+  padding: 10px;
+  text-align: center;
+  width: 100px;
+}
+
+.adept_logs_inner {
+  width: 50%;
+  background: #fff;
+  height: 300px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  overflow: scroll;	
+  padding: 10px;
+}
