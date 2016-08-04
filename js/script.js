@@ -3,9 +3,9 @@
 var ADEPT_SYNC_OPTIONS = [
 							"import_categories",
 							"import_course",
-							"unpublish_courses",
+							//"unpublish_courses",
 							"import_instructors",
-							"course_update",
+							//"course_update",
 							"class_group",
 							"update_group",
 							"class_meeting",
@@ -21,6 +21,7 @@ jQuery(document).ready(function(){
 
 function adept_sync_btn_click() {
 	jQuery("#adept_sync_btn").click(function() {
+		ADEPT_SYNC_COUNTER = 0;
 		adept_sync_next_step();
 	});
 }

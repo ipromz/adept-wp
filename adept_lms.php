@@ -1192,4 +1192,6 @@ include_once MY_PLUGIN_PATH . "admin/admin_sync_page.php";
 include_once MY_PLUGIN_PATH . "includes/general_functions.php";
 
 $adept = new WP_Lib();
+
+
 ?>

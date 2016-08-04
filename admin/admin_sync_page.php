@@ -27,7 +27,6 @@ function wpa_sync_page_callback(){
 
 }
 
-
 add_action("wp_ajax_adept_sync" , "adept_sync_ajax");
 
 function adept_sync_ajax() {
