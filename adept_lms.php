@@ -219,8 +219,8 @@ HTML;
 	echo '<b>Course Instructors  :</b><br/><br/>';	
 	$all_instructors = get_all_of_post_type( 'instructors' );
 
-  	$linked_instructor_ids = get_post_meta(  $post->ID,'_instructor_ids' ) ;
-
+  	$linked_instructor_ids = get_post_meta(  $post->ID,'_instructor_ids', true ) ;
+    //pre($linked_instructor_ids); exit;
         if ( 0 == count($all_instructors) ) {
             $choice_block = '<p>No Instructor found in the system.</p>';
         } else {
@@ -1147,22 +1147,45 @@ add_action('admin_footer', 'add_publish_confirmation');
 //error nag for sitepress plugin
 add_action("init" , "adept_sitepress_plugin_notice");
 function adept_sitepress_plugin_notice() {
+    
     $plugins = get_option( "active_plugins"  );
     if(!in_array("sitepress-multilingual-cms/sitepress.php", $plugins))
     {
 
         add_action( 'admin_notices', 'adept_sitepress_plugin_notice_nag' );
     }
+    
+    add_action( 'admin_notices', 'wpa_nags' );
 }
 
 function adept_sitepress_plugin_notice_nag() {
+
     ?>
     <div class="notice notice-error ">
         <p>Adept LMS Plugin require WPML Multilingual CMS. Please install WPML Multilingual CMS</p>
     </div>
     <?php
+
+    //if()
+
 }
 
+
+function wpa_nags() {
+    global $pagenow;
+    global $page;
+    if($pagenow == "admin.php") {
+        if(isset($_GET["page"]) ) {
+            if($_GET["page"] == "adept_lms" || $_GET["page"] == "adept_lms_sync")  {
+
+                echo '<div class="notice notice-error ">
+                        Please ensure that you have setup server cron manually for the given URL: <em>'.wpa_get_cron_url().'</em>
+                    </div>';
+            }
+        }
+    }
+
+}
 //enqueing styles and scripts
 function wpa_custom_wp_admin_style() {
       wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
@@ -1183,7 +1206,7 @@ function wpa_footer_js() {
 
 
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
-
+define("WPA_PLUGIN_FILE" , __FILE__);
 
 
 

@@ -24,12 +24,19 @@ if(!function_exists("post_val")) {
 
 
 
-function wpa_add_post_language($post_id, $post_type, $lang, $title, $desc = "") {
+function wpa_add_post_language($post_id, $post_type, $lang, $title, $desc = "" , $excerpt="") {
 	global $sitepress;
 	$trigid = wpml_get_content_trid('post_' . $post_type, $post_id); // Find Transalation ID function from WPML API. 
 	$_POST['icl_post_language'] = $lang; // Set another language
 
-	$tpropertyid1 = wp_insert_post( array( 'post_title' => $title, 'post_type' => $post_type, 'post_status'=> 'publish' , 'post_content'=>$desc) ); // Insert French post
+	$tpropertyid1 = wp_insert_post( 
+							array( 'post_title' => $title, 
+								'post_type' => $post_type, 
+								'post_status'=> 'publish' , 
+								'post_content'=>$desc,
+								'post_excerpt'=>$excerpt
+								) 
+							); // Insert French post
 	$sitepress->set_element_language_details($tpropertyid1, 'post_' . $post_type, $trigid, $lang); // Change this post translation ID to Hebrew's post id
  	return $tpropertyid1;
 }
@@ -84,4 +91,8 @@ function wpa_update_post_content($post_id , $content) {
   	);
 	wp_update_post( $my_post );
 
+}
+
+function wpa_get_cron_url() {
+	return plugins_url("cron.php" , WPA_PLUGIN_FILE);
 }

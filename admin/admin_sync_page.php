@@ -13,6 +13,7 @@ function wpa_sync_page_callback(){
 	?>
 
 	<div class="wrap adept_sync_wrap">
+		
 		<div class='adept_btn_wrap'>
 			<a href='#' id="adept_sync_btn" class="button button-primary">Sync Now</a>
 		</div>

@@ -188,10 +188,13 @@ Class WP_Lib {
         
         $all_courses_list = $this->getdata($url);					
         $get_all_languages = $this->get_languages();
+        //pre($all_courses_list); exit;
 
 		$site_default_language = $get_all_languages->default_language;
-        $site_default_language = "nb";
-        $_POST['icl_post_language'] = $site_default_language;
+        if($site_default_language == "no" ) {
+            $site_default_language = "nb";
+        }
+        
 
         //pre($all_courses_list); exit;
         
@@ -229,12 +232,10 @@ Class WP_Lib {
                         'guid' => ''
                     );
 
-                    //$_POST['icl_post_language'] = $language_code = $site_default_language;
-                    $_POST['icl_post_language'] = $language_code = $site_default_language;
                     
                     // Insert the post into the database.
-                    $post_id = wp_insert_post($my_post); 
-                    
+                    //$post_id = wp_insert_post($my_post); 
+
                     //add norverian language
                     //wpa_add_post_language($post_id , "courses" , "nb");
                     
@@ -244,16 +245,26 @@ Class WP_Lib {
                     if(is_array($v->translation) && count($v->translation)>0) {
                         //pre($v->translation); exit;
                         foreach($v->translation as $locale) {
-                          
-                            $new_id = wpa_add_post_language($post_id , "courses" , $locale->locale , $locale->course_title , $locale->description);
+                            //pre($locale); exit;
+                            if($locale->locale == "no") {
+                                $locale->locale = "nb";
+                            }
+                            
+                            $_POST['icl_post_language'] = $locale->locale;
+                            
+                            if(!isset($post_id)) {
+                                $post_id = wp_insert_post($my_post);                                
+                            }
+                            else {
+                            
+                                $new_id = wpa_add_post_language($post_id , "courses" , $locale->locale , $locale->course_title , $locale->description , $locale->teaser);
+                                //pre($locale);
+                                //echo $new_id."<br><br>";
 
-                            /*pre($locale); exit;*/
-
-                            //wpa_update_post_content($new_id , $content);
-
-                            $new_post_id[] = $new_id;
+                                $new_post_id[] = $new_id;
                            
                                
+                            }
                            
                         }
                     }
@@ -271,11 +282,14 @@ Class WP_Lib {
 					
 					
 					if(count($v->instructors)>0){
-						foreach($v->instructors as $key => $value){
-							$get_instructor_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
-                            $instructorid = $get_instructor_id[0]->post_id;
-							add_post_meta( $post_id , '_instructor_ids', $instructorid );
-						}
+						
+                        $instructor_ids = array();
+                        foreach($v->instructors as $key => $value){
+							$instructor_ids[] = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_instructor_id' AND  meta_value ='" . $value->instructor_id."' LIMIT 0,1 ");
+                        }
+
+                        update_post_meta($post_id , '_instructor_ids', $instructor_ids);
+                       
 						
 					}
 					
@@ -806,6 +820,7 @@ Class WP_Lib {
 	  global $wpdb;
         $adept_author_value = get_option('adept_author');
         $all_meeting_list = $this->getdata($url);
+        pre($all_meeting_list); exit;
         //echo "<pre>";
 		//print_r($all_meeting_list);
 		//exit();
@@ -1095,8 +1110,7 @@ Class WP_Lib {
         global $wpdb,$sitepress;
 
         $all_courses_list = $this->getdata($url);
-		//echo "<pre>";
-		//print_r($all_courses_list);
+        //pre($all_courses_list); exit;
         $adept_author_value = get_option('adept_author');
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
@@ -1166,8 +1180,10 @@ Class WP_Lib {
 					$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 				$plugin2 = 'wpml-translation-management/plugin.php';
 
-				if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
+                if(1){
+				//if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                     if (!empty($v->translation)) {
+                        echo "heree-promz";
                         foreach ($v->translation as $a => $b) {
                             if ($b->locale != $site_default_language) {
 
@@ -1198,7 +1214,7 @@ Class WP_Lib {
 
 
                                     // Insert the post into the database.
-                                    $post_id = wp_insert_post($my_post, $wp_error);
+                                    $post_id_new = wpa_add_post_language($post_id, "groups", $b->locale, $b->group_title, $b->description , $b->description);
 									if(count($b->courses)>0){
 										foreach($b->courses as $key => $value){
 											$get_course_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_post_id' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
@@ -1207,23 +1223,23 @@ Class WP_Lib {
 										}
 									}
 
-                                    add_post_meta($post_id, '_group_id', $b->locale . '_' . $b->_group_id . '_' . $b->id);
-                                    add_post_meta($post_id, '_tags', $b->tags);
-                                    add_post_meta($post_id, '_course_fee', $b->course_fee);
-                                    add_post_meta($post_id, '_taxable', $b->taxable);
-                                    add_post_meta($post_id, '_published', $b->published);
-                                    add_post_meta($post_id, '_allow_bookings', $b->allow_bookings);
-                                    add_post_meta($post_id, '_start_date', $b->start_date);
-                                    add_post_meta($post_id, '_end_date', $b->end_date);
-                                    add_post_meta($post_id, '_reg_date', $b->reg_date);
-                                    add_post_meta($post_id, '_seats', $b->seats);
-                                    add_post_meta($post_id, '_hide_if_full', $b->hide_if_full);
-                                    add_post_meta($post_id, '_show_seats_left', $b->show_seats_left);
-                                    add_post_meta($post_id, '_lessons', $b->lessons);
-                                    add_post_meta($post_id, '_status', $b->status);
-                                    add_post_meta($post_id, '_subscription_plan_id', $b->subscription_plan_id);
+                                    add_post_meta($post_id_new, '_group_id', $b->locale . '_' . $b->_group_id . '_' . $b->id);
+                                    add_post_meta($post_id_new, '_tags', $b->tags);
+                                    add_post_meta($post_id_new, '_course_fee', $b->course_fee);
+                                    add_post_meta($post_id_new, '_taxable', $b->taxable);
+                                    add_post_meta($post_id_new, '_published', $b->published);
+                                    add_post_meta($post_id_new, '_allow_bookings', $b->allow_bookings);
+                                    add_post_meta($post_id_new, '_start_date', $b->start_date);
+                                    add_post_meta($post_id_new, '_end_date', $b->end_date);
+                                    add_post_meta($post_id_new, '_reg_date', $b->reg_date);
+                                    add_post_meta($post_id_new, '_seats', $b->seats);
+                                    add_post_meta($post_id_new, '_hide_if_full', $b->hide_if_full);
+                                    add_post_meta($post_id_new, '_show_seats_left', $b->show_seats_left);
+                                    add_post_meta($post_id_new, '_lessons', $b->lessons);
+                                    add_post_meta($post_id_new, '_status', $b->status);
+                                    add_post_meta($post_id_new, '_subscription_plan_id', $b->subscription_plan_id);
 
-                                    $_POST['icl_post_language'] = $language_code = $b->locale;
+                                    //$_POST['icl_post_language'] = $language_code = $b->locale;
                                     //wpml_add_translatable_content('post_post', $post_id, $language_code);
                                 }
                             }
@@ -1502,7 +1518,8 @@ Class WP_Lib {
     function import_instructors($url) {
 		
         $temp = $this->getdata($url);
-		// Delete posts from post type Intructors
+		//pre($temp); exit;
+        // Delete posts from post type Intructors
         $args = array(
             'numberposts' => 50,
             'post_type' => 'instructors'
@@ -1514,14 +1531,6 @@ Class WP_Lib {
                 wp_delete_post($post->ID, true);
             }
         }
-
-        foreach ($intructors_posts as $post) {
-            // Delete's each post.
-            wp_delete_post($post->ID, true);
-            // Set to False if you want to send them to Trash.
-        }
-
-
 
         global $wpdb;
         $adept_author_value = get_option('adept_author');
@@ -1549,15 +1558,16 @@ Class WP_Lib {
             );
             // Insert the post into the database.
             $post_id = wp_insert_post($my_post, $wp_error);
-			if(count($v->courses)>0){
+			if(count($v->courses)>0) {
 			
-						foreach($v->courses as $key => $value){
-							$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
-                            $groupid = $get_group_id[0]->post_id;
-							
-							add_post_meta( $post_id , '_course_ids', $groupid );
-						}
-					}
+				foreach($v->courses as $key => $value){
+					$get_group_id = $wpdb->get_results("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+                    $groupid = $get_group_id[0]->post_id;
+					
+					add_post_meta( $post_id , '_course_ids', $groupid );
+				}
+			}
+
             add_post_meta($post_id, '_instructor_id', $_temp1->id);
             add_post_meta($post_id, '_email', $_temp1->email);
             //add_post_meta($post_id, '_full_name', $_temp1->full_name);
