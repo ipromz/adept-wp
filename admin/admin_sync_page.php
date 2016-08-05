@@ -33,7 +33,7 @@ add_action("wp_ajax_adept_sync" , "adept_sync_ajax");
 function adept_sync_ajax() {
 	
 	$step = $_GET["step"];
-	echo $step;
+	echo $step." - ";
 	$adept = new WP_Lib();
 	
 	global $wpdb; 

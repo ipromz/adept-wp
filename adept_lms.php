@@ -891,8 +891,10 @@ function wpt_group_fields() {
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
 
     // Get the email data if its already been entered
-    $email = get_post_meta($post->ID, '_tags', true);
+    $tags = get_post_meta($post->ID, '_tags', true);
+    $tags = implode(", ", $tags);
     // Echo out the field
+
     echo '<b>Tags :</b> <input type="text" name="_tags" class="widefat" value="' . $tags . '" /><br/><br/>';
 	
 	// Get the group_id data if its already been entered

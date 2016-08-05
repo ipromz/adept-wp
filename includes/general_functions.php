@@ -35,7 +35,7 @@ function wpa_add_post_language($post_id, $post_type, $lang, $title, $desc = "" ,
 								'post_status'=> 'publish' , 
 								'post_content'=>$desc,
 								'post_excerpt'=>$excerpt
-								) 
+								) , true
 							); // Insert French post
 	$sitepress->set_element_language_details($tpropertyid1, 'post_' . $post_type, $trigid, $lang); // Change this post translation ID to Hebrew's post id
  	return $tpropertyid1;
@@ -60,7 +60,8 @@ function wpa_translate_copy($post_id , $new_post_id) {
 				"_booking_count",
 				"_image_url",
 				"_instructor_ids",
-				"_course_url"
+				"_course_url",
+				"_adept_course_id"
 		);
 
 	foreach($meta_keys as $key) {
@@ -81,6 +82,14 @@ function wpa_translate_copy($post_id , $new_post_id) {
         "term_taxonomy_id" => $check_term_id_slug[0]->term_id
     ));*/
 
+}
+
+
+function wpa_duplicate_meta($metas , $post_id , $post_id_new) {
+	foreach($metas as $meta) {
+		$val = get_post_meta($post_id , $meta , true);
+		update_post_meta($post_id_new , $meta , $val);	
+	}
 }
 
 function wpa_update_post_content($post_id , $content) {

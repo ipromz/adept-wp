@@ -3,7 +3,7 @@
 var ADEPT_SYNC_OPTIONS = [
 							"import_categories",
 							"import_course",
-							//"unpublish_courses",
+							"unpublish_courses",
 							"import_instructors",
 							//"course_update",
 							"class_group",
