@@ -61,7 +61,7 @@ function wpa_translate_copy($post_id , $new_post_id) {
 				"_image_url",
 				"_instructor_ids",
 				"_course_url",
-				"_adept_course_id"
+				"_adept_api_id"
 		);
 
 	foreach($meta_keys as $key) {

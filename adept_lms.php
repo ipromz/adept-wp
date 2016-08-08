@@ -196,8 +196,7 @@ function wpt_course_fields() {
 	echo '<b>Course Groups :</b><br/><br/>';	
 	$all_groups = get_all_of_post_type( 'groups' );
 
-  	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids' ) ;
-
+  	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids', true ) ;
         if ( 0 == count($all_groups) ) {
             $choice_block = '<p>No Group found in the system.</p>';
         } else {

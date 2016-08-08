@@ -2,12 +2,12 @@
 
 var ADEPT_SYNC_OPTIONS = [
 							"import_categories",
-							"import_course",
-							"unpublish_courses",
 							"import_instructors",
-							//"course_update",
 							"class_group",
-							"update_group",
+							//"update_group",
+							"import_course",
+							//"unpublish_courses",
+							//"course_update",
 							"class_meeting",
 							"update_meeting"
 							];
@@ -20,7 +20,9 @@ jQuery(document).ready(function(){
 });
 
 function adept_sync_btn_click() {
-	jQuery("#adept_sync_btn").click(function() {
+	jQuery("#adept_sync_btn").click(function(e) {
+		e.preventDefault();
+		jQuery(".adept_logs_inner").html("");
 		ADEPT_SYNC_COUNTER = 0;
 		adept_sync_next_step();
 	});
