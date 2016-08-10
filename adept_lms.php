@@ -194,7 +194,7 @@ function wpt_course_fields() {
     echo '<b>SKU :</b> <input type="text" name="_sku" value="' . $sku . '" class="widefat" /><br/><br/>';
 
 	echo '<b>Course Groups :</b><br/><br/>';	
-	$all_groups = get_all_of_post_type( 'groups' );
+	$all_groups = get_all_of_post_type_2( 'groups' );
 
   	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids', true ) ;
         if ( 0 == count($all_groups) ) {
@@ -282,6 +282,16 @@ function get_all_of_post_type( $type_name = '') {
         return $items;
     }
 
+function get_all_of_post_type_2($post_type) {
+    global $wpdb;
+    $posts = $wpdb->get_col("SELECT element_id FROM `{$wpdb->prefix}icl_translations` where element_type = 'post_$post_type' group by trid ");
+    $args = array(
+            'post__in' => $posts,
+            'post_type'=>'any',
+        );
+
+    return get_posts($args);
+}
 function wpt_save_course_meta($post_id, $post) {
 	global $wpdb;
 	
