@@ -9,7 +9,7 @@ var ADEPT_SYNC_OPTIONS = [
 							//"unpublish_courses",
 							//"course_update",
 							"class_meeting",
-							"update_meeting"
+							//"update_meeting"
 							];
 var ADEPT_SYNC_COUNTER = 0;
 

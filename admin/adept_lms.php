@@ -46,7 +46,7 @@ if (isset($_POST['import_course'])) {
 		$finalResult = array();
         $url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 		$result = $adept->import_course($url);
-		$success = 'Course imported successfully';
+		$success = 'Course imported successfully -';
 		
     }
 }

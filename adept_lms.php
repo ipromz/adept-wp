@@ -297,6 +297,7 @@ function wpt_save_course_meta($post_id, $post) {
 	
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
+    if(!isset($_POST['coursemeta_noncename'])) return;
     if (!wp_verify_nonce($_POST['coursemeta_noncename'], plugin_basename(__FILE__))) {
         return $post->ID;
     }
@@ -528,6 +529,7 @@ function wpt_save_meeting_meta($post_id, $post) {
 	global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
+    if(!isset($_POST['meetingmeta_noncename'])) return;
     if (!wp_verify_nonce($_POST['meetingmeta_noncename'], plugin_basename(__FILE__))) {
         return $post->ID;
     }
@@ -782,6 +784,7 @@ function wpt_save_instructor_meta($post_id, $post) {
 	global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
+    if(!isset($_POST['instructormeta_noncename'])) return;
     if (!wp_verify_nonce($_POST['instructormeta_noncename'], plugin_basename(__FILE__))) {
         return $post->ID;
     }
@@ -983,6 +986,7 @@ function wpt_save_group_meta($post_id, $post) {
 	global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
+    if(!isset($_POST['groupmeta_noncename'])) return;
     if (!wp_verify_nonce($_POST['groupmeta_noncename'], plugin_basename(__FILE__))) {
         return $post->ID;
     }
