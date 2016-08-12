@@ -35,7 +35,7 @@ function wpa_add_post_language($post_id, $post_type, $lang, $title, $desc = "" ,
 								'post_status'=> 'publish' , 
 								'post_content'=>$desc,
 								'post_excerpt'=>$excerpt
-								) , true
+								) 
 							); // Insert French post
 	$sitepress->set_element_language_details($tpropertyid1, 'post_' . $post_type, $trigid, $lang); // Change this post translation ID to Hebrew's post id
  	return $tpropertyid1;

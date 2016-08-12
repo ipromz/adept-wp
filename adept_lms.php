@@ -470,7 +470,7 @@ function add_meeting_metaboxes() {
 
 function wpt_meeting_fields() {
     global $post;
-	
+
 	
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' .
@@ -489,6 +489,7 @@ function wpt_meeting_fields() {
 
     // Get the start_time data if its already been entered
     $start_time = get_post_meta($post->ID, '_start_time', true);
+    //echo $start_time; exit;
     // Echo out the field
     echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time . '" class="widefat" /><br/><br/>';
 
@@ -580,7 +581,8 @@ function wpt_save_meeting_meta($post_id, $post) {
     $ch = curl_init($curl);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 		'Content-Type: application/x-www-form-urlencoded',
 		'Content-Length: ' . strlen($data))
@@ -617,14 +619,16 @@ function wpt_save_meeting_meta($post_id, $post) {
     foreach ($meeting_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
-        $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
+        
+        update_post_meta($post->ID, $key, $value);
+        /*$value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
         if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
             update_post_meta($post->ID, $key, $value);
         } else { // If the custom field doesn't have a value
             add_post_meta($post->ID, $key, $value);
         }
         if (!$value)
-            delete_post_meta($post->ID, $key); // Delete if blank
+            delete_post_meta($post->ID, $key); // Delete if blank*/
     }
 }
 
