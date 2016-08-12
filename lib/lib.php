@@ -165,8 +165,6 @@ Class WP_Lib {
                 }
 
                 $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='".$v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
-                echo "<br>SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='".$v->id . "' ORDER BY post_id DESC LIMIT 0,1 ";
-                echo "<br>get_existing_post_id:$get_existing_post_id <br>";
 
                 if (trim($get_existing_post_id) == "") {
 
