@@ -54,6 +54,9 @@ function adept_sync_next_step() {
 		else {
 			as_log("sync complete");		
 		}
+	}).error(function() {
+		//dont increment, let the same step run again 
+		adept_sync_next_step();
 	});
 
 
@@ -63,4 +66,5 @@ function adept_sync_next_step() {
 
 function as_log(msg) {
 	jQuery(".adept_logs_inner").append("<br>"+msg);
+	jQuery(".adept_logs_inner").animate({ scrollTop: jQuery('.adept_logs_inner').prop("scrollHeight")}, 1000);
 }

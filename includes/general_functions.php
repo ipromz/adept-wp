@@ -28,15 +28,17 @@ function wpa_add_post_language($post_id, $post_type, $lang, $title, $desc = "" ,
 	global $sitepress;
 	$trigid = wpml_get_content_trid('post_' . $post_type, $post_id); // Find Transalation ID function from WPML API. 
 	$_POST['icl_post_language'] = $lang; // Set another language
+	
+	$postdata = array( 'post_title' => $title, 
+						'post_type' => $post_type, 
+						'post_status'=> 'publish' , 
+						'post_content'=>$desc,
+						'post_excerpt'=>$excerpt
+						);
 
-	$tpropertyid1 = wp_insert_post( 
-							array( 'post_title' => $title, 
-								'post_type' => $post_type, 
-								'post_status'=> 'publish' , 
-								'post_content'=>$desc,
-								'post_excerpt'=>$excerpt
-								) 
-							); // Insert French post
+	//pre($postdata);
+
+	$tpropertyid1 = wp_insert_post( $postdata ); 
 	$sitepress->set_element_language_details($tpropertyid1, 'post_' . $post_type, $trigid, $lang); // Change this post translation ID to Hebrew's post id
  	return $tpropertyid1;
 }
@@ -72,15 +74,12 @@ function wpa_translate_copy($post_id , $new_post_id) {
 
 	$relation = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}term_relationships where object_id = $post_id ");
 
+	//echo "<br>".$new_post_id."-".$relation->term_taxonomy_id."<br>";
 	$wpdb->insert($wpdb->prefix . "term_relationships" , array(
 		"object_id" => $new_post_id,
 		"term_taxonomy_id" => $relation->term_taxonomy_id
 	));
 
-    /*$wpdb->insert($wpdb->prefix . "term_relationships", array(
-        "object_id" => $post_id,
-        "term_taxonomy_id" => $check_term_id_slug[0]->term_id
-    ));*/
 
 }
 
@@ -104,4 +103,100 @@ function wpa_update_post_content($post_id , $content) {
 
 function wpa_get_cron_url() {
 	return plugins_url("cron.php" , WPA_PLUGIN_FILE);
+}
+
+
+function my_insert_post($postarr) {
+	
+	global $wpdb;
+
+
+	$user_id = get_current_user_id();
+
+	$defaults = array(
+		'post_author' => $user_id,
+		'post_content' => '',
+		'post_content_filtered' => '',
+		'post_title' => '',
+		'post_excerpt' => '',
+		'post_status' => 'publish',
+		'post_type' => 'post',
+		'comment_status' => '',
+		'ping_status' => '',
+		'post_password' => '',
+		'to_ping' =>  '',
+		'pinged' => '',
+		'post_parent' => 0,
+		'menu_order' => 0,
+		'guid' => '',
+		//'import_id' => 0,
+		//'context' => '',
+	);
+
+	$ints = array('menu_order','post_parent' , 'comment_count' );
+
+
+	if ( ! empty( $postarr['ID'] ) ) {
+		
+		$postarr = sanitize_post($postarr, 'db');
+
+		unset($postarr["filter"]);
+		
+		$post_ID = $postarr['ID'];
+
+		$query = " update {$wpdb->prefix}posts set ";
+
+		foreach($postarr as $key=>$val) {
+			
+			if($key == "ID") continue;
+
+			if(in_array($key, $ints)) {
+				$query .= " `$key` = $val,";
+				
+			}
+			else {
+				$query .= " `$key` = '$val',";
+				
+			}
+
+		}
+		$query = rtrim($query , ",");
+
+		$query .= " where ID = $post_ID";
+		$wpdb->query($query);
+
+		return $post_ID;
+	} 
+	else {
+		
+
+		$postarr = wp_parse_args($postarr, $defaults);
+
+		$postarr = sanitize_post($postarr, 'db');
+
+		unset($postarr["filter"]);
+
+		$query = " insert into {$wpdb->prefix}posts set ";
+
+		foreach($postarr as $key=>$val) {
+			
+			if($key == "ID") continue;
+
+			if(in_array($key, $ints)) {
+				$query .= " `$key` = $val,";
+				
+			}
+			else {
+				$query .= " `$key` = '$val',";
+				
+			}
+
+		}
+		$query = rtrim($query , ",");
+
+		$wpdb->query($query);
+		return $wpdb->insert_id;
+
+	}
+
 }

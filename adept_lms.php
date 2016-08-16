@@ -159,7 +159,7 @@ function add_course_metaboxes() {
 }
 
 function wpt_course_fields() {
-    global $post;
+    global $post, $wpdb;
 
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="coursemeta_noncename" id="coursemeta_noncename" value="' .
@@ -197,6 +197,7 @@ function wpt_course_fields() {
 	$all_groups = get_all_of_post_type_2( 'groups' );
 
   	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids', true ) ;
+        //pre($linked_group_ids); exit;
         if ( 0 == count($all_groups) ) {
             $choice_block = '<p>No Group found in the system.</p>';
         } else {
@@ -216,7 +217,7 @@ HTML;
         echo $choice_block."</br></br>";
 	// Instructor select box	
 	echo '<b>Course Instructors  :</b><br/><br/>';	
-	$all_instructors = get_all_of_post_type( 'instructors' );
+	$all_instructors = $wpdb->get_results(" select * from {$wpdb->prefix}posts where post_type='instructors' and post_status in ('publish', 'draft') ");
 
   	$linked_instructor_ids = get_post_meta(  $post->ID,'_instructor_ids', true ) ;
     //pre($linked_instructor_ids); exit;
@@ -284,13 +285,12 @@ function get_all_of_post_type( $type_name = '') {
 
 function get_all_of_post_type_2($post_type) {
     global $wpdb;
-    $posts = $wpdb->get_col("SELECT element_id FROM `{$wpdb->prefix}icl_translations` where element_type = 'post_$post_type' group by trid ");
-    $args = array(
-            'post__in' => $posts,
-            'post_type'=>'any',
-        );
+    
+    //because we want dont want one post to appear many times,
+    $posts = $wpdb->get_results(" select * from {$wpdb->prefix}posts where ID in (SELECT element_id FROM `{$wpdb->prefix}icl_translations` where element_type = 'post_$post_type' group by trid )");
 
-    return get_posts($args);
+    return $posts; 
+
 }
 function wpt_save_course_meta($post_id, $post) {
 	global $wpdb;

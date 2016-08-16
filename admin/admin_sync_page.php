@@ -32,6 +32,8 @@ add_action("wp_ajax_adept_sync" , "adept_sync_ajax");
 
 function adept_sync_ajax() {
 	
+	set_time_limit(150); //increase max execution time
+
 	$step = $_GET["step"];
 	echo $step." - ";
 	$adept = new WP_Lib();
@@ -63,8 +65,8 @@ function adept_sync_ajax() {
 		case "import_course":
 			$url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
         	//echo $url; exit;
-        	$result = $adept->import_course($url);
-        	echo 'Course imported successfully';
+        	echo $result = $adept->import_course($url);
+        	//echo 'Course imported successfully';
 		break;		
 
 		case "unpublish_courses":
