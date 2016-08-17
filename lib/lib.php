@@ -1,7 +1,7 @@
 <?php
-/*
+
 error_reporting(E_ALL); 
-ini_set('display_errors', 1);*/
+ini_set('display_errors', 1);
  include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
 
 Class WP_Lib {
@@ -148,7 +148,7 @@ Class WP_Lib {
         
 
         if(isset($_GET["show_data"])) {
-            echo $url; 
+
             foreach($all_courses_list->data as &$course) {
                 $course->description="nullified";
                 foreach($course->translation as &$locale) {
@@ -192,8 +192,6 @@ Class WP_Lib {
                         "post_type" => 'courses',
                         'guid' => ''
                     );
-
-                    
 
                     
                     $new_post_id = array();
@@ -313,6 +311,10 @@ Class WP_Lib {
         update_post_meta($post_id, '_image_url', $data->image_url);
         update_post_meta($post_id, '_course_url', $data->course_url);
         update_post_meta($post_id, '_adept_api_id', $data->id);
+
+
+        update_post_meta( $post_id, '_group_locations', $this->stringify($data->group_locations) );
+        update_post_meta($post_id, '_group_level', $data->level);
         
         // Insert category id in courses
         $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE '" . $data->course_category_id . "_%'");
@@ -878,6 +880,32 @@ Class WP_Lib {
 
             return $value;
         }
+    }
+
+    function stringify($data) {
+            
+        if(empty($data)) return;
+
+        $arr = $data;
+        if(is_string($data)) {
+
+            if( strpos($arr, ',' ) === false ) {
+                $arr = array($data);
+            }
+            else {
+                $arr = explode( ",", $data );
+            }
+
+        }
+
+        $return = "";
+
+        foreach($arr as $a) {
+            $a = trim($a);
+            $return.= "@@$a";            
+        }
+
+        return $return;
     }
 
 }
