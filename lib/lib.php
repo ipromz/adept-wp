@@ -83,7 +83,10 @@ Class WP_Lib {
 		$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
 		$plugin2 = 'wpml-translation-management/plugin.php';
         $temp = $this->getdata($url);
-        //pre($temp); exit;
+        if(isset($_GET["show_data"])) {
+            pre($temp); exit;
+        }
+
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
         $taxonomy = 'genre';
@@ -91,7 +94,7 @@ Class WP_Lib {
             foreach ($temp->data as $_temp1) {
                 $name = $_temp1->name;
                 $description = $_temp1->name;
-                $slug = $_temp1->id . '_' . sanitize_title($name);
+                $slug = "cat-".$_temp1->id . '-' . sanitize_title($name);
                 $_POST['icl_tax_' . $taxonomy . '_language'] = $language_code = $site_default_language;
                 $catdata = get_term_by('slug', $slug, 'genre');
 
@@ -267,6 +270,7 @@ Class WP_Lib {
         
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
+        //pre($site_default_language);
 
         if(count($data->groups)>0){
             $group_ids = array();
@@ -317,12 +321,20 @@ Class WP_Lib {
         update_post_meta($post_id, '_group_level', $data->level);
         
         // Insert category id in courses
-        $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE '" . $data->course_category_id . "_%'");
+        $previous_slug = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");
 
-        $wpdb->insert($wpdb->prefix . "term_relationships", array(
-            "object_id" => $post_id,
-            "term_taxonomy_id" => $check_term_id_slug[0]->term_id
-        ));
+        echo "<b>{$data->course_title}</b><br>";
+        echo "<br> SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat_" . $data->course_category_id . "_%' <br>$previous_slug<br><br>";
+
+
+
+        if(!empty($previous_slug)) {
+
+            $wpdb->insert($wpdb->prefix . "term_relationships", array(
+                "object_id" => $post_id,
+                "term_taxonomy_id" => $previous_slug
+            ));
+        }
 
     }
 
@@ -868,6 +880,8 @@ Class WP_Lib {
     function get_languages() {
 
         if ( false === ( $value = get_transient( 'adept_languages' ) ) ) {
+        //if ( true ) {
+
             $adept_access_token_value = get_option('adept_access_token');
             $adept_api_url_value = get_option('adept_api_url');
             $adept_account_id_value = get_option('adept_account_id');

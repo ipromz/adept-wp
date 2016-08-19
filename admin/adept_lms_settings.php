@@ -44,7 +44,7 @@ if (isset($_POST['save_code'])) {
     $data = "email=" . $email . "&password=" . $password;
 
     $temp = $adept->postdata($curl, $data);
-
+    //pre($temp); exit;
     $access_token = $temp->access_token;
     $language = $temp->language;
     $date = date('Y-m-d h:i:s', time());
