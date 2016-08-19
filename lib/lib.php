@@ -1,7 +1,7 @@
 <?php
-
+/*
 error_reporting(E_ALL); 
-ini_set('display_errors', 1);
+ini_set('display_errors', 1);*/
  include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
 
 Class WP_Lib {
@@ -322,11 +322,6 @@ Class WP_Lib {
         
         // Insert category id in courses
         $previous_slug = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");
-
-        echo "<b>{$data->course_title}</b><br>";
-        echo "<br> SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat_" . $data->course_category_id . "_%' <br>$previous_slug<br><br>";
-
-
 
         if(!empty($previous_slug)) {
 
