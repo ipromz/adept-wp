@@ -548,7 +548,9 @@ Class WP_Lib {
         $adept_author_value = get_option('adept_author');
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
-        //pre($all_courses_list); exit;
+        if(isset($_GET["show_data"])) {
+            pre($all_courses_list); exit;
+        }
         if (!empty($all_courses_list->data)) {
 
             foreach ($all_courses_list->data as $k => $v) {
@@ -635,6 +637,7 @@ Class WP_Lib {
                                     }
                                     update_post_meta($post_id, '_group_common_id',  $v->id);
                                     update_post_meta($post_id, '_adept_api_id',  $v->id);
+                                    update_post_meta($post_id, '_group_locations',  $v->location);
                                 }
                                 else {
 
@@ -681,6 +684,7 @@ Class WP_Lib {
                                                             "_status",
                                                             "_subscription_plan_id",
                                                             "_adept_api_id",
+                                                            "_group_locations",
                                                             "_course_ids",);
                                             
                                             wpa_duplicate_meta( $metas , $post_id , $post_id_new);
@@ -801,6 +805,7 @@ Class WP_Lib {
         }
         update_post_meta($post_id, '_group_common_id',  $group->id);
         update_post_meta($post_id, '_adept_api_id',  $group->id);
+        update_post_meta($post_id, '_group_locations',  $group->location);
     }
 
 
