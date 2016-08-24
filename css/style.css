@@ -16,3 +16,8 @@
   overflow: scroll;	
   padding: 10px;
 }
+
+
+.select2-container {
+    width: 100%;
+}

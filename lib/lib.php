@@ -266,7 +266,7 @@ Class WP_Lib {
         //pre($data); exit;
         global $wpdb;
 
-        $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE '" . $data->course_category_id . "_%'");                              
+        $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");                              
         
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
@@ -921,6 +921,21 @@ Class WP_Lib {
 
         return $return;
     }
+
+    function unstringify($data) {
+        if(!is_string($data)) {
+            return "";
+        }
+
+        $str = explode("@@", $data);    
+
+        $str = implode(",", $str);
+        $str = trim($str , ",");
+
+        return $str;
+
+    }
+
 
 }
 

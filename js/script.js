@@ -16,6 +16,7 @@ var ADEPT_SYNC_COUNTER = 0;
 jQuery(document).ready(function(){
 
 	adept_sync_btn_click();
+	jQuery(".group_select, .instructors_select , .wpaselect2").select2();
 
 });
 

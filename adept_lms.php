@@ -160,7 +160,7 @@ function add_course_metaboxes() {
 
 function wpt_course_fields() {
     global $post, $wpdb;
-
+    $adept = new WP_Lib();
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="coursemeta_noncename" id="coursemeta_noncename" value="' .
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
@@ -197,46 +197,57 @@ function wpt_course_fields() {
 	$all_groups = get_all_of_post_type_2( 'groups' );
 
   	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids', true ) ;
-        //pre($linked_group_ids); exit;
-        if ( 0 == count($all_groups) ) {
-            $choice_block = '<p>No Group found in the system.</p>';
-        } else {
-            $choices = array();
-            foreach ( $all_groups as $group ) {
-                $checked = ( in_array( $group->ID, $linked_group_ids ) ) ? ' checked="checked"' : '';
+    
+    if(empty($linked_group_ids)) {
+        $linked_group_ids = array();
+    }
 
-                $display_name = esc_attr( $group->post_title );
-                $choices[] = <<<HTML
-<label><input type="checkbox" name="group_ids[]" value="{$group->ID}" {$checked}/> {$display_name}</label><br/><br/>
+
+    //pre($linked_group_ids); exit;
+    if ( 0 == count($all_groups) ) {
+        $choice_block = '<p>No Group found in the system.</p>';
+    } else {
+        $html = array();
+        $html[] = "<select name='group_ids[]'  multiple='multiple' class='group_select'>";
+        foreach ( $all_groups as $group ) {
+            $selected = ( in_array( $group->ID, $linked_group_ids ) ) ? ' selected="selected"' : '';
+
+            $display_name = esc_attr( $group->post_title );
+            $html[] = <<<HTML
+                <option  value="{$group->ID}" {$selected}> {$display_name}</option>
 HTML;
 
-            }
-            $choice_block = implode("\r\n", $choices);
         }
+        $html[] = '</select>';
+        $choice_block = implode("\r\n", $html);
+    }
 
-        echo $choice_block."</br></br>";
+    echo $choice_block."</br></br>";
 	// Instructor select box	
 	echo '<b>Course Instructors  :</b><br/><br/>';	
 	$all_instructors = $wpdb->get_results(" select * from {$wpdb->prefix}posts where post_type='instructors' and post_status in ('publish', 'draft') ");
-
   	$linked_instructor_ids = get_post_meta(  $post->ID,'_instructor_ids', true ) ;
-    //pre($linked_instructor_ids); exit;
-        if ( 0 == count($all_instructors) ) {
-            $choice_block = '<p>No Instructor found in the system.</p>';
-        } else {
-            $choices = array();
-			
-            foreach ( $all_instructors as $instructor ) {
-                $checked = ( in_array( $instructor->ID, $linked_instructor_ids ) ) ? ' checked="checked"' : '';
+    if(empty($linked_instructor_ids)) {
+        $linked_instructor_ids = array();
+    }
+    if ( 0 == count($all_instructors) ) {
+        $choice_block = '<p>No Instructor found in the system.</p>';
+    } 
+    else {
+        $choices = array();
+        $choices[] = "<select name='instructor_ids[]' multiple='multiple' class='instructors_select'>";			
+        foreach ( $all_instructors as $instructor ) {
+            $selected = ( in_array( $instructor->ID, $linked_instructor_ids ) ) ? ' selected="selected"' : '';
 
-                $display_name = esc_attr( $instructor->post_title );
-                $choices[] = <<<HTML
-<label><input type="checkbox" name="instructor_ids[]" value="{$instructor->ID}" {$checked}/> {$display_name}</label><br/><br/>
+            $display_name = esc_attr( $instructor->post_title );
+            $choices[] = <<<HTML
+<option value="{$instructor->ID}" {$selected} > {$display_name}</option>
 HTML;
 
-            }
-            $choice_block = implode("\r\n", $choices);
         }
+        $choices[] = "</select>";
+        $choice_block = implode("\r\n", $choices);
+    }
 
         echo $choice_block."</br></br>";
     
@@ -258,9 +269,17 @@ HTML;
     echo '<b>Image Url :</b> <input type="text" name="_image_url" value="' . $image_url . '" class="widefat" /><br/><br/>';
 
 
-	$course_url = get_post_meta($post->ID, '_course_url', true);
+    $course_url = get_post_meta($post->ID, '_course_url', true);
     // Echo out the field
     echo '<b>Course Url :</b> <input type="text" name="_course_url" value="' . $course_url . '" class="widefat"  readonly /><br/><br/>';
+	
+    $location = get_post_meta($post->ID, '_group_locations', true);
+    $location = $adept->unstringify($location);
+
+    echo '<b>Location:</b> <input type="text" name="_group_locations" value="' . $location . '" class="widefat"   /><br/><br/>';
+    
+    $level = get_post_meta($post->ID, '_group_level', true);
+    echo '<b>Level:</b> <input type="text" name="_group_level" value="' . $level . '" class="widefat"   /><br/><br/>';
 
 }
 
@@ -347,10 +366,11 @@ function wpt_save_course_meta($post_id, $post) {
 	);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	$result = curl_exec($ch);
+	//uncomment this line
+    //$result = curl_exec($ch);
 //var_dump($result); die();
 	
-	$resultdata = json_decode($result);
+    //	$resultdata = json_decode($result);
 //var_dump($resultdata); die();
 	
 	// OK, we're authenticated: we need to find and save the data
@@ -362,6 +382,8 @@ function wpt_save_course_meta($post_id, $post) {
     $course_meta['_sku'] = $_POST['_sku'];
     $course_meta['_subscription'] = $_POST['_subscription'];
     $course_meta['_image_url'] = $_POST['_image_url'];
+    $course_meta['_group_locations'] = $adept->stringify($_POST['_group_locations']);
+    $course_meta['_group_level'] = $_POST['_group_level'];
 	$groups = $_POST['group_ids'];
 	$instructors = $_POST['instructor_ids'];
 	
@@ -982,7 +1004,15 @@ HTML;
     $status = get_post_meta($post->ID, '_status', true);
     // Echo out the field
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
-   
+    
+    $location = get_post_meta($post->ID, '_group_locations', true);
+    $adept = new WP_Lib();
+    $location = $adept->unstringify($location);
+    echo '<b>Location:</b> <input type="text" name="_group_locations" value="' . $location . '" class="widefat"   /><br/><br/>';
+    
+    $level = get_post_meta($post->ID, '_group_level', true);
+    echo '<b>Level:</b> <input type="text" name="_group_level" value="' . $level . '" class="widefat"   /><br/><br/>';
+
 }
 
 
@@ -1012,9 +1042,11 @@ function wpt_save_group_meta($post_id, $post) {
     $lessons = $_POST['_lessons'];
     $status = $_POST['_status'];
 
-    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
     include_once MY_PLUGIN_PATH . "lib/lib.php";
     $adept = new WP_Lib();
+
+
+    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
     $adept_api_url_value = get_option('adept_api_url');
 	
 	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_group_id'");
@@ -1044,7 +1076,7 @@ function wpt_save_group_meta($post_id, $post) {
 	);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	$result = curl_exec($ch);
+	//$result = curl_exec($ch);
 	//var_dump($result); die();
 	
 	$resultdata = json_decode($result);
@@ -1074,6 +1106,9 @@ function wpt_save_group_meta($post_id, $post) {
      */
     $group_meta['_lessons'] = $_POST['_lessons'];
     $group_meta['_status'] = $_POST['_status'];
+
+    $group_meta['_group_locations'] = $adept->stringify($_POST['_group_locations']);
+    $group_meta['_group_level'] = $_POST['_group_level'];
 
 	$courses = $_POST['course_ids'];
 		delete_post_meta( $post->ID , '_course_ids');
@@ -1207,8 +1242,11 @@ function wpa_nags() {
 }
 //enqueing styles and scripts
 function wpa_custom_wp_admin_style() {
-      wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
-      wp_enqueue_style("adept" , plugins_url("css/style.css" , __FILE__) );
+    wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
+    
+    wp_enqueue_script( 'select2-js',  plugins_url("js/select2.js" , __FILE__) , array("jquery") );
+    wp_enqueue_style("select2-css" , plugins_url("js/select2.css" , __FILE__) );
+    wp_enqueue_style("adept" , plugins_url("css/style.css" , __FILE__) );
 }
 add_action( 'admin_enqueue_scripts', 'wpa_custom_wp_admin_style' );
 
