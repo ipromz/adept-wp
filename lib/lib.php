@@ -24,14 +24,14 @@ Class WP_Lib {
         
         
         $result = curl_exec($ch);
-		//echo $result; exit;
+        //echo $result; exit;
         $resultdata = json_decode($result);
-		//echo $resultdata; die();
+        //echo $resultdata; die();
 
         return $resultdata;
     }
 
-	function putdata($url, $data) {
+    function putdata($url, $data) {
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -46,14 +46,14 @@ Class WP_Lib {
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         $result = curl_exec($ch);
-		
+        
         $resultdata = json_decode($result);
-		//echo $resultdata; die();
+        //echo $resultdata; die();
 
         return $resultdata;
     }
 
-	
+    
     function getdata($url) {
         
         $ch = curl_init($url);
@@ -72,16 +72,16 @@ Class WP_Lib {
         $result = curl_exec($ch);
         $resultdata = json_decode($result);
         //pre($resultdata); exit;
-		//print_r($resultdata);
+        //print_r($resultdata);
         return $resultdata;
     }
 
     function import_category($url) {
-		//echo $url; die();
+        //echo $url; die();
         global $wpdb, $sitepress;
 
-		$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-		$plugin2 = 'wpml-translation-management/plugin.php';
+        $plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+        $plugin2 = 'wpml-translation-management/plugin.php';
         $temp = $this->getdata($url);
         if(isset($_GET["show_data"])) {
             pre($temp); exit;
@@ -128,9 +128,9 @@ Class WP_Lib {
                         $wpdb->update($wpdb->prefix . 'icl_translations', $updates, $where);
                     }
                 }
-				
-				$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				$plugin2 = 'wpml-translation-management/plugin.php';
+                
+                $plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+                $plugin2 = 'wpml-translation-management/plugin.php';
 
             }
             return $fi_category->errors['term_exists'][0];
@@ -142,7 +142,7 @@ Class WP_Lib {
         return "Update course to live site";
     }
 
-    function import_course($url) {		
+    function import_course($url) {      
         global $wpdb, $sitepress;
         $wpdb->hide_errors();
         include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
@@ -266,8 +266,11 @@ Class WP_Lib {
         //pre($data); exit;
         global $wpdb;
 
-        $check_term_id_slug = $wpdb->get_results("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");                              
-        
+        $term_id = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");                              
+        if(!empty($term_id)) {
+            wp_set_object_terms($post_id, (int)$term_id, 'genre' , false); //false to append
+        }
+
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
         //pre($site_default_language);
@@ -294,7 +297,6 @@ Class WP_Lib {
             update_post_meta($post_id , '_instructor_ids', $instructor_ids);
         }
 
-        wp_set_post_terms($post_id, $check_term_id_slug[0]->term_id, 'genre');
         update_post_meta($post_id, '_post_id', $site_default_language . "_" . $data->id);
         update_post_meta($post_id, '_tags', $data->tags);
         update_post_meta($post_id, '_is_featured', $data->is_featured);
@@ -321,6 +323,7 @@ Class WP_Lib {
         update_post_meta($post_id, '_group_level', $data->level);
         
         // Insert category id in courses
+        /*
         $previous_slug = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");
 
         if(!empty($previous_slug)) {
@@ -329,7 +332,7 @@ Class WP_Lib {
                 "object_id" => $post_id,
                 "term_taxonomy_id" => $previous_slug
             ));
-        }
+        }*/
 
     }
 
@@ -563,11 +566,11 @@ Class WP_Lib {
 
 
                     
-					/*$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-				    $plugin2 = 'wpml-translation-management/plugin.php';*/
+                    /*$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
+                    $plugin2 = 'wpml-translation-management/plugin.php';*/
 
                     if(1){
-    				//if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
+                    //if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
                         if (!empty($v->translation)) {
                             
                             foreach ($v->translation as $a => $b) {
@@ -810,12 +813,12 @@ Class WP_Lib {
 
 
     function import_instructors($url) {
-		
+        
         $temp = $this->getdata($url);
         // Delete posts from post type Intructors
         $args = array(
             'numberposts' => 50,
-            'post_type' => 'instructors'
+            'post_type' => 'dt_team'
         );
         $intructors_posts = get_posts($args);
 
@@ -829,9 +832,9 @@ Class WP_Lib {
         $adept_author_value = get_option('adept_author');
         foreach ($temp->data as $_temp1) {
             // Gather post data.
-			if($_temp1->bio == ''){
-				$_temp1->bio = ' ';
-			}
+            if($_temp1->bio == ''){
+                $_temp1->bio = ' ';
+            }
             $my_post = array(
                 "post_author" => $adept_author_value,
                 //"post_date" => $_temp1->created_at,
@@ -846,32 +849,32 @@ Class WP_Lib {
                 //"post_modified" => $_temp1->updated_at,
                 //"post_modified_gmt" => $_temp1->updated_at,
                 "menu_order" => '0',
-                "post_type" => 'instructors',
+                "post_type" => 'dt_team',
                 'guid' => ''
             );
             // Insert the post into the database.
             $post_id = wp_insert_post($my_post);
-			if(count($_temp1->courses)>0) {
-			    $group_ids = array(); 
-				foreach($_temp1->courses as $key => $value){
-					$groupid = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
+            if(count($_temp1->courses)>0) {
+                $group_ids = array(); 
+                foreach($_temp1->courses as $key => $value){
+                    $groupid = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_course_ids' AND  meta_value ='" . $value->course_id."' LIMIT 0,1 ");
                     if($groupid != "") {
                         $group_ids[] = $groupid;
-                    }					
+                    }                   
                 }
-					update_post_meta( $post_id , '_course_ids', $group_ids );
-			}
+                    update_post_meta( $post_id , '_course_ids', $group_ids );
+            }
 
             update_post_meta($post_id, '_instructor_id', $_temp1->id);
             update_post_meta($post_id, '_adept_api_id', $_temp1->id);
-            update_post_meta($post_id, '_email', $_temp1->email);
+            update_post_meta($post_id, '_dt_teammate_options_mail', $_temp1->email);
             update_post_meta($post_id, '_avatar', $_temp1->avatar);
             //add_post_meta($post_id, '_bio', $_temp1->bio);
         }
 
         //$this->unpublished_posts($temp->data , "instructors");
         if(count($temp->data) == 0 ) {
-            $this->unpublish_all_posts("instructors");
+            $this->unpublish_all_posts("dt_team");
         }
 
         return "Instructors imported successfully";
@@ -947,7 +950,7 @@ function wpadept_clear() {
     global $wpdb;
     if(isset($_GET["adept_clear"])) {
         
-        $posttypes = "('courses' , 'groups' , 'meetings' , 'instructors')";
+        $posttypes = "('courses' , 'groups' , 'meetings' , 'instructors' , 'dt_team')";
         $posttypes_2 = "('post_courses' , 'post_groups' , 'post_meetings' , 'post_instructors')";
 
         
