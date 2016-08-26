@@ -1,7 +1,7 @@
 <?php 
 
-error_reporting(E_ALL); 
-ini_set('display_errors', 1);
+/*error_reporting(E_ALL); 
+ini_set('display_errors', 1);*/
 
 add_action("wp_ajax_adept_get_cats" , "adept_get_cats_ajax");
 function adept_get_cats_ajax() {
