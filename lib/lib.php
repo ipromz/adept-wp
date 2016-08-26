@@ -171,11 +171,16 @@ Class WP_Lib {
         if (!empty($all_courses_list->data)) {
            
             foreach ($all_courses_list->data as $k => $v) {
+                
+                if($this->should_skip_category($v->course_category_id)) {
+                   continue; 
+                }
+                
                 $adept_author_value = get_option('adept_author');
-                //echo "<br><b>{$v->course_title}</b><br>";
                 if ($v->teaser == '') {
                     $v->teaser = $v->description;
                 }
+
 
                 $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='".$v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
 
@@ -235,7 +240,6 @@ Class WP_Lib {
 
                     }
 
-                    //echo "sdfsd";exit;
 
                     $this->course_insert_extra_information($post_id , $v );
                     foreach($new_post_id as $id) {
@@ -257,9 +261,29 @@ Class WP_Lib {
         else {
             $this->unpublish_all_posts("courses");
         }
-        pre($all_courses_list); 
+        //pre($all_courses_list); 
         return "No Courses for import";
     
+    }
+
+    function should_skip_category($category_id) {
+        $adept_filter_enabled = get_option("adept_filter_enabled");
+        $adept_cat_filter = get_option("adept_cat_filter");
+        
+        if($adept_filter_enabled != "1") {
+            echo "no need of any filtering";
+            return false;
+        }
+
+
+        if(in_array($category_id, $adept_cat_filter)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+
+
     }
 
     function course_insert_extra_information($post_id , $data ) {
@@ -557,6 +581,7 @@ Class WP_Lib {
         if (!empty($all_courses_list->data)) {
 
             foreach ($all_courses_list->data as $k => $v) {
+
 
                 $adept_author_value = get_option('adept_author');
                 $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta" . " where meta_key='_group_id' AND meta_value ='" . $site_default_language . "_" . $v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");

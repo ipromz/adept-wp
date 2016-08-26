@@ -37,6 +37,16 @@ if (isset($_POST['save_code'])) {
         } else {
             $cron = $_POST['cron'];
         }
+
+        $adept_filter_enabled = 0;
+        $adept_cat_filter = array();
+        if(isset($_POST["adept_filter_enabled"])) {
+            $adept_filter_enabled = $_POST["adept_filter_enabled"];
+        }
+        if(isset($_POST["adept_cat_filter"])) {
+            $adept_cat_filter = $_POST["adept_cat_filter"];
+        }
+
     }
 	$url = "https://".$account_id.'.adeptlms.com/api/v1/';
         
@@ -63,8 +73,11 @@ if (isset($_POST['save_code'])) {
             add_option('adept_language', $language, '', 'yes');
             add_option('adept_author', $author, '', 'yes');
             add_option('adept_cron', $cron, '', 'yes');
+            
+            update_option('adept_filter_enabled', $adept_filter_enabled);
+            update_option('adept_cat_filter', $adept_cat_filter);
 
-			register_activation_hook(__FILE__, 'my_activation');			// added for set cron start /*				function my_activation() {					wp_schedule_event(time(), 'hourly', 'my_hourly_event');				}				add_action('my_hourly_event', 'do_this_hourly');				function do_this_hourly() {					// do something every hour				}				register_deactivation_hook(__FILE__, 'my_deactivation');				function my_deactivation() {					wp_clear_scheduled_hook('my_hourly_event');				}*/// added for set cron end
+			register_activation_hook(__FILE__, 'my_activation');			
             $success = "Api authenticated succeeded";
         } else {
             wp_cache_delete('alloptions', 'options');
@@ -76,6 +89,10 @@ if (isset($_POST['save_code'])) {
             update_option('adept_language', $language);
             update_option('adept_author', $author);
             update_option('adept_cron', $cron);
+
+            update_option('adept_filter_enabled', $adept_filter_enabled);
+            update_option('adept_cat_filter', $adept_cat_filter);
+
             $success = "User details updated";
         }
     } else {
@@ -99,6 +116,12 @@ if ($cron == '1') {
 if ($cron == '0') {
     $unselect = 'checked="checked"';
 }
+
+$adept_filter_enabled = get_option("adept_filter_enabled");
+$adept_cat_filter = get_option("adept_cat_filter" , array());
+
+echo "<script> var adept_cat_filter =  ".json_encode($adept_cat_filter)." </script>";
+
 ?>
 <title>Adept LMS Plugin Settings</title>
 <h1>Adept LMS Plugin Settings</h1>
@@ -142,6 +165,24 @@ if ($cron == '0') {
                     <th><?php esc_html_e('Set Author') ?> </th>
                     <td>
                         <?php wp_dropdown_users(array('name' => 'author', 'selected' => $author)); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Filter Categories'); ?></th>
+                    <td>
+
+                        <input type="checkbox" name="adept_filter_enabled" id="filter_enabled" value="1" <?php checked($adept_filter_enabled , "1"); ?>>
+                    </td>
+                </tr>
+                <tr id="category_filters" class="hidden">
+                    <th>Choose Categories</th>
+                    <td>
+                        <div class="adept_loader">
+                            <img src="http://localhost/lingu//wp-admin/images/spinner-2x.gif">
+                        </div>
+                        <div class="adept_cat_filter_select" class="hidden">
+                            
+                        </div>
                     </td>
                 </tr>
                 <tr>
