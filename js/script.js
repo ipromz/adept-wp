@@ -56,8 +56,9 @@ function adept_sync_next_step() {
 			as_log("sync complete");		
 		}
 	}).error(function() {
+		as_log("error occured");
 		//dont increment, let the same step run again 
-		adept_sync_next_step();
+		//adept_sync_next_step();
 	});
 
 

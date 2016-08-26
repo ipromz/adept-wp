@@ -611,7 +611,7 @@ function wpt_save_meeting_meta($post_id, $post) {
 	);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	$result = curl_exec($ch);
+	//$result = curl_exec($ch);
 //var_dump($result); die();
 	
 	$resultdata = json_decode($result);
@@ -716,7 +716,15 @@ add_shortcode('meetings', 'wp_meetings_shortcode');
 add_action('init', 'create_instructors');
 
 function create_instructors() {
-    register_post_type('instructors', array(
+   
+    //get list of all the post_types
+    $post_types = get_post_types();
+    //if dt_team is already defined then return without doing anything
+    if(in_array("dt_team", $post_types)) {
+        return;
+    }
+
+    register_post_type('dt_team', array(
         'labels' => array(
             'name' => __('Instructors'),
             'singular_name' => __('Instructor'),
@@ -746,7 +754,7 @@ add_action('add_meta_boxes', 'add_instructor_metaboxes');
 // Add the Course Meta Boxes
 
 function add_instructor_metaboxes() {
-    add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'instructors', 'normal', 'high');
+    add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'dt_team', 'normal', 'high');
 }
 
 function wpt_instructor_fields() {
@@ -757,41 +765,43 @@ function wpt_instructor_fields() {
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
 
     // Get the email data if its already been entered
-    $email = get_post_meta($post->ID, '_email', true);
+    //$email = get_post_meta($post->ID, '_dt_teammate_options_mail', true);
     // Echo out the field
-    echo '<b>Email :</b> <input type="text" name="_email" class="widefat" value="' . $email . '" /><br/><br/>';
+    //echo '<b>Email :</b> <input type="text" name="_dt_teammate_options_mail" class="widefat" value="' . $email . '" /><br/><br/>';
 
-	// Get the group_id data if its already been entered
-	$instructor_id = get_post_meta($post->ID, '_instructor_id', true);
+    // Get the group_id data if its already been entered
+    $instructor_id = get_post_meta($post->ID, '_instructor_id', true);
     // Echo out the field
     echo '<input type="hidden" name="_instructor_id" value="' . $instructor_id . '" class="widefat" /><br/><br/>';
 
-	
+    
     // Get the avatar data if its already been entered
     $avatar = get_post_meta($post->ID, '_avatar', true);
     // Echo out the field
     echo '<b>Avatar : </b><input type="text" name="_avatar" value="' . $avatar . '" class="widefat" /><br/><br/>';
 
-	
-	echo '<b>Instructor Courses :</b><br/><br/>';	
-	$all_courses = get_all_of_post_type( 'courses' );
+    
+    echo '<b>Instructor Courses :</b><br/><br/>';   
+    $all_courses = get_all_of_post_type( 'courses' );
 
     $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' ) ;
-	
+    
 
         if ( 0 == count($all_courses) ) {
             $choice_block = '<p>No Course found in the system.</p>';
         } else {
             $choices = array();
+            $choices[] = "<select class='wpaselect2' name='course_ids[]' multiple>";
             foreach ( $all_courses as $course ) {
-                $checked = ( in_array( $course->ID, $linked_group_ids ) ) ? ' checked="checked"' : '';
+                $selected = ( in_array( $course->ID, $linked_group_ids ) ) ? ' selected="selected"' : '';
 
                 $display_name = esc_attr( $course->post_title );
                 $choices[] = <<<HTML
-<label><input type="checkbox" name="course_ids[]" value="{$course->ID}" {$checked}/> {$display_name}</label><br/>
+<option  value="{$course->ID}" {$selected} > {$display_name}</option>
 HTML;
 
             }
+            $choices[] = "</select>";
             $choice_block = implode("\r\n", $choices);
         }
 
@@ -807,7 +817,7 @@ HTML;
 }
 
 function wpt_save_instructor_meta($post_id, $post) {
-	global $wpdb;
+    global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if(!isset($_POST['instructormeta_noncename'])) return;
@@ -827,47 +837,47 @@ function wpt_save_instructor_meta($post_id, $post) {
     $full_name = $_POST['_full_name'];
     $avatar = $_POST['_avatar'];
     $bio = $_POST['_bio'];
-	
+    
     define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
     include_once MY_PLUGIN_PATH . "lib/lib.php";
     $adept = new WP_Lib();
     $adept_api_url_value = get_option('adept_api_url');
-	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");		$oripostidStr = $get_existing_post_id[0]->meta_value;
-	$oripostidArray = explode('_',$oripostidStr);
-	$originalPostId = $oripostidArray[1];
-	//echo $originalPostId; die;
+    $get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");        $oripostidStr = $get_existing_post_id[0]->meta_value;
+    $oripostidArray = explode('_',$oripostidStr);
+    $originalPostId = $oripostidArray[1];
+    //echo $originalPostId; die;
     $curl = $adept_api_url_value . 'update_instructor/'.$originalPostId;
-	$data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&instructor[email]=" . $email
+    $data = "id=" . $postid . "&access_token=" . $adept_access_token_value . "&instructor[email]=" . $email
             . "&instructor[full_name]=" . $full_name . "&instructor[avatar]=" . $avatar
             . "&instructor[bio]=" . $bio;
 
-	$ch = curl_init($curl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		'Content-Type: application/x-www-form-urlencoded',
-		'Content-Length: ' . strlen($data))
-	);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	$result = curl_exec($ch);
-	//var_dump($result); die();
-	
-	$resultdata = json_decode($result);
-	//var_dump($resultdata); die();
-	
-	// OK, we're authenticated: we need to find and save the data
+    //$ch = curl_init($curl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/x-www-form-urlencoded',
+        'Content-Length: ' . strlen($data))
+    );
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    //$result = curl_exec($ch);
+    //var_dump($result); die();
+    
+    $resultdata = json_decode($result);
+    //var_dump($resultdata); die();
+    
+    // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
     $instructor_meta['_instructor_id'] = $_POST['_instructor_id'];
-    $instructor_meta['_email'] = $_POST['_email'];
+    $instructor_meta['_dt_teammate_options_mail'] = $_POST['_dt_teammate_options_mail'];
 
     $instructor_meta['_avatar'] = $_POST['_avatar'];
   
 
     // Add values of $course_meta as custom fields
-	
+    
     foreach ($instructor_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
@@ -881,6 +891,7 @@ function wpt_save_instructor_meta($post_id, $post) {
             delete_post_meta($post->ID, $key); // Delete if blank
     }
 }
+
 
 add_action('save_post', 'wpt_save_instructor_meta', 1, 2); // save the custom fields
 

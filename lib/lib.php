@@ -950,18 +950,25 @@ function wpadept_clear() {
     global $wpdb;
     if(isset($_GET["adept_clear"])) {
         
-        $posttypes = "('courses' , 'groups' , 'meetings' , 'instructors' , 'dt_team')";
-        $posttypes_2 = "('post_courses' , 'post_groups' , 'post_meetings' , 'post_instructors')";
+        if(is_user_logged_in()) {
 
-        
+            if(current_user_can("manage_options")) {
 
-        $wpdb->query("delete from {$wpdb->prefix}postmeta where post_id in (select ID from wp_posts where post_type in $posttypes )");
-        $wpdb->query("delete from {$wpdb->prefix}posts where post_type in $posttypes");
-        $wpdb->query("delete from {$wpdb->prefix}icl_translations where element_type in $posttypes_2 ");
-        
-        wp_die("Cleaned.");
+                $posttypes = "('courses' , 'groups' , 'meetings' , 'instructors' , 'dt_team')";
+                $posttypes_2 = "('post_courses' , 'post_groups' , 'post_meetings' , 'post_instructors')";
+                
 
+                $wpdb->query("delete from {$wpdb->prefix}postmeta where post_id in (select ID from wp_posts where post_type in $posttypes )");
+                $wpdb->query("delete from {$wpdb->prefix}posts where post_type in $posttypes");
+                $wpdb->query("delete from {$wpdb->prefix}icl_translations where element_type in $posttypes_2 ");
+                
+                wp_die("Cleaned.");
+            }
+        }
+
+        wp_die("Not authorized.");
     }
 }
+
 
 ?>
