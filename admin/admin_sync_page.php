@@ -114,7 +114,10 @@ function adept_sync_ajax() {
 		break;		
 
 		case "import_instructors":
-	        $url = $adept_api_url_value . 'instructors?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+
+	        //$url = $adept_api_url_value . 'instructors?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+	        $url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+	        //echo $url; exit;
 	        $result = $adept->import_instructors($url);
 	        $success = $result;
 	        echo 'instructor updated successfully';

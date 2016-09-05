@@ -782,10 +782,11 @@ function wpt_instructor_fields() {
 
     
     echo '<b>Instructor Courses :</b><br/><br/>';   
-    $all_courses = get_all_of_post_type( 'courses' );
+    $all_courses = get_all_of_post_type_2( 'courses' );
 
-    $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' ) ;
-    
+    $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' , true ) ;
+    //pre($linked_group_ids);
+    //pre($all_courses);
 
         if ( 0 == count($all_courses) ) {
             $choice_block = '<p>No Course found in the system.</p>';
