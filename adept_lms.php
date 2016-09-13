@@ -33,13 +33,15 @@ class WP_Adept_LMS {
 
     function wpa_add_menu() {
 
-        add_wmenu_page('Adept LMS', 'Adept LMS', 'manage_options', 'adept_lms', array(
+        /*add_wmenu_page('Adept LMS', 'Adept LMS', 'manage_options', 'adept_lms', array(
             __CLASS__,
             'wpa_page_file_path'
-                ), "", '2.2.9');
-
-        add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array( $this, 'wpa_page_file_path1')
-        );        
+                ), "", '2.2.9');*/
+        $icon = plugins_url( "images/logo-icon-2.png", __FILE__ );
+        add_menu_page( 'Adept LMS','Adept LMS', 'manage_options', 'adept_lms', array( $this, 'wpa_page_file_path1') , $icon , 2);
+        
+        /*add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array( $this, 'wpa_page_file_path1')
+        );*/        
 
     }
 

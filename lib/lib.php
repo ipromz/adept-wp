@@ -483,7 +483,9 @@ Class WP_Lib {
         global $wpdb;
         $adept_author_value = get_option('adept_author');
         $all_meeting_list = $this->getdata($url);
-
+        if(isset($_GET["show_data"])) {
+            pre($all_meeting_list); exit;
+        }
 
         $meetings_flat_data = $this->flatten_meetings_array($all_meeting_list->data);
             
@@ -541,8 +543,18 @@ Class WP_Lib {
             
             update_post_meta($post_id, '_meeting_id', $meeting->id);
             update_post_meta($post_id, '_adept_api_id', $meeting->id);
-            update_post_meta($post_id, '_start_time', $meeting->start_time);
+            
+            $gmt_offset = get_option('gmt_offset');
+            $starttime_ts = strtotime($meeting->start_time);
+            $starttime_ts_local = $starttime_ts + ($gmt_offset*3600);
+            $date = date("d/m/Y" , $starttime_ts_local );
+            //echo $date; exit;
+            update_post_meta($post_id, '_start_time', $starttime_ts_local);
+            
+            update_post_meta($post_id, '_start_date', $date);
             update_post_meta($post_id, '_duration', $meeting->duration);
+            update_post_meta($post_id, '_instructor', $meeting->instructor_id);
+            update_post_meta($post_id, '_category', $meeting->category);
             if(isset($meeting->end_time)) {
                 update_post_meta($post_id, '_end_time', $meeting->end_time);
             }
@@ -554,9 +566,6 @@ Class WP_Lib {
                 update_post_meta($post_id, '_check_address', $meeting->check_address);
             }
             update_post_meta($post_id, '_group_id', $meeting->group_id);
-            if(isset($meeting->user_id)){
-                update_post_meta($post_id, '_user_id', $meeting->user_id);
-            }    
             update_post_meta($post_id, '_kind', $meeting->kind);
             update_post_meta($post_id, '_video_conference_account_id', $meeting->video_conference_account_id);
             update_post_meta($post_id, '_video_conference_url', $meeting->video_conference_url);
@@ -839,8 +848,9 @@ Class WP_Lib {
     function import_instructors($url) {
         
         $temp = $this->getdata($url);
-        //pre($temp); exit;
-
+        if(isset($_GET["show_data"])) {
+            pre($temp); exit;
+        }
         global $wpdb;
         $adept_author_value = get_option('adept_author');
         foreach ($temp->data as $_temp1) {
@@ -896,6 +906,7 @@ Class WP_Lib {
             update_post_meta($post_id, '_instructor_id', $_temp1->id);
             update_post_meta($post_id, '_adept_api_id', $_temp1->id);
             update_post_meta($post_id, '_dt_teammate_options_mail', $_temp1->email);
+            update_post_meta($post_id, '_dt_teammate_options_position', $_temp1->position);
             update_post_meta($post_id, '_avatar', $_temp1->avatar);
             //add_post_meta($post_id, '_bio', $_temp1->bio);
         }

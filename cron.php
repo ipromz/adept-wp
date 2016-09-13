@@ -3,6 +3,8 @@
 
 require_once "../../../wp-load.php";
 
+set_time_limit(300); 
+
 global $wpdb; 
 
 $post_table = $wpdb->prefix . "posts";
