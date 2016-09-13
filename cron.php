@@ -33,12 +33,6 @@ $result = $adept->import_course($url);
 echo 'Course imported successfully <br><br>';
 
 
-//importing meetings
-$url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
-$result = $adept->import_meeting($url);
-$success = $result;
-echo 'class meeting imported successfully <br><br>';
-
 
 //importing groups
 $url = $adept_api_url_value . 'groups?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
@@ -47,7 +41,14 @@ $success = $result;
 echo 'class group imported successfully <br><br>';
 
 //importing instructors
-$url = $adept_api_url_value . 'instructors?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+$url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 $result = $adept->import_instructors($url);
 $success = $result;
 echo 'instructor updated successfully <br><br>';
+
+//importing meetings
+$url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+$result = $adept->import_meeting($url);
+$success = $result;
+echo 'class meeting imported successfully <br><br>';
+
