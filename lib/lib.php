@@ -540,7 +540,7 @@ Class WP_Lib {
             }               
                     
             $post_id = wp_insert_post($my_post);
-            
+            //pre($meeting); exit;
             update_post_meta($post_id, '_meeting_id', $meeting->id);
             update_post_meta($post_id, '_adept_api_id', $meeting->id);
             
@@ -565,16 +565,24 @@ Class WP_Lib {
             if(isset($meeting->check_address)) {
                 update_post_meta($post_id, '_check_address', $meeting->check_address);
             }
-            update_post_meta($post_id, '_group_id', $meeting->group_id);
+            $group_ids = get_wp_id($meeting->group_id , "groups");
+            if($group_ids  && count($group_ids)) {
+                $group_ids_str = $this->stringify($group_ids);
+                //pre($group_ids_str);// exit;
+                //echo $post_id." ".$group_ids_str."<br>";
+                update_post_meta($post_id, '_group_id', $group_ids_str);
+            }
             update_post_meta($post_id, '_kind', $meeting->kind);
             update_post_meta($post_id, '_video_conference_account_id', $meeting->video_conference_account_id);
             update_post_meta($post_id, '_video_conference_url', $meeting->video_conference_url);
             update_post_meta($post_id, '_video_conference_uid', $meeting->video_conference_uid);
+            update_post_meta($post_id, '_hour_length', $meeting->hour_length);
                  
         }
 
        
     }
+
 
     function import_groups($url) {
         global $wpdb,$sitepress;

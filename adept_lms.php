@@ -227,7 +227,7 @@ HTML;
     echo $choice_block."</br></br>";
 	// Instructor select box	
 	echo '<b>Course Instructors  :</b><br/><br/>';	
-	$all_instructors = $wpdb->get_results(" select * from {$wpdb->prefix}posts where post_type='instructors' and post_status in ('publish', 'draft') ");
+	$all_instructors = $wpdb->get_results(" select * from {$wpdb->prefix}posts where post_type='dt_team' and post_status in ('publish', 'draft') ");
   	$linked_instructor_ids = get_post_meta(  $post->ID,'_instructor_ids', true ) ;
     if(empty($linked_instructor_ids)) {
         $linked_instructor_ids = array();
@@ -493,8 +493,9 @@ function add_meeting_metaboxes() {
 }
 
 function wpt_meeting_fields() {
-    global $post;
+    global $post, $wpdb;
 
+    $wpdb->show_errors();
 	
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' .
@@ -507,9 +508,9 @@ function wpt_meeting_fields() {
 
 	
 	// Get the date data if its already been entered
-    $date = get_post_meta($post->ID, '_date', true);
+    //$date = get_post_meta($post->ID, '_date', true);
     // Echo out the field
-    echo '<b>Date :</b> <input type="text" name="_date" value="' . $date . '" class="widefat" /><br/><br/>';
+    //echo '<b>Date :</b> <input type="text" name="_date" value="' . $date . '" class="widefat" /><br/><br/>';
 
     // Get the start_time data if its already been entered
     $start_time = get_post_meta($post->ID, '_start_time', true);
@@ -518,9 +519,34 @@ function wpt_meeting_fields() {
     echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time . '" class="widefat" /><br/><br/>';
 
     // Get the start_time data if its already been entered
-    $end_time = get_post_meta($post->ID, '_end_time', true);
+    $duration = get_post_meta($post->ID, '_duration', true);
     // Echo out the field
-    echo '<b>End Time : </b><input type="text" name="_end_time" value="' . $end_time . '" class="widefat" /><br/><br/>';
+    echo '<b>Duration : </b><input type="text" name="_duration" value="' . $duration . '" class="widefat" /><br/><br/>';
+
+    $hour_length = get_post_meta($post->ID, '_hour_length', true);
+    echo '<b>Hour Length : </b><input type="text" name="_hour_length" value="' . $hour_length . '" class="widefat" /><br/><br/>';
+
+    $linked_instructor_id = get_post_meta($post->ID, '_instructor', true);
+    $all_instructors = $wpdb->get_results("select p.* , pm.meta_value as instructor_id from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta pm where pm.post_id=p.ID and pm.meta_key='_adept_api_id' and post_type='dt_team' and post_status in ('publish', 'draft') ");
+    if(empty($linked_instructor_ids)) {
+        $linked_instructor_ids = 0;
+    }
+    $html_option = ""; 
+    foreach($all_instructors as $ins ) {
+        $selected = "";
+        if( $linked_instructor_id == $ins->instructor_id ) {
+            $selected = " selected ";
+        }
+        $html_option .= "<option $selected value='{$ins->ID}'> {$ins->post_title}</option>";
+    }
+
+
+
+    echo '<b>Instructor: </b>
+            <select name="_instructor"  class="" >
+                '.$html_option.'
+            </select>
+    <br/><br/>';
 
     // Get the status data if its already been entered
     $status = get_post_meta($post->ID, '_status', true);
@@ -536,13 +562,12 @@ function wpt_meeting_fields() {
     // Get the address data if its already been entered
     $address = get_post_meta($post->ID, '_address', true);
     // Echo out the field
-    echo '<b>Address :</b> <textarea type="text" name="_address" class="widefat">' . $address . '</textarea><br/><br/>';
+    echo '<b>Address :</b> <textarea  name="_address" class="widefat">' . $address . '</textarea><br/><br/>';
+    
+    $category = get_post_meta($post->ID, '_category', true);
+    echo '<b>Category :</b> <input type="text" name="_category" class="widefat" value="'.$category.'" /><br/><br/>';
 
-    // Get the check_address data if its already been entered
-    $check_address = get_post_meta($post->ID, '_check_address', true);
-    // Echo out the field
-    echo '<b>Check Address :</b> <input type="radio" name="_check_address" value="true" class="widefat" /> True';
-    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_check_address" value="false" class="widefat" /> False  <br/><br/>';
+
 
     // Get the group_id data if its already been entered
     $group_id = get_post_meta($post->ID, '_group_id', true);
@@ -1196,7 +1221,7 @@ function add_publish_confirmation(){
 
     if(is_object($post)) {
         
-        if ( 'courses' === $post->post_type  ||  'groups' === $post->post_type ||  'instructors' === $post->post_type ||  'meetings' === $post->post_type ) {     
+        if ( 'courses' === $post->post_type  ||  'groups' === $post->post_type ||  'dt_team' === $post->post_type ||  'meetings' === $post->post_type ) {     
         $confirmation_message = "Content will be updated on LMS,Are you sure?";      
         echo '<script type="text/javascript">';    
         echo 'var publish = document.getElementById("publish");';     
