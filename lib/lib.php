@@ -491,6 +491,8 @@ Class WP_Lib {
             
         $this->update_meeting($meetings_flat_data);
 
+        //pre($meetings_flat_data[0]); exit;
+
         $this->unpublished_posts($meetings_flat_data , "meetings");   
 
         return "Meetings imported successfully";
@@ -577,6 +579,8 @@ Class WP_Lib {
             update_post_meta($post_id, '_video_conference_url', $meeting->video_conference_url);
             update_post_meta($post_id, '_video_conference_uid', $meeting->video_conference_uid);
             update_post_meta($post_id, '_hour_length', $meeting->hour_length);
+            update_post_meta($post_id, '_level', $meeting->level);
+            update_post_meta($post_id, '_location', $meeting->location);
                  
         }
 
