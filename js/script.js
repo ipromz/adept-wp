@@ -123,7 +123,7 @@ function adept_populate_category_filter_select(cats) {
 	for(i in cats) {
 		var cat = cats[i];
 		var selected = "";
-		console.log("promz: "+cat.id+": "+adeptInArray(cat.id, adept_cat_filter));
+		//console.log("promz: "+cat.id+": "+adeptInArray(cat.id, adept_cat_filter));
 		if(adeptInArray(cat.id, adept_cat_filter)) {
 			selected = " selected='selected' ";
 		}

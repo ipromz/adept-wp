@@ -495,6 +495,7 @@ function add_meeting_metaboxes() {
 function wpt_meeting_fields() {
     global $post, $wpdb;
 
+    $adeptlib = new WP_Lib();
     $wpdb->show_errors();
 	
     // Noncename needed to verify where the data originated
@@ -554,10 +555,10 @@ function wpt_meeting_fields() {
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
 
     // Get the web_conference data if its already been entered
-    $web_conference = get_post_meta($post->ID, '_web_conference', true);
+    /*$web_conference = get_post_meta($post->ID, '_web_conference', true);
     // Echo out the field
     echo '<b>Web Conference :</b> <input type="radio" name="_web_conference" value="true" class="widefat" /> True';
-    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_web_conference" value="false" class="widefat" /> False  <br/><br/>';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_web_conference" value="false" class="widefat" /> False  <br/><br/>';*/
 
     // Get the address data if its already been entered
     $address = get_post_meta($post->ID, '_address', true);
@@ -569,10 +570,14 @@ function wpt_meeting_fields() {
 
 
 
-    // Get the group_id data if its already been entered
-    $group_id = get_post_meta($post->ID, '_group_id', true);
-    // Echo out the field
-    echo '<b>Group Id:</b> <input type="text" name="_group_id" value="' . $group_id . '" class="widefat" /><br/><br/>';
+    $group_id_wp = get_post_meta($post->ID, '_group_id', true);
+    $str = $adeptlib->unstringify($group_id_wp);
+
+    echo '<b>Group Id(WordPress):</b> <input type="text" name="_group_id" value="' . $str . '" class="widefat" /><br/><br/>';
+    
+    $group_id_adept = get_post_meta($post->ID, '_group_id_adept', true);
+    echo "<b>Group Id(Adept):</b> $group_id_adept <br/><br/>";
+
 }
 
 function wpt_save_meeting_meta($post_id, $post) {
@@ -588,6 +593,8 @@ function wpt_save_meeting_meta($post_id, $post) {
     if (!current_user_can('edit_post', $post->ID))
         return $post->ID;
 
+    $adeptlib = new WP_Lib();
+
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post_id;
     $meeting_title = $_POST['post_title'];
@@ -595,11 +602,12 @@ function wpt_save_meeting_meta($post_id, $post) {
     $date = $_POST['_date'];
     $start_time = $_POST['_start_time'];
     $end_time = $_POST['_end_time'];
-    $web_conference = $_POST['_web_conference'];
+    //$web_conference = $_POST['_web_conference'];
     $address = $_POST['_address'];
     $meeting_id = $_POST['_meeting_id'];
     $status = $_POST['_status'];
     $group_id = $_POST['_group_id'];
+    $group_id = $adeptlib->stringify($group_id);
     $check_address = $_POST['_check_address'];
     $user_id = $_POST['_user_id'];
     $kind = $_POST['_kind'];
@@ -650,7 +658,7 @@ function wpt_save_meeting_meta($post_id, $post) {
     $meeting_meta['_date'] = $_POST['_date'];
     $meeting_meta['_start_time'] = $_POST['_start_time'];
     $meeting_meta['_end_time'] = $_POST['_end_time'];
-    $meeting_meta['_web_conference'] = $_POST['_web_conference'];
+    //$meeting_meta['_web_conference'] = $_POST['_web_conference'];
     $meeting_meta['_address'] = $_POST['_address'];
     $meeting_meta['_meeting_id'] = $_POST['_meeting_id'];
     $meeting_meta['_status'] = $_POST['_status'];
@@ -712,7 +720,7 @@ function wp_meetings_shortcode($atts) {
         $start_time = get_post_meta($meeting->ID, '_start_time');
         $end_time = get_post_meta($meeting->ID, '_end_time');
         $status = get_post_meta($meeting->ID, '_status');
-        $web_conference = get_post_meta($meeting->ID, '_web_conference');
+        //$web_conference = get_post_meta($meeting->ID, '_web_conference');
         $address = get_post_meta($meeting->ID, '_address');
         $class_id = get_post_meta($meeting->ID, '_class_id');
         $group_id = get_post_meta($meeting->ID, '_group_id');
@@ -738,7 +746,7 @@ function wp_meetings_shortcode($atts) {
 }
 
 
-add_shortcode('meetings', 'wp_meetings_shortcode');
+//add_shortcode('meetings', 'wp_meetings_shortcode');
 
 add_action('init', 'create_instructors');
 
@@ -1272,7 +1280,7 @@ function wpa_nags() {
             if($_GET["page"] == "adept_lms" || $_GET["page"] == "adept_lms_sync")  {
 
                 echo '<div class="notice notice-error ">
-                        Please ensure that you have setup server cron manually for the given URL: <em>'.wpa_get_cron_url().'</em>
+                        Please ensure that you have setup server cron manually for the given URLs: <em>'.wpa_get_cron_url().' , '.wpa_get_cron_meeting_url().' </em>
                     </div>';
             }
         }
@@ -1282,7 +1290,6 @@ function wpa_nags() {
 //enqueing styles and scripts
 function wpa_custom_wp_admin_style() {
     wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
-    
     wp_enqueue_script( 'select2-js',  plugins_url("js/select2.js" , __FILE__) , array("jquery") );
     wp_enqueue_style("select2-css" , plugins_url("js/select2.css" , __FILE__) );
     wp_enqueue_style("adept" , plugins_url("css/style.css" , __FILE__) );

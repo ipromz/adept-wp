@@ -105,6 +105,10 @@ function wpa_get_cron_url() {
 	return plugins_url("cron.php" , WPA_PLUGIN_FILE);
 }
 
+function wpa_get_cron_meeting_url() {
+	return plugins_url("cron-meetings.php" , WPA_PLUGIN_FILE);
+}
+
 
 
 function get_wp_id($post_id , $post_type) {

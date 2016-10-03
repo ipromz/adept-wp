@@ -45,10 +45,3 @@ $url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token
 $result = $adept->import_instructors($url);
 $success = $result;
 echo 'instructor updated successfully <br><br>';
-
-//importing meetings
-$url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
-$result = $adept->import_meeting($url);
-$success = $result;
-echo 'class meeting imported successfully <br><br>';
-

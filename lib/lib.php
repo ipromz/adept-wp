@@ -574,6 +574,8 @@ Class WP_Lib {
                 //echo $post_id." ".$group_ids_str."<br>";
                 update_post_meta($post_id, '_group_id', $group_ids_str);
             }
+            update_post_meta($post_id, '_group_id_adept', $meeting->group_id );
+
             update_post_meta($post_id, '_kind', $meeting->kind);
             update_post_meta($post_id, '_video_conference_account_id', $meeting->video_conference_account_id);
             update_post_meta($post_id, '_video_conference_url', $meeting->video_conference_url);
