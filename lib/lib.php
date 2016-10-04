@@ -536,6 +536,7 @@ Class WP_Lib {
                 "ping_status" => 'closed',
                 "post_type" => 'meetings',
                 "post_name" =>  sanitize_title( $meeting->title ),
+                "post_status" => "publish",
             );
             if(!empty($post_id)) {
                 $my_post["ID"] = $post_id;
