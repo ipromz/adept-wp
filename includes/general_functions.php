@@ -117,3 +117,16 @@ function get_wp_id($post_id , $post_type) {
 	global $wpdb;
 	return $wpdb->get_col("select ID from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where p.ID = m.post_id and post_type='$post_type' and meta_key='_adept_api_id' and meta_value='$post_id ' ");	    
 }
+
+function cron_check_is_authenticated($url) {
+	
+	$lib = new WP_Lib();
+
+	$data = $lib->getdata($url);
+
+	if(isset($data->data) && is_string($data->data) &&  $data->data == "Unauthorised") {
+		wp_die("Access token incorrect or expired, please reauthenticate." , "Unauthorised" , array( "response" => 502 ) );
+		
+	} 
+
+}

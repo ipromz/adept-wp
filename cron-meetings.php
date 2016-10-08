@@ -20,6 +20,10 @@ $adept_account_id_value = get_option('adept_account_id');
 
 //importing meetings
 $url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+
+cron_check_is_authenticated($url);
+
+
 $result = $adept->import_meeting($url);
 $success = $result;
 echo 'class meeting imported successfully <br><br>';

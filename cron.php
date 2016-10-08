@@ -17,8 +17,12 @@ $adept_access_token_value = get_option('adept_access_token');
 $adept_api_url_value = get_option('adept_api_url');
 $adept_account_id_value = get_option('adept_account_id');
 
+
+
 //importing courses categories
 $url = $adept_api_url_value . 'course_categories?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
+
+cron_check_is_authenticated($url);
    	
 $result = $adept->import_category($url);
 if ($result) {
