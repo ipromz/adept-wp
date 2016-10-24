@@ -23,29 +23,33 @@ $adept_account_id_value = get_option('adept_account_id');
 $url = $adept_api_url_value . 'course_categories?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 
 cron_check_is_authenticated($url);
-   	
+ 
+
 $result = $adept->import_category($url);
 if ($result) {
     echo $result;
 } else {
-    echo 'Categories category imported successfully <br><br>';
+    echo 'Categories category imported successfully (time: '.clc().')<br><br>';
 }
 
 //importing courses
 $url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 $result = $adept->import_course($url);
-echo 'Course imported successfully <br><br>';
+echo 'Course imported successfully  (time: '.clc().')<br><br>';
 
-
-
+/*
 //importing groups
 $url = $adept_api_url_value . 'groups?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 $result = $adept->import_groups($url);
 $success = $result;
-echo 'class group imported successfully <br><br>';
+echo 'class group imported successfully  (time: '.clc().')<br><br>';
+*/
+
 
 //importing instructors
 $url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 $result = $adept->import_instructors($url);
 $success = $result;
-echo 'instructor updated successfully <br><br>';
+echo 'instructor updated successfully  (time: '.clc().')<br><br>';
+
+

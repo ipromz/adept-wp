@@ -4,7 +4,7 @@
   Plugin Name: Adept LMS Plugin
   Plugin URI: http://www.orangecreative.net
   Description: Plugin for Adept LMS
-  Author: Viral Sonawala
+  Author: promz
   Version: 1.0
  */
 

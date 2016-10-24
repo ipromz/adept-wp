@@ -4,7 +4,7 @@
 add_action('admin_menu', 'wpa_add_menu_sync');
 
 function wpa_add_menu_sync() {
-	
+	wp_deregister_script('heartbeat');
 	add_submenu_page('adept_lms', 'Sync', 'Sync', 'manage_options', 'adept_lms_sync', 'wpa_sync_page_callback' );
 
 }
@@ -27,12 +27,13 @@ function wpa_sync_page_callback(){
 	<?php 
 
 }
+$itime = time();
 
 add_action("wp_ajax_adept_sync" , "adept_sync_ajax");
 
 function adept_sync_ajax() {
 	
-	set_time_limit(150); //increase max execution time
+	set_time_limit(165); //increase max execution time
 
 	$step = $_GET["step"];
 	echo $step." - ";
@@ -62,11 +63,13 @@ function adept_sync_ajax() {
 	        }
 		break;		
 
-		case "import_course":
+		case "import_course";
+
+			echo "import_course starts at - ".clc();
 			$url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
         	//echo $url; exit;
         	echo $result = $adept->import_course($url);
-        	//echo 'Course imported successfully';
+        	echo '<br>Course import end at - '.clc();
 		break;		
 
 		case "unpublish_courses":
@@ -84,10 +87,12 @@ function adept_sync_ajax() {
 		break;		
 
 		case "class_meeting":
+			echo 'meeting start at '.clc()."<br>";
+
 	        $url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        $result = $adept->import_meeting($url);
 	        $success = $result;
-			echo 'class meeting imported successfully';
+			echo 'class meeting imported successfully at -'.calc();
 		break;		
 
 		case "update_meeting":
@@ -98,31 +103,41 @@ function adept_sync_ajax() {
 		break;		
 
 		case "class_group":
+			echo 'group import start at - '.clc()."<br>";
+
 	        $url = $adept_api_url_value . 'groups?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        $result = $adept->import_groups($url);
 	        $success = $result;
-			echo 'class group imported successfully';
+			echo 'class group imported successfully at - '.clc()."<br>";
 
 		break;		
 
 		case "update_group":
+			echo 'group start at - '.clc()."<br>";
+
 	        $url = $adept_api_url_value . 'recent_group_updates?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        $result = $adept->update_groups($url);
 	        $success = $result;
-			echo 'group updated successfully';
+			echo 'group updated successfully'.clc();
 
 		break;		
 
 		case "import_instructors":
 
+			echo 'instructor start at - '.clc()."<br>";
 	        //$url = $adept_api_url_value . 'instructors?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        $url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        //echo $url; exit;
 	        $result = $adept->import_instructors($url);
 	        $success = $result;
-	        echo 'instructor updated successfully';
+			echo 'instructor end at - '.clc()."<br>";
 
 		break;
 	}
-	exit;
+	wp_die();
+}
+
+function clc(){
+    global $itime;
+    return time() - $itime;
 }

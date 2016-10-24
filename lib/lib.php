@@ -1,8 +1,9 @@
 <?php
-/*
+
 error_reporting(E_ALL); 
-ini_set('display_errors', 1);*/
- include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
+ini_set('display_errors', 1);
+include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
+
 
 Class WP_Lib {
 
@@ -489,6 +490,8 @@ Class WP_Lib {
 
         $meetings_flat_data = $this->flatten_meetings_array($all_meeting_list->data);
             
+        //echo count($meetings_flat_data); exit;
+
         $this->update_meeting($meetings_flat_data);
 
         //pre($meetings_flat_data[0]); exit;
@@ -522,8 +525,7 @@ Class WP_Lib {
         foreach($meetings as $meeting) {
             //check if post exists
             $post_id = $wpdb->get_var("select * from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where m.post_id=p.ID and p.post_type='meetings' and m.meta_key='_adept_api_id' and m.meta_value='{$meeting->id}'  ");
-            //echo "<br>select * from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where m.post_id=p.ID and p.post_type='meetings' and m.meta_key='_adept_api_id' and m.meta_value='{$meeting->id}'  <br>";
-            //echo " post_id: $post_id";
+
             if($meeting->description == "" ) {
                 $meeting->description = " ";
             }
@@ -541,8 +543,8 @@ Class WP_Lib {
             if(!empty($post_id)) {
                 $my_post["ID"] = $post_id;
             }               
-                    
             $post_id = wp_insert_post($my_post);
+            //echo "<br>inserted one post at".clc()."<br>";
             //pre($meeting); exit;
             update_post_meta($post_id, '_meeting_id', $meeting->id);
             update_post_meta($post_id, '_adept_api_id', $meeting->id);
@@ -551,6 +553,15 @@ Class WP_Lib {
             $starttime_ts = strtotime($meeting->start_time);
             $starttime_ts_local = $starttime_ts + ($gmt_offset*3600);
             $date = date("d/m/Y" , $starttime_ts_local );
+            if($meeting->id == 40) {
+
+                pre($meeting);
+                echo "<br>".$starttime_ts."<br>";
+                echo "<br>".$starttime_ts_local."<br>";
+                echo "<br>".$date."<br>";
+                exit;
+            }
+
             //echo $date; exit;
             update_post_meta($post_id, '_start_time', $starttime_ts_local);
             
@@ -862,6 +873,7 @@ Class WP_Lib {
 
     function import_instructors($url) {
         
+        //echo "hi";
         $temp = $this->getdata($url);
         if(isset($_GET["show_data"])) {
             pre($temp); exit;
