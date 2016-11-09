@@ -61,6 +61,8 @@ function wpa_translate_copy($post_id , $new_post_id) {
 				"_subscription",
 				"_booking_count",
 				"_image_url",
+				"_small_image_url",
+				"_small_image_url",
 				"_instructor_ids",
 				"_course_url",
 				"_adept_api_id",
@@ -76,7 +78,6 @@ function wpa_translate_copy($post_id , $new_post_id) {
 
 	$relation = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}term_relationships where object_id = $post_id ");
 
-	//echo "<br>".$new_post_id."-".$relation->term_taxonomy_id."<br>";
 	$wpdb->insert($wpdb->prefix . "term_relationships" , array(
 		"object_id" => $new_post_id,
 		"term_taxonomy_id" => $relation->term_taxonomy_id

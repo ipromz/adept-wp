@@ -340,6 +340,7 @@ Class WP_Lib {
             update_post_meta($post_id, '_booking_count', $data->booking_count);
         }
         update_post_meta($post_id, '_image_url', $data->image_url);
+        update_post_meta($post_id, '_small_image_url', $data->small_image_url);
         update_post_meta($post_id, '_course_url', $data->course_url);
         update_post_meta($post_id, '_adept_api_id', $data->id);
 
