@@ -2,7 +2,13 @@
 
 error_reporting(E_ALL); 
 ini_set('display_errors', 1);
-include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
+
+
+//print_r($option); exit;
+
+if(wpa_is_wpml_installed()) {
+    include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
+} 
 
 
 Class WP_Lib {
@@ -81,8 +87,6 @@ Class WP_Lib {
         //echo $url; die();
         global $wpdb, $sitepress;
 
-        $plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-        $plugin2 = 'wpml-translation-management/plugin.php';
         $temp = $this->getdata($url);
         if(isset($_GET["show_data"])) {
             pre($temp); exit;
@@ -91,6 +95,8 @@ Class WP_Lib {
         $get_all_languages = $this->get_languages();
         $site_default_language = $get_all_languages->default_language;
         $taxonomy = 'genre';
+
+
         if ($temp) {
             foreach ($temp->data as $_temp1) {
                 $name = $_temp1->name;
@@ -110,28 +116,29 @@ Class WP_Lib {
                             )
                     );
 
-                    // Fetching WPML's trid
-                    if ($fi_category->errors['term_exists'][0] == '' && is_plugin_active($plugin1) && is_plugin_active($plugin2)) {
+                    if(wpa_is_wpml_installed()) {
+                        
+                        // Fetching WPML's trid
+                        if( $fi_category->errors['term_exists'][0] == '' ) {
 
-                        $trid = $sitepress->get_element_trid($fi_category['term_taxonomy_id'], 'tax_' . $taxonomy);
+                            $trid = $sitepress->get_element_trid($fi_category['term_taxonomy_id'], 'tax_' . $taxonomy);
 
-                        // Updating icl_translations table to connect the two terms
+                            // Updating icl_translations table to connect the two terms
 
-                        $updates = array(
-                            'trid' => $trid,
-                            'language_code' => $site_default_language
-                        );
-                        $where = array(
-                            'element_type' => 'tax_' . $taxonomy,
-                            'element_id' => $fi_category['term_taxonomy_id']
-                        );
+                            $updates = array(
+                                'trid' => $trid,
+                                'language_code' => $site_default_language
+                            );
+                            $where = array(
+                                'element_type' => 'tax_' . $taxonomy,
+                                'element_id' => $fi_category['term_taxonomy_id']
+                            );
 
-                        $wpdb->update($wpdb->prefix . 'icl_translations', $updates, $where);
+                            $wpdb->update($wpdb->prefix . 'icl_translations', $updates, $where);
+                        }
                     }
                 }
                 
-                $plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-                $plugin2 = 'wpml-translation-management/plugin.php';
 
             }
             return $fi_category->errors['term_exists'][0];
@@ -146,7 +153,7 @@ Class WP_Lib {
     function import_course($url) {      
         global $wpdb, $sitepress;
         $wpdb->hide_errors();
-        include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
+        //include_once( WP_PLUGIN_DIR . '/sitepress-multilingual-cms/inc/wpml-api.php' );
         $all_courses_list = $this->getdata($url);                   
         $get_all_languages = $this->get_languages();
         
@@ -172,11 +179,11 @@ Class WP_Lib {
         if (!empty($all_courses_list->data)) {
            
             foreach ($all_courses_list->data as $k => $v) {
-                
                 if($this->should_skip_category($v->course_category_id)) {
                    continue; 
                 }
                 
+
                 $adept_author_value = get_option('adept_author');
                 if ($v->teaser == '') {
                     $v->teaser = $v->description;
@@ -185,73 +192,74 @@ Class WP_Lib {
 
                 $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='".$v->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
 
-                if (trim($get_existing_post_id) == "") {
-
-                         
-                    $my_post = array(
-                        "post_author" => $adept_author_value,
-                        "post_content" => $v->description,
-                        "post_excerpt" => $v->teaser,
-                        "post_title" => $v->course_title,
-                        "post_status" => 'publish',
-                        "comment_status" => 'closed',
-                        "ping_status" => 'closed',
-                        "post_name" => sanitize_title($v->course_title),
-                        "menu_order" => '0',
-                        "post_type" => 'courses',
-                        'guid' => ''
-                    );
-
-                    
-                    $new_post_id = array();
-
-                    if(is_array($v->translation) && count($v->translation)>0) {
-
-                        foreach($v->translation as $locale) {
-                            /*if($v->id == 6) {
-                                pre($v); exit;
-                            }*/
-
-                            if($locale->locale == "no") {
-                                $locale->locale = "nb";
-                            }
-                            
-                            $_POST['icl_post_language'] = $locale->locale;
-                            
-                            if(!isset($post_id)) {
-                                $my_post["post_title"] = $locale->course_title;
-                                $my_post["post_content"] = $locale->description;
-                                $my_post["post_excerpt"] = $locale->teaser;
-                                $post_id = wp_insert_post($my_post);                                
-                                //echo "<br>newdefining : $locale->course_title : $post_id<br> ";
-                            }
-                            else {
-                            
-                                $new_id = wpa_add_post_language($post_id , "courses" , $locale->locale , $locale->course_title , $locale->description , $locale->teaser);
-                                //echo "<br>already: $post_id : $locale->course_title : $new_id<br> ";
-                                //pre($locale);
-                                //echo $new_id."<br><br>";
-
-                                $new_post_id[] = $new_id;
-                           
-                               
-                            }
-                           
-                        }
-
-                    }
-
-
-                    $this->course_insert_extra_information($post_id , $v );
-                    foreach($new_post_id as $id) {
-                     wpa_translate_copy($post_id , $id);
-                    }
-
-
+                //if wpml plugin is not installed  
+                if(!wpa_is_wpml_installed()) {
+                    $this->import_course_without_wpml($v);
                 }
                 else {
-                    //echo "here"; echo $get_existing_post_id;
-                    $this->update_course($v , $get_existing_post_id);
+
+                    //echo "promzyaha <br>";
+                    if (trim($get_existing_post_id) == "") {
+                             
+                        $my_post = array(
+                            "post_author" => $adept_author_value,
+                            "post_content" => $v->description,
+                            "post_excerpt" => $v->teaser,
+                            "post_title" => $v->course_title,
+                            "post_status" => 'publish',
+                            "comment_status" => 'closed',
+                            "ping_status" => 'closed',
+                            "post_name" => sanitize_title($v->course_title),
+                            "menu_order" => '0',
+                            "post_type" => 'courses',
+                            'guid' => ''
+                        );
+
+                        
+                        $new_post_id = array();
+
+                        if(is_array($v->translation) && count($v->translation)>0) {
+
+                            foreach($v->translation as $locale) {
+
+                                if($locale->locale == "no") {
+                                    $locale->locale = "nb";
+                                }
+                                
+                                $_POST['icl_post_language'] = $locale->locale;
+                                
+                                if(!isset($post_id)) {
+                                    $my_post["post_title"] = $locale->course_title;
+                                    $my_post["post_content"] = $locale->description;
+                                    $my_post["post_excerpt"] = $locale->teaser;
+                                    $post_id = wp_insert_post($my_post);                                
+                                }
+                                else {
+                                
+                                    $new_id = wpa_add_post_language($post_id , "courses" , $locale->locale , $locale->course_title , $locale->description , $locale->teaser);
+                                    //echo "<br>already: $post_id : $locale->course_title : $new_id<br> ";
+                                    //pre($locale);
+                                    //echo $new_id."<br><br>";
+
+                                    $new_post_id[] = $new_id;
+                                  
+                                }
+                               
+                            }
+
+                        }
+
+
+                        $this->course_insert_extra_information($post_id , $v );
+                        foreach($new_post_id as $id) {
+                         wpa_translate_copy($post_id , $id);
+                        }
+
+
+                    }
+                    else {
+                        $this->update_course_with_wpml($v , $get_existing_post_id);
+                    }
                 }
                 unset($post_id);
 
@@ -265,6 +273,54 @@ Class WP_Lib {
         //pre($all_courses_list); 
         return "No Courses for import";
     
+    }
+
+
+    function import_course_without_wpml($course) {
+
+        global $wpdb;
+
+        $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='".$course->id . "' ORDER BY post_id DESC LIMIT 0,1 ");
+        $adept_author_value = get_option( 'adept_author' );
+        
+        $my_post = array(
+                        "post_author" => $adept_author_value,
+                        "post_content" => $course->description,
+                        "post_excerpt" => $course->teaser,
+                        "post_title" => $course->course_title,
+                        "post_status" => 'publish',
+                        "comment_status" => 'closed',
+                        "ping_status" => 'closed',
+                        "post_name" => sanitize_title($course->course_title),
+                        "menu_order" => '0',
+                        "post_type" => 'courses',
+                        'guid' => ''
+                    );
+
+
+        if(isset($course->translation) && count($course->translation)) {
+            $lang = $this->get_default_language();
+            foreach($course->translation as $locale) {
+                if($locale->locale == $lang) {
+                    //pre($locale); exit;
+                    //echo "default lang: $lang <br><br>";
+                    $my_post["post_title"] = $locale->course_title;
+                    $my_post["description"] = $locale->description;
+                    $my_post["post_excerpt"] = $locale->teaser;
+                }
+            }
+        }
+                        
+        $new_post_id = array();
+        
+        if($get_existing_post_id != "") {
+            $my_post["ID"] = $get_existing_post_id;
+        }
+
+        $post_id = wp_insert_post( $my_post );
+        //pre($post_id);
+        $this->course_insert_extra_information($post_id , $course);
+
     }
 
     function should_skip_category($category_id) {
@@ -287,8 +343,10 @@ Class WP_Lib {
 
     }
 
-    function course_insert_extra_information($post_id , $data ) {
-        //pre($data); exit;
+
+
+    function course_insert_extra_information($post_id , $data) {
+
         global $wpdb;
 
         $term_id = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");                              
@@ -340,7 +398,9 @@ Class WP_Lib {
             update_post_meta($post_id, '_booking_count', $data->booking_count);
         }
         update_post_meta($post_id, '_image_url', $data->image_url);
-        update_post_meta($post_id, '_small_image_url', $data->small_image_url);
+        if(isset($data->small_image_url)) {
+            update_post_meta($post_id, '_small_image_url', $data->small_image_url);
+        }
         update_post_meta($post_id, '_course_url', $data->course_url);
         update_post_meta($post_id, '_adept_api_id', $data->id);
 
@@ -348,21 +408,12 @@ Class WP_Lib {
         update_post_meta( $post_id, '_group_locations', $this->stringify($data->group_locations) );
         update_post_meta($post_id, '_group_level', $data->level);
         
-        // Insert category id in courses
-        /*
-        $previous_slug = $wpdb->get_var("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-" . $data->course_category_id . "-%'");
-
-        if(!empty($previous_slug)) {
-
-            $wpdb->insert($wpdb->prefix . "term_relationships", array(
-                "object_id" => $post_id,
-                "term_taxonomy_id" => $previous_slug
-            ));
-        }*/
 
     }
 
-    function update_course($course , $old_post) {
+
+
+    function update_course_with_wpml($course , $old_post) {
        
         global $sitepress;
         $post_type = "courses";
@@ -554,15 +605,7 @@ Class WP_Lib {
             $starttime_ts = strtotime($meeting->start_time);
             $starttime_ts_local = $starttime_ts + ($gmt_offset*3600);
             $date = date("d/m/Y" , $starttime_ts_local );
-            if($meeting->id == 40) {
-
-                pre($meeting);
-                echo "<br>".$starttime_ts."<br>";
-                echo "<br>".$starttime_ts_local."<br>";
-                echo "<br>".$date."<br>";
-                exit;
-            }
-
+            
             //echo $date; exit;
             update_post_meta($post_id, '_start_time', $starttime_ts_local);
             
@@ -575,7 +618,9 @@ Class WP_Lib {
             }
 
             update_post_meta($post_id, '_status', $meeting->status);
-            update_post_meta($post_id, '_web_conference', $meeting->web_conference);
+            if(isset($meeting->web_conference)) {
+                update_post_meta($post_id, '_web_conference', $meeting->web_conference);
+            }
             update_post_meta($post_id, '_address', $meeting->address);
             if(isset($meeting->check_address)) {
                 update_post_meta($post_id, '_check_address', $meeting->check_address);
@@ -624,14 +669,8 @@ Class WP_Lib {
                 //$postid = $get_existing_post_id[0]->post_id;
 
                 if (empty($get_existing_post_id)) {
-
-
-                    
-                    /*$plugin1 = 'sitepress-multilingual-cms/sitepress.php';
-                    $plugin2 = 'wpml-translation-management/plugin.php';*/
-
-                    if(1){
-                    //if(is_plugin_active($plugin1) && is_plugin_active($plugin2)){
+    
+                    if(wpa_is_wpml_installed()) { 
                         if (!empty($v->translation)) {
                             
                             foreach ($v->translation as $a => $b) {
@@ -764,9 +803,17 @@ Class WP_Lib {
                             unset($post_id);
                         }
                     }
+                    else {
+                        $this->import_group_without_wpml($v);
+                    }
                 }
                 else {
-                    $this->update_groups($v , $get_existing_post_id);
+                    if(wpa_is_wpml_installed()) {
+                        $this->update_groups($v , $get_existing_post_id);
+                    }
+                    else {
+                        $this->import_group_without_wpml($v); 
+                    }
                 }
             }
             $this->unpublished_posts($all_courses_list->data , "groups" );
@@ -777,6 +824,51 @@ Class WP_Lib {
         }
 
         return "No Groups for import";
+    }
+
+    function import_group_without_wpml($group) {
+        global $wpdb;
+        //echo "import_group_without_wpml me hai <br>"; exit;
+        //pre($group); exit;
+        $adept_author_value = get_option( 'adept_author' );
+
+        $post = array(  
+                        "post_author" =>  $adept_author_value,
+                        "post_title" =>  $group->group_title,
+                        "post_content" => $group->description,
+                        "post_excerpt" => $group->description,
+                        "post_type" => "groups",
+                        "post_status" => "publish",
+                        "post_name" => sanitize_title($group->group_title),
+
+                        );
+
+        $get_existing_post_id = $wpdb->get_var("SELECT post_id FROM " . $wpdb->prefix . "postmeta where meta_key='_adept_api_id' AND meta_value ='{$group->id}' ORDER BY post_id DESC LIMIT 0,1 ");
+
+        if($get_existing_post_id) {
+            //if post exists then it will be updated only
+            $post["ID"] = $get_existing_post_id; 
+        }
+
+        if(isset($group->translation) && count($group->translation)) {
+            $lang = $this->get_default_language();
+            foreach($group->translation as $locale) {
+                if($locale->locale == $lang) {
+                    //pre($locale); exit;
+                    //echo "default lang: $lang <br><br>";
+                    $post["post_title"] = $locale->group_title;
+                    $post["description"] = $locale->description;
+                    $post["post_excerpt"] = $locale->description;
+                }
+            }
+        }
+
+
+
+        $post_id = wp_insert_post( $post );
+        //pre($post_id);
+        $this->group_insert_extra_information($post_id , $group);
+
     }
 
     function update_groups($group , $old_post) {
@@ -1012,6 +1104,10 @@ Class WP_Lib {
 
         return $str;
 
+    }
+
+    function get_default_language() {
+        return get_option("adept_language" , "en");
     }
 
 

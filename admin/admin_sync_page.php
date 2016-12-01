@@ -92,7 +92,7 @@ function adept_sync_ajax() {
 	        $url = $adept_api_url_value . 'meetings?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	        $result = $adept->import_meeting($url);
 	        $success = $result;
-			echo 'class meeting imported successfully at -'.calc();
+			echo 'class meeting imported successfully at -'.clc();
 		break;		
 
 		case "update_meeting":

@@ -176,13 +176,9 @@ function wpt_course_fields() {
     $is_featured = get_post_meta($post->ID, '_is_featured', true);
     // Echo out the field
 
-    if ($is_featured == '1') {
-        $checked = "checked='checked'";
-    } else {
-        $unchecked = "checked='checked'";
-    }
-    echo '<b>Is Featured :</b> <input type="radio" name="_is_featured" ' . $checked . ' value="true" class="widefat" /> True ';
-    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_is_featured" ' . $unchecked . ' value="false" class="widefat" /> False <br/><br/>';
+   
+    echo '<b>Is Featured :</b> <input type="radio" name="_is_featured" ' . checked($is_featured , '1' , false) . ' value="true" class="widefat" /> True ';
+    echo '&nbsp;&nbsp;&nbsp;<input type="radio" name="_is_featured" ' .  checked($is_featured , '0', false) . ' value="false" class="widefat" /> False <br/><br/>';
 
     // Get the course_fee data if its already been entered
     $course_fee = get_post_meta($post->ID, '_course_fee', true);
@@ -256,7 +252,8 @@ HTML;
 	// Get the subscription data if its already been entered
     $subscription = get_post_meta($post->ID, '_subscription', true);
     // Echo out the field
-
+    $checked = "";
+    $unchecked = "";
     if ($subscription == '1') {
         $checked = "checked='checked'";
     } else {
@@ -1249,11 +1246,11 @@ add_action('admin_footer', 'add_publish_confirmation');
 add_action("init" , "adept_sitepress_plugin_notice");
 function adept_sitepress_plugin_notice() {
     
-    $plugins = get_option( "active_plugins"  );
-    if(!in_array("sitepress-multilingual-cms/sitepress.php", $plugins))
+    
+    if(!wpa_is_wpml_installed())
     {
 
-        add_action( 'admin_notices', 'adept_sitepress_plugin_notice_nag' );
+        //add_action( 'admin_notices', 'adept_sitepress_plugin_notice_nag' );
     }
     
     add_action( 'admin_notices', 'wpa_nags' );
@@ -1312,6 +1309,13 @@ define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define("WPA_PLUGIN_FILE" , __FILE__);
 
 
+function wpa_is_wpml_installed() {
+
+    $option = get_option("active_plugins");
+    
+    return in_array( "sitepress-multilingual-cms/sitepress.php", $option );
+
+}
 
 include_once MY_PLUGIN_PATH . "lib/lib.php";
 include_once MY_PLUGIN_PATH . "admin/admin_sync_page.php";
