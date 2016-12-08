@@ -649,6 +649,7 @@ Class WP_Lib {
 
 
     function import_groups($url) {
+
         global $wpdb,$sitepress;
         //echo $url; exit;
         $all_courses_list = $this->getdata($url);
@@ -824,6 +825,7 @@ Class WP_Lib {
         }
 
         return "No Groups for import";
+    
     }
 
     function import_group_without_wpml($group) {
@@ -893,7 +895,8 @@ Class WP_Lib {
             if($post_exists) {
                 //if post exists then it will be updated only
                 $post["ID"] = $post_exists; 
-                $post_id = wp_insert_post($post);
+                //$post_id = wp_insert_post($post);
+                $post_id = my_insert_post($post);
             }
             else {
 

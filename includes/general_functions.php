@@ -131,3 +131,75 @@ function cron_check_is_authenticated($url) {
 	} 
 
 }
+
+
+function my_insert_post($postarr) {
+	
+	global $wpdb;
+	$user_id = get_current_user_id();
+	$defaults = array(
+		'post_author' => $user_id,
+		'post_content' => '',
+		'post_content_filtered' => '',
+		'post_title' => '',
+		'post_excerpt' => '',
+		'post_status' => 'publish',
+		'post_type' => 'post',
+		'comment_status' => '',
+		'ping_status' => '',
+		'post_password' => '',
+		'to_ping' =>  '',
+		'pinged' => '',
+		'post_parent' => 0,
+		'menu_order' => 0,
+		'guid' => '',
+		//'import_id' => 0,
+		//'context' => '',
+	);
+	$ints = array('menu_order','post_parent' , 'comment_count' );
+	if ( ! empty( $postarr['ID'] ) ) {
+		
+		$postarr = sanitize_post($postarr, 'db');
+		unset($postarr["filter"]);
+		
+		$post_ID = $postarr['ID'];
+		$query = " update {$wpdb->prefix}posts set ";
+		foreach($postarr as $key=>$val) {
+			
+			if($key == "ID") continue;
+			if(in_array($key, $ints)) {
+				$query .= " `$key` = $val,";
+			}
+			else {
+				$query .= " `$key` = '$val',";
+				
+			}
+		}
+		$query = rtrim($query , ",");
+		$query .= " where ID = $post_ID";
+		$wpdb->query($query);
+		return $post_ID;
+	} 
+	else {
+		
+		$postarr = wp_parse_args($postarr, $defaults);
+		$postarr = sanitize_post($postarr, 'db');
+		unset($postarr["filter"]);
+		$query = " insert into {$wpdb->prefix}posts set ";
+		foreach($postarr as $key=>$val) {
+			
+			if($key == "ID") continue;
+			if(in_array($key, $ints)) {
+				$query .= " `$key` = $val,";
+				
+			}
+			else {
+				$query .= " `$key` = '$val',";
+				
+			}
+		}
+		$query = rtrim($query , ",");
+		$wpdb->query($query);
+		return $wpdb->insert_id;
+	}
+}
