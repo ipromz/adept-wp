@@ -1,8 +1,8 @@
 <?php
 
-error_reporting(E_ALL); 
+/*error_reporting(E_ALL); 
 ini_set('display_errors', 1);
-
+*/
 
 //print_r($option); exit;
 
@@ -533,20 +533,36 @@ Class WP_Lib {
     
     
     function import_meeting($url) {
+
         global $wpdb;
         $adept_author_value = get_option('adept_author');
         $all_meeting_list = $this->getdata($url);
+        
         if(isset($_GET["show_data"])) {
             pre($all_meeting_list); exit;
         }
 
+
         $meetings_flat_data = $this->flatten_meetings_array($all_meeting_list->data);
-            
-        //echo count($meetings_flat_data); exit;
 
-        $this->update_meeting($meetings_flat_data);
+        //pre($meeting_chunks); exit;
+        $splitHelper = new AWP_split_helper();
 
-        //pre($meetings_flat_data[0]); exit;
+        if($splitHelper->has_incomplete_batch()) {
+            $next = $splitHelper->get_next_batch();
+            //echo "get_next_batch";
+            //pre($next);
+        }
+        else {
+            $splitHelper->new_batch($meetings_flat_data);
+            $next = $splitHelper->get_next_batch();
+            //echo "new batch";
+        }
+
+        //echo count($next); exit;        
+
+        $this->update_meeting($next);
+
 
         $this->unpublished_posts($meetings_flat_data , "meetings");   
 
@@ -574,7 +590,10 @@ Class WP_Lib {
         //$wpdb->show_errors();
         $adept_author_value = get_option('adept_author');
         //pre($meetings);exit;
+        $count = 0;
         foreach($meetings as $meeting) {
+            file_put_contents(ABSPATH."/meetingslogs.log", $count );
+            $count++;
             //check if post exists
             $post_id = $wpdb->get_var("select * from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where m.post_id=p.ID and p.post_type='meetings' and m.meta_key='_adept_api_id' and m.meta_value='{$meeting->id}'  ");
 

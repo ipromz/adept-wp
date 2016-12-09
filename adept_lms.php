@@ -1321,6 +1321,7 @@ include_once MY_PLUGIN_PATH . "lib/lib.php";
 include_once MY_PLUGIN_PATH . "admin/admin_sync_page.php";
 include_once MY_PLUGIN_PATH . "includes/general_functions.php";
 include_once MY_PLUGIN_PATH . "includes/ajax-functions.php";
+include_once MY_PLUGIN_PATH . "lib/splitHelper.php";
 
 $adept = new WP_Lib();
 
