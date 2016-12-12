@@ -545,30 +545,26 @@ Class WP_Lib {
 
         $meetings_flat_data = $this->flatten_meetings_array($all_meeting_list->data);
 
-        //pre($meeting_chunks); exit;
+        //AWP_split_helper helps in dividing large batch of data
         $splitHelper = new AWP_split_helper();
 
+        //if there is already a part of huge data in queue to be processed, then process it
+        //else create new queue
         if($splitHelper->has_incomplete_batch()) {
             $next = $splitHelper->get_next_batch();
-            //echo "get_next_batch";
-            //pre($next);
         }
         else {
             $splitHelper->new_batch($meetings_flat_data);
             $next = $splitHelper->get_next_batch();
-            //echo "new batch";
         }
 
-        //echo count($next); exit;        
 
         $this->update_meeting($next);
-
 
         $this->unpublished_posts($meetings_flat_data , "meetings");   
 
         return "Meetings imported successfully";
        
-        //return "No Meetings for import";
     }
 
     function flatten_meetings_array($groups) {

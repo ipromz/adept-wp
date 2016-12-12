@@ -1,17 +1,12 @@
 <?php 
 
-
-add_action("init" , "myinit" );
-
-function myinit() {
-
-}
-
 class AWP_split_helper {
 
 	function new_batch($data) {
 
-		$meeting_chunks = array_chunk($data, 200);
+		$SIZE_OF_CHUNK = 200;
+
+		$meeting_chunks = array_chunk($data, $SIZE_OF_CHUNK); 
 
 		update_option("adept_meetings_batch" , $meeting_chunks);
 
