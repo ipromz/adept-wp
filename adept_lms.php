@@ -2,13 +2,27 @@
 
 /*
   Plugin Name: Adept LMS Plugin
-  Plugin URI: http://www.orangecreative.net
+  Plugin URI: http://adeptlms.com/
   Description: Plugin for Adept LMS
   Author: promz
   Version: 1.0
  */
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-class WP_Adept_LMS {
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
+
+define('WPADEPT_PLUGIN_PATH', plugin_dir_path(__FILE__));
+define("WPADEPT_PLUGIN_FILE" , __FILE__);
+
+include_once WPADEPT_PLUGIN_PATH . "/lib/lib.php";
+include_once WPADEPT_PLUGIN_PATH . "admin/admin_sync_page.php";
+include_once WPADEPT_PLUGIN_PATH . "includes/general_functions.php";
+include_once WPADEPT_PLUGIN_PATH . "includes/ajax-functions.php";
+include_once WPADEPT_PLUGIN_PATH . "lib/splitHelper.php";
+include_once WPADEPT_PLUGIN_PATH . "cron.php";
+
+class WPadept_LMS {
 
     // Constructor
     function __construct() {
@@ -38,10 +52,10 @@ class WP_Adept_LMS {
             'wpa_page_file_path'
                 ), "", '2.2.9');*/
         $icon = plugins_url( "images/logo-icon-2.png", __FILE__ );
+        
         add_menu_page( 'Adept LMS','Adept LMS', 'manage_options', 'adept_lms', array( $this, 'wpa_page_file_path1') , $icon , 2);
         
-        /*add_submenu_page('adept_lms', 'Adept LMS Settings', '<b style="color:#f9845b">Settings</b>', 'manage_options', 'adept_lms_settings', array( $this, 'wpa_page_file_path1')
-        );*/        
+
 
     }
 
@@ -124,9 +138,11 @@ class WP_Adept_LMS {
 
 }
 
-add_action('init', 'create_post_type');
+new WPadept_LMS();
 
-function create_post_type() {
+add_action('init', 'wpadept_create_post_type');
+
+function wpadept_create_post_type() {
     register_post_type('courses', array(
         'labels' => array(
             'name' => __('Courses'),
@@ -147,22 +163,22 @@ function create_post_type() {
         'public' => true,
         'has_archive' => true,
         'supports' => array('title', 'editor', 'excerpt', 'author'),
-        'register_meta_box_cb' => 'add_course_metaboxes'
+        'register_meta_box_cb' => 'wpadept_add_course_metaboxes'
             )
     );
 }
 
-add_action('add_meta_boxes', 'add_course_metaboxes');
+add_action('add_meta_boxes', 'wpadept_add_course_metaboxes');
 
 // Add the Course Meta Boxes
 
-function add_course_metaboxes() {
-    add_meta_box('wpt_course_fields', 'Course Other details', 'wpt_course_fields', 'courses', 'normal', 'high');
+function wpadept_add_course_metaboxes() {
+    add_meta_box('wpt_course_fields', 'Course Other details', 'wpadept_course_fields', 'courses', 'normal', 'high');
 }
 
-function wpt_course_fields() {
+function wpadept_course_fields() {
     global $post, $wpdb;
-    $adept = new WP_Lib();
+    $adept = new Wpadept_Lib();
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="coursemeta_noncename" id="coursemeta_noncename" value="' .
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
@@ -170,6 +186,7 @@ function wpt_course_fields() {
     // Get the tags data if its already been entered
     $tags = get_post_meta($post->ID, '_tags', true);
     // Echo out the field
+    $tags = esc_attr($tags);
     echo '<b>Tags : </b><input type="text" name="_tags" value="' . $tags . '" class="widefat" /><br/><br/>';
 
     // Get the is_featured data if its already been entered
@@ -182,17 +199,19 @@ function wpt_course_fields() {
 
     // Get the course_fee data if its already been entered
     $course_fee = get_post_meta($post->ID, '_course_fee', true);
+    $course_fee = esc_attr($course_fee );
     // Echo out the field
     echo '<b>Course Fee :</b> <input type="text" name="_course_fee" value="' . $course_fee . '" class="widefat" /><br/><br/>';
 
 
     // Get the sku data if its already been entered
     $sku = get_post_meta($post->ID, '_sku', true);
+    $sku = esc_attr($sku);
     // Echo out the field
     echo '<b>SKU :</b> <input type="text" name="_sku" value="' . $sku . '" class="widefat" /><br/><br/>';
 
 	echo '<b>Course Groups :</b><br/><br/>';	
-	$all_groups = get_all_of_post_type_2( 'groups' );
+	$all_groups = wpadept_get_all_of_post_type_2( 'groups' );
 
   	$linked_group_ids = get_post_meta(  $post->ID,'_group_ids', true ) ;
     
@@ -264,55 +283,61 @@ HTML;
 
 	// Get Image url 
     $image_url = get_post_meta($post->ID, '_image_url', true);
+    $image_url = esc_attr($image_url);
     // Echo out the field
     echo '<b>Image Url :</b> <input type="text" name="_image_url" value="' . $image_url . '" class="widefat" /><br/><br/>';
 
 
     $course_url = get_post_meta($post->ID, '_course_url', true);
+    $course_url = esc_attr($course_url);
     // Echo out the field
     echo '<b>Course Url :</b> <input type="text" name="_course_url" value="' . $course_url . '" class="widefat"  readonly /><br/><br/>';
 	
     $location = get_post_meta($post->ID, '_group_locations', true);
     $location = $adept->unstringify($location);
-
+    $location = esc_attr($location);
     echo '<b>Location:</b> <input type="text" name="_group_locations" value="' . $location . '" class="widefat"   /><br/><br/>';
     
     $level = get_post_meta($post->ID, '_group_level', true);
+    $level = esc_attr($level);
     echo '<b>Level:</b> <input type="text" name="_group_level" value="' . $level . '" class="widefat"   /><br/><br/>';
 
 }
 
-function get_all_of_post_type( $type_name = '') {
-        $items = array();
-        if ( !empty( $type_name ) ) {
-            $args = array(
-                'post_type' => "{$type_name}",
-                'posts_per_page' => -1,
-                'order' => 'ASC',
-                'orderby' => 'title'
-            );
-            $results = new WP_Query( $args );
-            if ( $results->have_posts() ) {
-                while ( $results->have_posts() ) {
-                    $items[] = $results->next_post();
-                }
+function wpadept_get_all_of_post_type( $type_name = '') {
+    $items = array();
+    if ( !empty( $type_name ) ) {
+        $args = array(
+            'post_type' => "{$type_name}",
+            'posts_per_page' => -1,
+            'order' => 'ASC',
+            'orderby' => 'title'
+        );
+        $results = new WP_Query( $args );
+        if ( $results->have_posts() ) {
+            while ( $results->have_posts() ) {
+                $items[] = $results->next_post();
             }
         }
-        return $items;
     }
+    return $items;
+}
 
-function get_all_of_post_type_2($post_type) {
+function wpadept_get_all_of_post_type_2($post_type) {
     global $wpdb;
     
+    $element_type = "post_".$post_type;
     //because we want dont want one post to appear many times,
-    $posts = $wpdb->get_results(" select * from {$wpdb->prefix}posts where ID in (SELECT element_id FROM `{$wpdb->prefix}icl_translations` where element_type = 'post_$post_type' group by trid )");
+    $qry = $wpdb->prepare(" select * from {$wpdb->prefix}posts where ID in (SELECT element_id FROM `{$wpdb->prefix}icl_translations` where element_type = '%s' group by trid )" , $element_type );
+    $posts = $wpdb->get_results($qry);
 
     return $posts; 
 
 }
-function wpt_save_course_meta($post_id, $post) {
-	global $wpdb;
-	
+
+function wpadept_save_course_meta($post_id, $post) {
+    global $wpdb;
+    
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if(!isset($_POST['coursemeta_noncename'])) return;
@@ -332,79 +357,80 @@ function wpt_save_course_meta($post_id, $post) {
     $teaser = $_POST['post_excerpt'];
     $description = $_POST['content'];
     $tags = $_POST['_tags'];
-	$course_fee = $_POST['_course_fee'];
+    $course_fee = $_POST['_course_fee'];
     $sku = $_POST['_sku'];
     $subscription = $_POST['_subscription'];
     $course_category_id = $_POST['tax_input']['tax_input'][0];
-    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
-    include_once MY_PLUGIN_PATH . "lib/lib.php";
-    $adept = new WP_Lib();
+    //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
+    $adept = new Wpadept_Lib();
     $adept_api_url_value = get_option('adept_api_url');
 
-	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");
-	//var_dump($get_existing_post_id);
-	$oripostidStr = $get_existing_post_id[0]->meta_value;
-	$oripostidArray = explode('_',$oripostidStr);
-	$originalPostId = $oripostidArray[1];
+    $qry = $wpdb->prepare("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=%d AND meta_key='_post_id'" , $post->ID);
+    $get_existing_post_id = $wpdb->get_results($qry);
+    //var_dump($get_existing_post_id);
+    $oripostidStr = $get_existing_post_id[0]->meta_value;
+    $oripostidArray = explode('_',$oripostidStr);
+    $originalPostId = $oripostidArray[1];
     $curl = $adept_api_url_value . 'update_course/' .$originalPostId;
     $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&course[course_title]=" . $course_title
             . "&course[teaser]=" . $teaser . "&course[description]=" . $description
             . "&course[tags]=" . $tags . "&course[course_fee]=" . $course_fee ."&course[sku]=" . $sku 
             . "&course[subscription]=" . $subscription
             . "&course[course_category_id]=" . $course_category_id;
-	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
-	//echo $data; die();
+    //$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
+    //echo $data; die();
    // $temp = $adept->postdata($curl, $data);
-	$ch = curl_init($curl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		'Content-Type: application/x-www-form-urlencoded',
-		'Content-Length: ' . strlen($data))
-	);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	//uncomment this line
+    $ch = curl_init($curl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/x-www-form-urlencoded',
+        'Content-Length: ' . strlen($data))
+    );
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    //uncomment this line
     //$result = curl_exec($ch);
 //var_dump($result); die();
-	
-    //	$resultdata = json_decode($result);
+    
+    //  $resultdata = json_decode($result);
 //var_dump($resultdata); die();
-	
-	// OK, we're authenticated: we need to find and save the data
+    
+    // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
-    $course_meta['_tags'] = $_POST['_tags'];
-    $course_meta['_is_featured'] = $_POST['_is_featured'];
-    $course_meta['_course_fee'] = $_POST['_course_fee'];
-    $course_meta['_sku'] = $_POST['_sku'];
-    $course_meta['_subscription'] = $_POST['_subscription'];
-    $course_meta['_image_url'] = $_POST['_image_url'];
-    $course_meta['_group_locations'] = $adept->stringify($_POST['_group_locations']);
-    $course_meta['_group_level'] = $_POST['_group_level'];
-	$groups = $_POST['group_ids'];
-	$instructors = $_POST['instructor_ids'];
-	
-	
-	delete_post_meta( $post->ID , '_group_ids');
-	delete_post_meta( $post->ID , '_instructor_ids');
+    $course_meta['_tags']               = sanitize_text_field($_POST['_tags']);
+    $course_meta['_is_featured']        = sanitize_text_field($_POST['_is_featured']);
+    $course_meta['_course_fee']         = sanitize_text_field($_POST['_course_fee']);
+    $course_meta['_sku']                = sanitize_text_field($_POST['_sku']);
+    $course_meta['_subscription']       = sanitize_text_field($_POST['_subscription']);
+    $course_meta['_image_url']          = sanitize_text_field($_POST['_image_url']);
+    $course_meta['_group_locations']    = sanitize_text_field($adept->stringify($_POST['_group_locations']));
+//include_once WPADEPT_PLUGIN_PATH . "lib/splitHelper.php";
+    $course_meta['_group_level']        = sanitize_text_field($_POST['_group_level']);
+    $groups                             = sanitize_text_field($_POST['group_ids']);
+    $instructors                        = sanitize_text_field($_POST['instructor_ids']);
+    
+    
+    delete_post_meta( $post->ID , '_group_ids');
+    delete_post_meta( $post->ID , '_instructor_ids');
     
     // Add values of $course_meta as custom fields
-	if ( 0 < count($groups) ) {
+    if ( 0 < count($groups) ) {
             foreach ( $groups as $group_id ) {
                 # We use add post meta with 4th parameter false to let us link
-                # books to as many authors as we want.				
-				add_post_meta( $post->ID, '_group_ids',$group_id );				
+                # books to as many authors as we want.              
+                add_post_meta( $post->ID, '_group_ids',$group_id );             
             }
         }
-		
-	// Add values of $course_meta as custom fields
-	if ( 0 < count($instructors) ) {
+        
+    // Add values of $course_meta as custom fields
+    if ( 0 < count($instructors) ) {
             foreach ( $instructors as $instructor_id ) {
                 # We use add post meta with 4th parameter false to let us link
-                # books to as many authors as we want.				
-				add_post_meta( $post->ID, '_instructor_ids',$instructor_id );				
+                # books to as many authors as we want.              
+                add_post_meta( $post->ID, '_instructor_ids',$instructor_id );               
             }
         }
 
@@ -423,11 +449,11 @@ function wpt_save_course_meta($post_id, $post) {
     }
 }
 
-add_action('save_post', 'wpt_save_course_meta', 1, 2); // save the custom fields
+add_action('save_post', 'wpadept_save_course_meta', 1, 2); // save the custom fields
 
-add_action('init', 'create_course_category');
+add_action('init', 'wpadept_create_course_category');
 
-function create_course_category() {
+function wpadept_create_course_category() {
     $labels = array(
         'name' => _x('Course Category', 'Course Category'),
         'singular_name' => _x('Course Category', 'Course Category'),
@@ -453,9 +479,9 @@ function create_course_category() {
     register_taxonomy('genre', array('courses'), $args);
 }
 
-add_action('init', 'create_meetings');
+add_action('init', 'wpadept_create_meetings');
 
-function create_meetings() {
+function wpadept_create_meetings() {
     register_post_type('meetings', array(
         'labels' => array(
             'name' => __('Meetings'),
@@ -476,42 +502,44 @@ function create_meetings() {
         'public' => true,
         'has_archive' => true,
         'supports' => array('title', 'editor'),
-        'register_meta_box_cb' => 'add_meeting_metaboxes'
+        'register_meta_box_cb' => 'wpadept_add_meeting_metaboxes'
             )
     );
 }
 
-add_action('add_meta_boxes', 'add_meeting_metaboxes');
+add_action('add_meta_boxes', 'wpadept_add_meeting_metaboxes');
 
 // Add the Course Meta Boxes
 
-function add_meeting_metaboxes() {
-    add_meta_box('wpt_meeting_fields', 'Meetings Other details', 'wpt_meeting_fields', 'meetings', 'normal', 'high');
+function wpadept_add_meeting_metaboxes() {
+    add_meta_box('wpt_meeting_fields', 'Meetings Other details', 'wpadept_meeting_fields', 'meetings', 'normal', 'high');
 }
 
-function wpt_meeting_fields() {
+function wpadept_meeting_fields() {
     global $post, $wpdb;
 
-    $adeptlib = new WP_Lib();
+    $adeptlib = new Wpadept_Lib();
     $wpdb->show_errors();
-	
+    
     // Noncename needed to verify where the data originated
     echo '<input type="hidden" name="meetingmeta_noncename" id="meetingmeta_noncename" value="' .
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
-	
-	// Get the group_id data if its already been entered
-	$meeting_id = get_post_meta($post->ID, '_meeting_id', true);
+    
+    // Get the group_id data if its already been entered
+    $meeting_id = get_post_meta($post->ID, '_meeting_id', true);
+    $meeting_id = esc_attr($meeting_i);
     // Echo out the field
     echo '<input type="hidden" name="_meeting_id" value="' . $meeting_id . '" class="widefat" /><br/><br/>';
 
-	
-	// Get the date data if its already been entered
+    
+    // Get the date data if its already been entered
     //$date = get_post_meta($post->ID, '_date', true);
     // Echo out the field
     //echo '<b>Date :</b> <input type="text" name="_date" value="' . $date . '" class="widefat" /><br/><br/>';
 
     // Get the start_time data if its already been entered
     $start_time = get_post_meta($post->ID, '_start_time', true);
+    $start_time = esc_attr($start_time );
     //echo $start_time; exit;
     // Echo out the field
     echo '<b>Start Time : </b><input type="text" name="_start_time" value="' . $start_time . '" class="widefat" /><br/><br/>';
@@ -519,22 +547,28 @@ function wpt_meeting_fields() {
     // Get the start_time data if its already been entered
     $duration = get_post_meta($post->ID, '_duration', true);
     // Echo out the field
+    $duration = esc_attr($duration);
     echo '<b>Duration : </b><input type="text" name="_duration" value="' . $duration . '" class="widefat" /><br/><br/>';
 
     $hour_length = get_post_meta($post->ID, '_hour_length', true);
+    $hour_length = esc_attr($hour_length);
     echo '<b>Hour Length : </b><input type="text" name="_hour_length" value="' . $hour_length . '" class="widefat" /><br/><br/>';
 
     $linked_instructor_id = get_post_meta($post->ID, '_instructor', true);
     $all_instructors = $wpdb->get_results("select p.* , pm.meta_value as instructor_id from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta pm where pm.post_id=p.ID and pm.meta_key='_adept_api_id' and post_type='dt_team' and post_status in ('publish', 'draft') ");
+    
     if(empty($linked_instructor_ids)) {
         $linked_instructor_ids = 0;
     }
     $html_option = ""; 
+    
     foreach($all_instructors as $ins ) {
         $selected = "";
         if( $linked_instructor_id == $ins->instructor_id ) {
             $selected = " selected ";
         }
+        $ins->ID = esc_attr($ins->ID );
+        $ins->post_title = esc_attr($ins->post_title );
         $html_option .= "<option $selected value='{$ins->ID}'> {$ins->post_title}</option>";
     }
 
@@ -549,6 +583,7 @@ function wpt_meeting_fields() {
     // Get the status data if its already been entered
     $status = get_post_meta($post->ID, '_status', true);
     // Echo out the field
+    $status = esc_attr($status );
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
 
     // Get the web_conference data if its already been entered
@@ -560,25 +595,28 @@ function wpt_meeting_fields() {
     // Get the address data if its already been entered
     $address = get_post_meta($post->ID, '_address', true);
     // Echo out the field
+    $address = esc_attr($address );
     echo '<b>Address :</b> <textarea  name="_address" class="widefat">' . $address . '</textarea><br/><br/>';
     
     $category = get_post_meta($post->ID, '_category', true);
+    $category = esc_attr($category);
     echo '<b>Category :</b> <input type="text" name="_category" class="widefat" value="'.$category.'" /><br/><br/>';
 
 
 
     $group_id_wp = get_post_meta($post->ID, '_group_id', true);
     $str = $adeptlib->unstringify($group_id_wp);
-
+    $str = esc_attr($str);
     echo '<b>Group Id(WordPress):</b> <input type="text" name="_group_id" value="' . $str . '" class="widefat" /><br/><br/>';
     
     $group_id_adept = get_post_meta($post->ID, '_group_id_adept', true);
+    $group_id_adept = esc_attr( $group_id_adept );
     echo "<b>Group Id(Adept):</b> $group_id_adept <br/><br/>";
 
 }
 
-function wpt_save_meeting_meta($post_id, $post) {
-	global $wpdb;
+function wpadept_save_meeting_meta($post_id, $post) {
+    global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if(!isset($_POST['meetingmeta_noncename'])) return;
@@ -590,40 +628,39 @@ function wpt_save_meeting_meta($post_id, $post) {
     if (!current_user_can('edit_post', $post->ID))
         return $post->ID;
 
-    $adeptlib = new WP_Lib();
+    $adeptlib = new Wpadept_Lib();
 
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post_id;
-    $meeting_title = $_POST['post_title'];
-    $description = $_POST['content'];
-    $date = $_POST['_date'];
-    $start_time = $_POST['_start_time'];
-    $end_time = $_POST['_end_time'];
+    $meeting_title = sanitize_text_field($_POST['post_title'] );
+    $description = sanitize_text_field($_POST['content']);
+    $date = sanitize_text_field($_POST['_date']);
+    $start_time = sanitize_text_field($_POST['_start_time']);
+    $end_time = sanitize_text_field($_POST['_end_time']);
     //$web_conference = $_POST['_web_conference'];
-    $address = $_POST['_address'];
-    $meeting_id = $_POST['_meeting_id'];
-    $status = $_POST['_status'];
-    $group_id = $_POST['_group_id'];
-    $group_id = $adeptlib->stringify($group_id);
-    $check_address = $_POST['_check_address'];
-    $user_id = $_POST['_user_id'];
-    $kind = $_POST['_kind'];
-    $video_conference_account_id = $_POST['_video_conference_account_id'];
-    $video_conference_url = $_POST['_video_conference_url'];
-    $video_conference_uid = $_POST['_video_conference_uid'];
+    $address = sanitize_text_field($_POST['_address']);
+    $meeting_id = sanitize_text_field($_POST['_meeting_id']);
+    $status = sanitize_text_field($_POST['_status']);
+    $group_id = sanitize_text_field($_POST['_group_id']);
+    $group_id = sanitize_text_field($adeptlib->stringify($group_id));
+    $check_address = sanitize_text_field($_POST['_check_address']);
+    $user_id = sanitize_text_field($_POST['_user_id']);
+    $kind = sanitize_text_field($_POST['_kind']);
+    $video_conference_account_id = sanitize_text_field($_POST['_video_conference_account_id']);
+    $video_conference_url = sanitize_text_field($_POST['_video_conference_url']);
+    $video_conference_uid = sanitize_text_field($_POST['_video_conference_uid']);
 
 
-    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
-    include_once MY_PLUGIN_PATH . "lib/lib.php";
-    $adept = new WP_Lib();
+    //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
+    $adept = new Wpadept_Lib();
     $adept_api_url_value = get_option('adept_api_url');
-	
+    
     $get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_meeting_id'");
-	// var_dump($get_existing_post_id); die();
-	$originalPostId = $get_existing_post_id[0]->meta_value;;
+    // var_dump($get_existing_post_id); die();
+    $originalPostId = $get_existing_post_id[0]->meta_value;;
     $curl = $adept_api_url_value . 'update_meeting/'.$originalPostId;
-	//echo $curl; die();
-	$data = "id=" . $post_id . "&access_token=" . $adept_access_token_value . "&meeting[title]=" . $course_title
+    //echo $curl; die();
+    $data = "id=" . $post_id . "&access_token=" . $adept_access_token_value . "&meeting[title]=" . $course_title
             . "&meeting[comment]=" . $description . "&meeting[date]=" . $date
             . "&meeting[start_time]=" . $start_time . "&meeting[end_time]=" . $end_time
             . "&meeting[address]=" . $allow_discounts . "&meeting[class_id]=" . $meeting_id
@@ -631,123 +668,60 @@ function wpt_save_meeting_meta($post_id, $post) {
             . "&meeting[check_address]=" . $check_address . "&meeting[group_id]=" . $group_id
             . "&meeting[user_id]=" . $user_id . "&meeting[kind]=" . $kind
             . "&meeting[video_conference_account_id]=" . $video_conference_account_id . "&meeting[video_conference_url]=" . $video_conference_url. "&meeting[video_conference_uid]=" . $video_conference_uid;
-	
+    
     $ch = curl_init($curl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		'Content-Type: application/x-www-form-urlencoded',
-		'Content-Length: ' . strlen($data))
-	);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	//$result = curl_exec($ch);
-//var_dump($result); die();
-	
-	$resultdata = json_decode($result);
-//var_dump($resultdata); die();
-	
-	// OK, we're authenticated: we need to find and save the data
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/x-www-form-urlencoded',
+        'Content-Length: ' . strlen($data))
+    );
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    //not executing curl, disabled until testing done
+    //$result = curl_exec($ch);
+    //var_dump($result); die();
+    
+    $resultdata = json_decode($result);
+    
+    // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
-    $meeting_meta['_date'] = $_POST['_date'];
-    $meeting_meta['_start_time'] = $_POST['_start_time'];
-    $meeting_meta['_end_time'] = $_POST['_end_time'];
-    //$meeting_meta['_web_conference'] = $_POST['_web_conference'];
-    $meeting_meta['_address'] = $_POST['_address'];
-    $meeting_meta['_meeting_id'] = $_POST['_meeting_id'];
-    $meeting_meta['_status'] = $_POST['_status'];
-    $meeting_meta['_group_id'] = $_POST['_group_id'];
-    $meeting_meta['_check_address'] = $_POST['_check_address'];
-    $meeting_meta['_user_id'] = $_POST['_user_id'];
-    $meeting_meta['_kind'] = $_POST['_kind'];
-    $meeting_meta['_video_conference_account_id'] = $_POST['_video_conference_account_id'];
-    $meeting_meta['_video_conference_url'] = $_POST['_video_conference_url'];
-    $meeting_meta['_video_conference_uid'] = $_POST['_video_conference_uid'];
+    $meeting_meta['_date'] = sanitize_text_field($_POST['_date']);
+    $meeting_meta['_start_time'] = sanitize_text_field($_POST['_start_time']);
+    $meeting_meta['_end_time'] = sanitize_text_field($_POST['_end_time']);
+    $meeting_meta['_address'] = sanitize_text_field($_POST['_address']);
+    $meeting_meta['_meeting_id'] = sanitize_text_field($_POST['_meeting_id']);
+    $meeting_meta['_status'] = sanitize_text_field($_POST['_status']);
+    $meeting_meta['_group_id'] = sanitize_text_field($_POST['_group_id']);
+    $meeting_meta['_check_address'] = sanitize_text_field($_POST['_check_address']);
+    $meeting_meta['_user_id'] = sanitize_text_field($_POST['_user_id']);
+    $meeting_meta['_kind'] = sanitize_text_field($_POST['_kind']);
+    $meeting_meta['_video_conference_account_id'] = sanitize_text_field($_POST['_video_conference_account_id']);
+    $meeting_meta['_video_conference_url'] = sanitize_text_field($_POST['_video_conference_url']);
+    $meeting_meta['_video_conference_uid'] = sanitize_text_field($_POST['_video_conference_uid']);
 
 
     // Add values of $course_meta as custom fields
 
     foreach ($meeting_meta as $key => $value) { // Cycle through the $course_meta array!
+
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
         
         update_post_meta($post->ID, $key, $value);
-        /*$value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
-        if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
-            update_post_meta($post->ID, $key, $value);
-        } else { // If the custom field doesn't have a value
-            add_post_meta($post->ID, $key, $value);
-        }
-        if (!$value)
-            delete_post_meta($post->ID, $key); // Delete if blank*/
+
     }
 }
 
-add_action('save_post', 'wpt_save_meeting_meta', 1, 2); // save the custom fields
+add_action('save_post', 'wpadept_save_meeting_meta', 1, 2); // save the custom fields
 
 
-function wp_meetings_shortcode($atts) {
-	$pull_quote_atts = shortcode_atts( array(
-        'group_id' => 'Group ID'
-    ), $atts );
-	
-    $args = array(
-        'offset' => 0,
-        'category' => '',
-        'category_name' => '',
-        'orderby' => 'date',
-        'order' => 'DESC',
-        'post_type' => 'meetings',
-        'post_status' => 'publish',
-        'suppress_filters' => true,
-		'meta_query' => array (
-		    array (
-			  'key' => '_group_id',
-			  'value' => $pull_quote_atts['group_id'],
-		    )
-		  )
-    );
-    $meetings_array = get_posts($args);
-    echo "<div class='meeting-loop'>";
-    foreach ($meetings_array as $meeting) {
-        $date = get_post_meta($meeting->ID, '_date');
-        $start_time = get_post_meta($meeting->ID, '_start_time');
-        $end_time = get_post_meta($meeting->ID, '_end_time');
-        $status = get_post_meta($meeting->ID, '_status');
-        //$web_conference = get_post_meta($meeting->ID, '_web_conference');
-        $address = get_post_meta($meeting->ID, '_address');
-        $class_id = get_post_meta($meeting->ID, '_class_id');
-        $group_id = get_post_meta($meeting->ID, '_group_id');
-        $check_address = get_post_meta($meeting->ID, '_check_address');
+add_action('init', 'wpadept_create_instructors');
 
-
-        echo '<ul class="meeting">
-			<li class="title"> ' . $meeting->post_title . '</li>
-			<li class="content"> ' . $meeting->post_content . ' </li>
-			<li class="date">' . $date[0] . '</li>
-			<li class="start_time">' . $start_time[0] . '</li>
-			<li class="end_time">' . $end_time[0] . '</li>
-			<li class="status">' . $status[0] . '</li>
-			<li class="web_conference">' . $web_conference[0] . '</li>
-			<li class="address">' . $address[0] . '</li>
-			<li class="class_id">' . $class_id[0] . '</li>
-			<li class="group_id">' . $group_id[0] . ' </li>
-			<li class="check_address">' . $check_address[0] . ' </li>
-			</ul>
-			';
-    }
-    echo "</div>";
-}
-
-
-//add_shortcode('meetings', 'wp_meetings_shortcode');
-
-add_action('init', 'create_instructors');
-
-function create_instructors() {
+function wpadept_create_instructors() {
    
     //get list of all the post_types
     $post_types = get_post_types();
@@ -781,15 +755,15 @@ function create_instructors() {
     );
 }
 
-add_action('add_meta_boxes', 'add_instructor_metaboxes');
+add_action('add_meta_boxes', 'wpadept_add_instructor_metaboxes' );
 
 // Add the Course Meta Boxes
 
-function add_instructor_metaboxes() {
-    add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpt_instructor_fields', 'dt_team', 'normal', 'high');
+function wpadept_add_instructor_metaboxes() {
+    add_meta_box('wpt_instructor_fields', 'Instructor Other details', 'wpadept_instructor_fields', 'dt_team', 'normal', 'high');
 }
 
-function wpt_instructor_fields() {
+function wpadept_instructor_fields() {
     global $post;
 
     // Noncename needed to verify where the data originated
@@ -804,19 +778,24 @@ function wpt_instructor_fields() {
     // Get the group_id data if its already been entered
     $instructor_id = get_post_meta($post->ID, '_instructor_id', true);
     // Echo out the field
+    $instructor_id = esc_attr($instructor_id);
     echo '<input type="hidden" name="_instructor_id" value="' . $instructor_id . '" class="widefat" /><br/><br/>';
 
     
     // Get the avatar data if its already been entered
     $avatar = get_post_meta($post->ID, '_avatar', true);
+    $avatar = esc_attr($avatar);
     // Echo out the field
     echo '<b>Avatar : </b><input type="text" name="_avatar" value="' . $avatar . '" class="widefat" /><br/><br/>';
 
     
     echo '<b>Instructor Courses :</b><br/><br/>';   
-    $all_courses = get_all_of_post_type_2( 'courses' );
+    $all_courses = wpadept_get_all_of_post_type_2( 'courses' );
 
-    $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' , true ) ;
+    $linked_group_ids = get_post_meta( $post->ID , '_course_ids' , true );
+    if(empty($linked_group_ids)) {
+        $linked_group_ids = array();
+    }
     //pre($linked_group_ids);
     //pre($all_courses);
 
@@ -849,7 +828,8 @@ HTML;
     
 }
 
-function wpt_save_instructor_meta($post_id, $post) {
+function wpadept_save_instructor_meta($post_id, $post) {
+
     global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
@@ -866,16 +846,17 @@ function wpt_save_instructor_meta($post_id, $post) {
     // We'll put it into an array to make it easier to loop though.
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post->ID;
-    $email = $_POST['_email'];
-    $full_name = $_POST['_full_name'];
-    $avatar = $_POST['_avatar'];
-    $bio = $_POST['_bio'];
+    $email = sanitize_text_field($_POST['_email']);
+    $full_name = sanitize_text_field($_POST['_full_name']);
+    $avatar = sanitize_text_field($_POST['_avatar']);
+    $bio = sanitize_text_field($_POST['_bio']);
     
-    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
-    include_once MY_PLUGIN_PATH . "lib/lib.php";
-    $adept = new WP_Lib();
+    //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
+    $adept = new Wpadept_Lib();
     $adept_api_url_value = get_option('adept_api_url');
-    $get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_post_id'");        $oripostidStr = $get_existing_post_id[0]->meta_value;
+    $qry = $wpdb->prepare("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=%d  AND meta_key='_post_id'" , $post->ID);
+    $get_existing_post_id = $wpdb->get_results($qry);
+    $oripostidStr = $get_existing_post_id[0]->meta_value;
     $oripostidArray = explode('_',$oripostidStr);
     $originalPostId = $oripostidArray[1];
     //echo $originalPostId; die;
@@ -903,10 +884,10 @@ function wpt_save_instructor_meta($post_id, $post) {
     // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
 
-    $instructor_meta['_instructor_id'] = $_POST['_instructor_id'];
-    $instructor_meta['_dt_teammate_options_mail'] = $_POST['_dt_teammate_options_mail'];
+    $instructor_meta['_instructor_id'] = sanitize_text_field($_POST['_instructor_id']);
+    $instructor_meta['_dt_teammate_options_mail'] = sanitize_text_field($_POST['_dt_teammate_options_mail']);
 
-    $instructor_meta['_avatar'] = $_POST['_avatar'];
+    $instructor_meta['_avatar'] = sanitize_text_field($_POST['_avatar']);
   
 
     // Add values of $course_meta as custom fields
@@ -914,6 +895,7 @@ function wpt_save_instructor_meta($post_id, $post) {
     foreach ($instructor_meta as $key => $value) { // Cycle through the $course_meta array!
         if ($post->post_type == 'revision')
             return; // Don't store custom data twice
+
         $value = implode(',', (array) $value); // If $value is an array, make it a CSV (unlikely)
         if (get_post_meta($post->ID, $key, FALSE)) { // If the custom field already has a value
             update_post_meta($post->ID, $key, $value);
@@ -926,12 +908,12 @@ function wpt_save_instructor_meta($post_id, $post) {
 }
 
 
-add_action('save_post', 'wpt_save_instructor_meta', 1, 2); // save the custom fields
+add_action('save_post', 'wpadept_save_instructor_meta', 1, 2); // save the custom fields
 
 
-add_action('init', 'create_groups');
+add_action('init', 'wpadept_create_groups');
 
-function create_groups() {
+function wpadept_create_groups() {
     register_post_type('groups', array(
         'labels' => array(
             'name' => __('Groups'),
@@ -952,20 +934,20 @@ function create_groups() {
         'public' => true,
         'has_archive' => true,
         'supports' => array('title', 'editor'),
-        'register_meta_box_cb' => 'add_group_metaboxes'
+        'register_meta_box_cb' => 'wpadept_add_group_metaboxes'
             )
     );
 }
 
-add_action('add_meta_boxes', 'add_group_metaboxes');
+add_action('add_meta_boxes', 'wpadept_add_group_metaboxes');
 
 // Add the Course Meta Boxes
 
-function add_group_metaboxes() {
-    add_meta_box('wpt_group_fields', 'Group Other details', 'wpt_group_fields', 'groups', 'normal', 'high');
+function wpadept_add_group_metaboxes() {
+    add_meta_box('wpt_group_fields', 'Group Other details', 'wpadept_group_fields', 'groups', 'normal', 'high');
 }
 
-function wpt_group_fields() {
+function wpadept_group_fields() {
     global $post;
 
     // Noncename needed to verify where the data originated
@@ -973,25 +955,26 @@ function wpt_group_fields() {
     wp_create_nonce(plugin_basename(__FILE__)) . '" />';
 
     // Get the email data if its already been entered
-    $tags = get_post_meta($post->ID, '_tags', true);
-    $tags = implode(", ", $tags);
+    $tags = get_post_meta( $post->ID, '_tags', true );
+    $tags = implode( ", ", $tags );
     // Echo out the field
-
+    $tags = esc_attr($tags);
     echo '<b>Tags :</b> <input type="text" name="_tags" class="widefat" value="' . $tags . '" /><br/><br/>';
-	
-	// Get the group_id data if its already been entered
-	$group_id = get_post_meta($post->ID, '_group_id', true);
+    
+    // Get the group_id data if its already been entered
+    $group_id = get_post_meta($post->ID, '_group_id', true);
     // Echo out the field
+    $group_id = esc_attr($group_id);
     echo '<input type="hidden" name="_group_id" value="' . $group_id . '" class="widefat" /><br/><br/>';
 
 
     // Get the course_fee data if its already been entered
     $course_fee = get_post_meta($post->ID, '_course_fee', true);
-    // Echo out the field
+    $course_fee = esc_attr($course_fee);
     echo '<b>Course Fee :</b> <input type="text" name="_course_fee" value="' . $course_fee . '" class="widefat" /><br/><br/>';
-	
-	echo '<b>Group Courses :</b><br/><br/>';	
-	$all_courses = get_all_of_post_type( 'courses' );
+    
+    echo '<b>Group Courses :</b><br/><br/>';    
+    $all_courses = wpadept_get_all_of_post_type( 'courses' );
 
     $linked_group_ids = get_post_meta(  $post->ID,'_course_ids' ) ;;
 
@@ -1017,51 +1000,53 @@ HTML;
     // Get the start_date data if its already been entered
     $start_date = get_post_meta($post->ID, '_start_date', true);
     // Echo out the field
+    $start_date = esc_attr($start_date);
     echo '<b>Start Date :</b> <input type="text" name="_start_date" value="' . $start_date . '" class="widefat" /><br/><br/>';
 
     // Get the end_date data if its already been entered
-    $end_date = get_post_meta($post->ID, '_end_date', true);
-    // Echo out the field
+    $end_date = get_post_meta( $post->ID, '_end_date', true );
+    $end_date = esc_attr($end_date);
     echo '<b>End Date :</b> <input type="text" name="_end_date" value="' . $end_date . '" class="widefat" /><br/><br/>';
 
     // Get the reg_date data if its already been entered
-    $reg_date = get_post_meta($post->ID, '_reg_date', true);
-    // Echo out the field
+    $reg_date = get_post_meta( $post->ID, '_reg_date', true );
+    $reg_date = esc_attr($reg_date);
     echo '<b>Reg Date:</b> <input type="text" name="_reg_date" value="' . $reg_date . '" class="widefat" /><br/><br/>';
 
     // Get the seats data if its already been entered
     $seats = get_post_meta($post->ID, '_seats', true);
-    // Echo out the field
+    $seats = esc_attr($seats);
     echo '<b>Seats :</b> <input type="text" name="_seats" value="' . $seats . '" class="widefat" /><br/><br/>';
 
     // Get the seats data if its already been entered
     $address = get_post_meta($post->ID, '_address', true);
-    // Echo out the field
+    $address = esc_attr($address);
     echo '<b>Address :</b> <input type="text" name="_address" value="' . $address . '" class="widefat" /><br/><br/>';
 
     // Get the lessons data if its already been entered
     $lessons = get_post_meta($post->ID, '_lessons', true);
-    // Echo out the field
+    $lessons = esc_attr($lessons);
     echo '<b>Lessons :</b> <input type="text" name="_lessons" value="' . $lessons . '" class="widefat" /><br/><br/>';
 
     // Get the status data if its already been entered
     $status = get_post_meta($post->ID, '_status', true);
-    // Echo out the field
+    $status = esc_attr($status);
     echo '<b>Status :</b> <input type="text" name="_status" value="' . $status . '" class="widefat" /><br/><br/>';
     
     $location = get_post_meta($post->ID, '_group_locations', true);
-    $adept = new WP_Lib();
+    $adept = new Wpadept_Lib();
     $location = $adept->unstringify($location);
     echo '<b>Location:</b> <input type="text" name="_group_locations" value="' . $location . '" class="widefat"   /><br/><br/>';
     
     $level = get_post_meta($post->ID, '_group_level', true);
+    $level = esc_attr( $level );
     echo '<b>Level:</b> <input type="text" name="_group_level" value="' . $level . '" class="widefat"   /><br/><br/>';
 
 }
 
 
-function wpt_save_group_meta($post_id, $post) {
-	global $wpdb;
+function wpadept_save_group_meta($post_id, $post) {
+    global $wpdb;
     // verify this came from the our screen and with proper authorization,
     // because save_post can be triggered at other times
     if(!isset($_POST['groupmeta_noncename'])) return;
@@ -1075,95 +1060,97 @@ function wpt_save_group_meta($post_id, $post) {
 
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post->ID;
-    $group_title = $_POST['post_title'];
-    $description = $_POST['post_content'];
-    $tags = $_POST['_tags'];
-    $course_fee = $_POST['_course_fee'];
-    $start_date = $_POST['_start_date'];
-    $end_date = $_POST['_end_date'];
-    $reg_date = $_POST['_reg_date'];
-    $seats = $_POST['_seats'];
-    $lessons = $_POST['_lessons'];
-    $status = $_POST['_status'];
+    $group_title = sanitize_text_field( $_POST['post_title'] );
+    $description = sanitize_text_field( $_POST['post_content']);
+    $tags = sanitize_text_field( $_POST['_tags']);
+    $course_fee = sanitize_text_field( $_POST['_course_fee']);
+    $start_date = sanitize_text_field( $_POST['_start_date']);
+    $end_date = sanitize_text_field( $_POST['_end_date']);
+    $reg_date = sanitize_text_field( $_POST['_reg_date']);
+    $seats = sanitize_text_field( $_POST['_seats']);
+    $lessons = sanitize_text_field( $_POST['_lessons']);
+    $status = sanitize_text_field( $_POST['_status']);
 
-    include_once MY_PLUGIN_PATH . "lib/lib.php";
-    $adept = new WP_Lib();
+    //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
+    $adept = new Wpadept_Lib();
 
 
-    define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
     $adept_api_url_value = get_option('adept_api_url');
-	
-	$get_existing_post_id = $wpdb->get_results("select meta_value from " . $wpdb->prefix . "postmeta" . " where post_id=".$post->ID." AND meta_key='_group_id'");
-	//var_dump($get_existing_post_id);
-	$oripostidStr = $get_existing_post_id[0]->meta_value;
-	$oripostidArray = explode('_',$oripostidStr);
-	$originalPostId = $oripostidArray[1];
-	//echo $originalPostId; die();
+    
+    $qry = $wpdb->prepare( "select meta_value from " . $wpdb->prefix . "postmeta  where post_id=%d AND meta_key='_group_id'" , $post->ID );
+    $get_existing_post_id = $wpdb->get_results( $qry );
+    //var_dump($get_existing_post_id);
+    $oripostidStr = $get_existing_post_id[0]->meta_value;
+    $oripostidArray = explode('_',$oripostidStr);
+    $originalPostId = $oripostidArray[1];
+    //echo $originalPostId; die();
     $curl = $adept_api_url_value . 'update_group/' .$originalPostId;
-	//echo $curl; die(); 
+    //echo $curl; die(); 
     $data = "id=" . $email . "&access_token=" . $adept_access_token_value . "&group[group_title]=" . $group_title
             . "&group[description]=" . $description . "&group[tags]=" . $tags
             . "&group[course_fee]=". "&group[start_date]=" . $start_date . "&group[end_date]=" . $end_date
             . "&group[reg_date]=" . $reg_date .  "&group[address]=" . $address . "&group[seats]=" . $seats
             . "&group[lessons]=" . $lessons . "&group[status]=" . $status;
 
-	//$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
+    //$data = "access_token=fa547f76ea1ebedbceb6b1ab674040bf&course[course_title]=test123456&course[teaser]=test";
 //echo $data; die();
    // $temp = $adept->postdata($curl, $data);
-	$ch = curl_init($curl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-		'Content-Type: application/x-www-form-urlencoded',
-		'Content-Length: ' . strlen($data))
-	);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-	//$result = curl_exec($ch);
-	//var_dump($result); die();
-	
-	$resultdata = json_decode($result);
-	//var_dump($resultdata); die();
-	// OK, we're authenticated: we need to find and save the data
+    $ch = curl_init($curl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/x-www-form-urlencoded',
+        'Content-Length: ' . strlen($data))
+    );
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    //not executing curl
+    //$result = curl_exec($ch);
+    //var_dump($result); die();
+    
+    $resultdata = json_decode($result);
+    //var_dump($resultdata); die();
+    // OK, we're authenticated: we need to find and save the data
     // We'll put it into an array to make it easier to loop though.
-	
-	
-    $group_meta['_group_id'] = $_POST['_group_id'];
-    $group_meta['_tags'] = $_POST['_tags'];
-    $group_meta['_course_fee'] = $_POST['_course_fee'];
+    
+    
+    $group_meta['_group_id'] = sanitize_text_field($_POST['_group_id']);
+    $group_meta['_tags'] = sanitize_text_field($_POST['_tags']);
+    $group_meta['_course_fee'] = sanitize_text_field($_POST['_course_fee']);
     /*
     $course_meta['_taxable'] = $_POST['_taxable'];
     $course_meta['_published'] = $_POST['_published'];
     $course_meta['_allow_bookings'] = $_POST['_allow_bookings'];
      * 
      */
-    $group_meta['_start_date'] = $_POST['_start_date'];
-    $group_meta['_end_date'] = $_POST['_end_date'];
-    $group_meta['_reg_date'] = $_POST['_reg_date'];
-	$group_meta['_address'] = $_POST['_address'];
-    $group_meta['_seats'] = $_POST['_seats'];
+    $group_meta['_start_date'] = sanitize_text_field($_POST['_start_date']);
+    $group_meta['_end_date'] = sanitize_text_field($_POST['_end_date']);
+    $group_meta['_reg_date'] = sanitize_text_field($_POST['_reg_date']);
+    $group_meta['_address'] = sanitize_text_field($_POST['_address']);
+    $group_meta['_seats'] = sanitize_text_field($_POST['_seats']);
     /*
     $course_meta['_hide_if_full'] = $_POST['_hide_if_full'];
     $course_meta['_show_seats_left'] = $_POST['_show_seats_left'];
      * 
      */
-    $group_meta['_lessons'] = $_POST['_lessons'];
-    $group_meta['_status'] = $_POST['_status'];
+    $group_meta['_lessons'] = sanitize_text_field($_POST['_lessons']);
+    $group_meta['_status'] = sanitize_text_field($_POST['_status']);
 
     $group_meta['_group_locations'] = $adept->stringify($_POST['_group_locations']);
-    $group_meta['_group_level'] = $_POST['_group_level'];
+    $group_meta['_group_level'] = sanitize_text_field($_POST['_group_level']);
 
-	$courses = $_POST['course_ids'];
-		delete_post_meta( $post->ID , '_course_ids');
+    $courses = $_POST['course_ids'];
+        delete_post_meta( $post->ID , '_course_ids');
     // Add values of $course_meta as custom fields
-	if ( 0 < count($courses) ) {
+    if ( 0 < count($courses) ) {
             foreach ( $courses as $course_id ) {
                 # We use add post meta with 4th parameter false to let us link
                 # books to as many authors as we want.
+                $course_id = sanitize_text_field( $course_id );
                 add_post_meta( $post->ID , '_course_ids', $course_id );
             }
-        }
+    }
     // Add values of $course_meta as custom fields
 
     foreach ($group_meta as $key => $value) { // Cycle through the $course_meta array!
@@ -1180,9 +1167,10 @@ function wpt_save_group_meta($post_id, $post) {
     }
 }
 
-add_action('save_post', 'wpt_save_group_meta', 1, 2); // save the custom fields
+add_action('save_post', 'wpadept_save_group_meta', 1, 2); // save the custom fields
 
-function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null) {
+function wpadept_add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null) {
+
     global $menu, $admin_page_hooks, $_registered_pages, $_parent_pages;
 
     $menu_slug = plugin_basename($menu_slug);
@@ -1221,8 +1209,9 @@ function add_wmenu_page($page_title, $menu_title, $capability, $menu_slug, $func
     return $hookname;
 }
 
-function add_publish_confirmation(){
-	global $post;
+function wpadept_add_publish_confirmation(){
+
+    global $post;
 
     if(is_object($post)) {
         
@@ -1235,28 +1224,27 @@ function add_publish_confirmation(){
         echo '}';     
         echo '</script>'; } 
     }
-} 
+}
 
-add_action('admin_footer', 'add_publish_confirmation');
+//add_action('admin_footer', 'wpadept_add_publish_confirmation');
 
-	new WP_Adept_LMS();
 
 
 //error nag for sitepress plugin
-add_action("init" , "adept_sitepress_plugin_notice");
-function adept_sitepress_plugin_notice() {
+add_action("init" , "wpadept_sitepress_plugin_notice");
+function wpadept_sitepress_plugin_notice() {
     
     
-    if(!wpa_is_wpml_installed())
+    if(!wpadept_is_wpml_installed())
     {
 
-        //add_action( 'admin_notices', 'adept_sitepress_plugin_notice_nag' );
+        //add_action( 'admin_notices', 'wpadept_sitepress_plugin_notice_nag' );
     }
     
-    add_action( 'admin_notices', 'wpa_nags' );
+    add_action( 'admin_notices', 'wpadept_nags' );
 }
 
-function adept_sitepress_plugin_notice_nag() {
+function wpadept_sitepress_plugin_notice_nag() {
 
     ?>
     <div class="notice notice-error ">
@@ -1269,7 +1257,7 @@ function adept_sitepress_plugin_notice_nag() {
 }
 
 
-function wpa_nags() {
+function wpadept_nags() {
     global $pagenow;
     global $page;
     if($pagenow == "admin.php") {
@@ -1277,7 +1265,7 @@ function wpa_nags() {
             if($_GET["page"] == "adept_lms" || $_GET["page"] == "adept_lms_sync")  {
 
                 echo '<div class="notice notice-error ">
-                        Please ensure that you have setup server cron manually for the given URLs: <em>'.wpa_get_cron_url().' , '.wpa_get_cron_meeting_url().' </em>
+                        Please ensure that you have setup server cron manually for the given URLs: <em>'.wpadept_get_cron_url().' , '.wpadept_get_cron_meeting_url().' </em>
                     </div>';
             }
         }
@@ -1285,19 +1273,19 @@ function wpa_nags() {
 
 }
 //enqueing styles and scripts
-function wpa_custom_wp_admin_style() {
+function wpadept_custom_wp_admin_style() {
     wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
     wp_enqueue_script( 'select2-js',  plugins_url("js/select2.js" , __FILE__) , array("jquery") );
-    wp_enqueue_style("select2-css" , plugins_url("js/select2.css" , __FILE__) );
+    wp_enqueue_style("select2-css" , plugins_url("css/select2.css" , __FILE__) );
     wp_enqueue_style("adept" , plugins_url("css/style.css" , __FILE__) );
 }
-add_action( 'admin_enqueue_scripts', 'wpa_custom_wp_admin_style' );
+add_action( 'admin_enqueue_scripts', 'wpadept_custom_wp_admin_style' );
 
 
 //adding necesary js variables in the footer
-add_action("admin_footer" , "wpa_footer_js");
+add_action("admin_footer" , "wpadept_footer_js");
 
-function wpa_footer_js() {
+function wpadept_footer_js() {
     echo "<script>
         var ADEPT_SITE_URL = '".site_url()."';
     </script>";
@@ -1305,25 +1293,26 @@ function wpa_footer_js() {
 
 
 
-define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define("WPA_PLUGIN_FILE" , __FILE__);
 
+function wpadept_is_wpml_installed() {
 
-function wpa_is_wpml_installed() {
-
-    $option = get_option("active_plugins");
-    
+    $option = get_option("active_plugins");    
     return in_array( "sitepress-multilingual-cms/sitepress.php", $option );
 
 }
 
-include_once MY_PLUGIN_PATH . "lib/lib.php";
-include_once MY_PLUGIN_PATH . "admin/admin_sync_page.php";
-include_once MY_PLUGIN_PATH . "includes/general_functions.php";
-include_once MY_PLUGIN_PATH . "includes/ajax-functions.php";
-include_once MY_PLUGIN_PATH . "lib/splitHelper.php";
-
-$adept = new WP_Lib();
 
 
+
+//$adept = new Wpadept_Lib();
+
+//todo
+//x rename WP_LIB
+//x check error_reporting
+//check metabox issue
+//x sanitize
+//x escape
+//x wpdb->prepare
+//change cron endpoints 
+//sanitization in backend setting page
 ?>

@@ -1,6 +1,8 @@
 <?php 
 
-class AWP_split_helper {
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+class Wpadept_split_helper {
 
 	function new_batch($data) {
 

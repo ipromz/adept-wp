@@ -17,7 +17,7 @@ jQuery(document).ready(function(){
 
 	adept_sync_btn_click();
 	jQuery(".group_select, .instructors_select , .wpaselect2").select2();
-	jQuery("#filter_enabled").change(filter_enabled_fn);
+	jQuery("#adept_filter_enabled").change(filter_enabled_fn);
 	filter_enabled_fn();
 });
 
@@ -76,7 +76,7 @@ var ADEPT_CATEGORIES_LIST = [];
 
 function filter_enabled_fn() {
 
-	if(jQuery("#filter_enabled").prop("checked")) {
+	if(jQuery("#adept_filter_enabled").prop("checked")) {
 		jQuery("#category_filters").removeClass("hidden");
 		adept_cat_filter_ajax();
 	}
