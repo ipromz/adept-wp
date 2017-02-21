@@ -9,8 +9,8 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-error_reporting(E_ALL); 
-ini_set('display_errors', 1);
+/*error_reporting(E_ALL); 
+ini_set('display_errors', 1);*/
 
 define('WPADEPT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define("WPADEPT_PLUGIN_FILE" , __FILE__);
@@ -353,14 +353,14 @@ function wpadept_save_course_meta($post_id, $post) {
 
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post_id;
-    $course_title = $_POST['post_title'];
-    $teaser = $_POST['post_excerpt'];
-    $description = $_POST['content'];
-    $tags = $_POST['_tags'];
-    $course_fee = $_POST['_course_fee'];
-    $sku = $_POST['_sku'];
-    $subscription = $_POST['_subscription'];
-    $course_category_id = $_POST['tax_input']['tax_input'][0];
+    $course_title = sanitize_text_field($_POST['post_title']);
+    $teaser = wp_kses_post($_POST['post_excerpt']);
+    $description = wp_kses_post($_POST['content']);
+    $tags = sanitize_text_field($_POST['_tags']);
+    $course_fee = sanitize_text_field($_POST['_course_fee']);
+    $sku = sanitize_text_field($_POST['_sku']);
+    $subscription = sanitize_text_field($_POST['_subscription']);
+    $course_category_id = sanitize_text_field($_POST['tax_input']['tax_input'][0]);
     //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
     $adept = new Wpadept_Lib();
     $adept_api_url_value = get_option('adept_api_url');
@@ -1061,7 +1061,7 @@ function wpadept_save_group_meta($post_id, $post) {
     $adept_access_token_value = get_option('adept_access_token');
     $postid = $post->ID;
     $group_title = sanitize_text_field( $_POST['post_title'] );
-    $description = sanitize_text_field( $_POST['post_content']);
+    $description = wp_kses_post( $_POST['post_content']);
     $tags = sanitize_text_field( $_POST['_tags']);
     $course_fee = sanitize_text_field( $_POST['_course_fee']);
     $start_date = sanitize_text_field( $_POST['_start_date']);
@@ -1252,8 +1252,6 @@ function wpadept_sitepress_plugin_notice_nag() {
     </div>
     <?php
 
-    //if()
-
 }
 
 
@@ -1272,6 +1270,7 @@ function wpadept_nags() {
     }
 
 }
+
 //enqueing styles and scripts
 function wpadept_custom_wp_admin_style() {
     wp_enqueue_script( "adeptwp", plugins_url("js/script.js" , __FILE__), "jquery");
@@ -1302,17 +1301,13 @@ function wpadept_is_wpml_installed() {
 }
 
 
-
-
-//$adept = new Wpadept_Lib();
-
 //todo
 //x rename WP_LIB
 //x check error_reporting
-//check metabox issue
+//x check metabox issue
 //x sanitize
 //x escape
 //x wpdb->prepare
-//change cron endpoints 
-//sanitization in backend setting page
+//x change cron endpoints 
+//x sanitization in backend setting page
 ?>

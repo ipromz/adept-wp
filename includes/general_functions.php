@@ -2,24 +2,24 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if(!function_exists("pre")) {
-	function pre($arr) {
+if(!function_exists("wpadept_pre")) {
+	function wpadept_pre($arr) {
 		echo "<pre>";
 		print_r($arr);
 		echo "</pre>";
 	}
 }
 
-if(!function_exists("get_val")) {
+if(!function_exists("wpadept_get_val")) {
 
-	function get_val($key) {
+	function wpadept_get_val($key) {
 		return (isset($_GET[$key])) ? $_GET[$key] : "";
 	}
 
 }
 
-if(!function_exists("post_val")) {
-	function post_val($key) {
+if(!function_exists("wpadept_post_val")) {
+	function wpadept_post_val($key) {
 		return (isset($_POST[$key])) ? $_POST[$key] : "";
 	}
 }
@@ -118,7 +118,7 @@ function wpadept_get_cron_meeting_url() {
 
 
 
-function get_wp_id($post_id , $post_type) {
+function wpadept_get_wp_id($post_id , $post_type) {
 	global $wpdb;
 	return $wpdb->get_col("select ID from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where p.ID = m.post_id and post_type='$post_type' and meta_key='_adept_api_id' and meta_value='$post_id ' ");	    
 }

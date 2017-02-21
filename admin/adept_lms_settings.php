@@ -2,6 +2,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+if(!current_user_can("manage_options") ) wp_die("You are not allowed to access this");
+
 
 //include_once WPADEPT_PLUGIN_PATH . "lib/lib.php";
 $adept = new Wpadept_Lib();
@@ -9,27 +11,31 @@ $wp_adept_lms = new Wpadept_LMS();
 
 
 if (isset($_POST['wpadept_save_code'])) {
+
+    check_admin_referer( "awedpt_settings" );
        
     if (trim($_POST['email']) == '') {
         $error = 'Please enter email';
     } else {
-        $email = $_POST['email'];
+        $email = sanitize_text_field( $_POST['email'] );
     }
     if (trim($_POST['password']) == '') {
         $error = 'Please enter password';
     } else {
+        //we are not saving or echoing this field. And it might contain special characters so not sanitizing
         $password = $_POST['password'];
     }
     if (trim($_POST['account_id']) == '') {
         $error = 'Please enter Account Id';
     } else {
-        $account_id = $_POST['account_id'];
+
+        $account_id = sanitize_text_field($_POST['account_id']);
     }
 
     if (trim($_POST['author']) == '') {
         $error = 'Please enter Author';
     } else {
-        $author = $_POST['author'];
+        $author = sanitize_text_field($_POST['author']);
     }
 
    
@@ -40,16 +46,16 @@ if (isset($_POST['wpadept_save_code'])) {
     $adept_cat_filter = array();
     $adept_language = "en";
     if(isset($_POST["adept_language"])) {
-        $adept_language = $_POST["adept_language"];
+        $adept_language = sanitize_text_field($_POST["adept_language"]);
         update_option('adept_language', $adept_language);
     }
     if(isset($_POST["adept_filter_enabled"])) {
-        $adept_filter_enabled = $_POST["adept_filter_enabled"];
+        $adept_filter_enabled = sanitize_text_field($_POST["adept_filter_enabled"]);
     }
     update_option('adept_filter_enabled', $adept_filter_enabled);
 
    if(isset($_POST["adept_cat_filter"])) {
-        $adept_cat_filter = $_POST["adept_cat_filter"];
+        $adept_cat_filter = sanitize_text_field($_POST["adept_cat_filter"]);
         update_option('adept_cat_filter', $adept_cat_filter);
     }
 
@@ -60,7 +66,7 @@ if (isset($_POST['wpadept_save_code'])) {
     $data = "email=" . $email . "&password=" . $password;
 
     $temp = $adept->postdata($curl, $data);
-    //pre($temp); exit;
+
     $access_token = $temp->access_token;
     $language = $temp->language;
     $date = date('Y-m-d h:i:s', time());
@@ -73,7 +79,7 @@ if (isset($_POST['wpadept_save_code'])) {
 
             add_option('adept_api_url', $url, '', 'yes');
             add_option('adept_email', $email, '', 'yes');
-            add_option('adept_password', md5($password), '', 'yes');
+            //add_option('adept_password', md5($password), '', 'yes');
             add_option('adept_account_id', $account_id, '', 'yes');
             add_option('adept_access_token', $access_token, '', 'yes');
             //add_option('adept_language', $language, '', 'yes');
@@ -82,12 +88,12 @@ if (isset($_POST['wpadept_save_code'])) {
             //update_option('adept_filter_enabled', $adept_filter_enabled);
             //update_option('adept_cat_filter', $adept_cat_filter);
 
-            register_activation_hook(__FILE__, 'my_activation');            
+            //register_activation_hook(__FILE__, 'my_activation');            
             $success = "Api authenticated succeeded";
         } else {
             update_option('adept_api_url', $url);
             update_option('adept_email', $email);
-            update_option('adept_password', md5($password));
+            //update_option('adept_password', md5($password));
             update_option('adept_account_id', $account_id);
             update_option('adept_access_token', $access_token);
             //update_option('adept_language', $language);
@@ -188,6 +194,9 @@ echo "<script> var adept_cat_filter =  ".json_encode($adept_cat_filter)." </scri
                     <th></th>
                     <td>
                         <p class="submit">
+                        <?php 
+                            wp_nonce_field( "awedpt_settings" );
+                        ?>
                             <input type="submit" class="button-primary" value="Save Authentication" name="wpadept_save_code" />
                         </p>
                     </td>

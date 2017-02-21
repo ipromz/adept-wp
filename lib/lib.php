@@ -650,7 +650,7 @@ Class Wpadept_Lib {
             if(isset($meeting->check_address)) {
                 update_post_meta($post_id, '_check_address', $meeting->check_address);
             }
-            $group_ids = get_wp_id($meeting->group_id , "groups");
+            $group_ids = wpadept_get_wp_id($meeting->group_id , "groups");
             if($group_ids  && count($group_ids)) {
                 $group_ids_str = $this->stringify($group_ids);
                 //pre($group_ids_str);// exit;
