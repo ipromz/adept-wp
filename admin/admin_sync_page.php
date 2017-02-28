@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 add_action('admin_menu', 'wpadept_add_menu_sync' , 12); //priority must be more than 10
 
 function wpadept_add_menu_sync() {
-	wp_deregister_script('heartbeat');
+	//wp_deregister_script('heartbeat');
 	add_submenu_page('adept_lms', 'Sync', 'Sync', 'manage_options', 'adept_lms_sync', 'wpadept_sync_page_callback' );
 
 }

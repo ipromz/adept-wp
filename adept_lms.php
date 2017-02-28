@@ -9,8 +9,8 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-/*error_reporting(E_ALL); 
-ini_set('display_errors', 1);*/
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
 
 define('WPADEPT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define("WPADEPT_PLUGIN_FILE" , __FILE__);
@@ -1296,6 +1296,7 @@ function wpadept_footer_js() {
 function wpadept_is_wpml_installed() {
 
     $option = get_option("active_plugins");    
+    //print_r($option); exit;
     return in_array( "sitepress-multilingual-cms/sitepress.php", $option );
 
 }

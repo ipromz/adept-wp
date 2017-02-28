@@ -189,17 +189,18 @@ Class Wpadept_Lib {
 
 
                 $qry = $wpdb->prepare("SELECT post_id FROM " . $wpdb->prefix . "postmeta m, {$wpdb->prefix}posts  p where p.ID = m.post_id and p.post_type='courses' and meta_key='_adept_api_id' AND meta_value ='%d' ORDER BY post_id DESC LIMIT 0,1 " , $v->id);
-                $get_existing_post_id = $wpdb->get_var();
+                $get_existing_post_id = $wpdb->get_var($qry);
 
                 //if wpml plugin is not installed  
                 if(!wpadept_is_wpml_installed()) {
+                    //echo "not installed";
                     $this->import_course_without_wpml($v);
                 }
                 else {
 
                     //echo "promzyaha <br>";
                     if (trim($get_existing_post_id) == "") {
-                             
+                        echo "-ok1- ";     
                         $my_post = array(
                             "post_author" => $adept_author_value,
                             "post_content" => $v->description,
@@ -257,6 +258,8 @@ Class Wpadept_Lib {
 
                     }
                     else {
+                        echo "-ok2- ";     
+
                         $this->update_course_with_wpml($v , $get_existing_post_id);
                     }
                 }
@@ -435,13 +438,13 @@ Class Wpadept_Lib {
             if($post_exists) {
                 //if post exists then it will be updated only
                 $post["ID"] = $post_exists; 
-                $post_id = wp_insert_post($post);
+                $post_id = wpadept_insert_post($post);
             }
             else {
 
                 $trigid = wpml_get_content_trid('post_' . $post_type, $old_post); // Find Transalation ID function from WPML API. 
                 $_POST['icl_post_language'] = $locale->locale; // Set another language
-                $post_id = wp_insert_post($post);
+                $post_id = wpadept_insert_post($post);
                 $sitepress->set_element_language_details($post_id, 'post_' . $post_type, $trigid, $locale->locale); // Change this post 
                 
 
@@ -547,7 +550,8 @@ Class Wpadept_Lib {
         $all_meeting_list = $this->getdata($url);
         
         if(isset($_GET["show_data"])) {
-            pre($all_meeting_list); exit;
+            echo "<pre>";
+            print_r($all_meeting_list); exit;
         }
 
 
@@ -560,7 +564,7 @@ Class Wpadept_Lib {
         //else create new queue
         if($splitHelper->has_incomplete_batch()) {
             $next = $splitHelper->get_next_batch();
-            echo "incomplee";
+            //echo "incomplee";
         }
         else {
             $splitHelper->new_batch($meetings_flat_data);
@@ -597,7 +601,7 @@ Class Wpadept_Lib {
         $count = 0;
         foreach($meetings as $meeting) {
 
-            file_put_contents(ABSPATH."/meetingslogs.log", $count );
+            //file_put_contents(ABSPATH."/meetingslogs.log", $count );
             $count++;
             //check if post exists
             $qry = $wpdb->prepare("select * from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where m.post_id=p.ID and p.post_type='meetings' and m.meta_key='_adept_api_id' and m.meta_value='%d' " , $meeting->id );
@@ -666,6 +670,9 @@ Class Wpadept_Lib {
             update_post_meta($post_id, '_hour_length', $meeting->hour_length);
             update_post_meta($post_id, '_level', $meeting->level);
             update_post_meta($post_id, '_location', $meeting->location);
+            update_post_meta($post_id, '_public', $meeting->public);
+            update_post_meta($post_id, '_meeting_url', $meeting->meeting_url);
+            update_post_meta($post_id, '_meeting_type', $meeting->meeting_type);
                  
         }
 
