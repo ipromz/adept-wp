@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function wpadept_cron() {
 
 	set_time_limit(300); 
-
+	//exit;
 	global $wpdb; 
 
 	$post_table = $wpdb->prefix . "posts";
@@ -30,22 +30,22 @@ function wpadept_cron() {
 	if ($result) {
 	    echo $result;
 	} else {
-	    echo 'Categories category imported successfully (time: '.adept_clc().')<br><br>';
+	    echo 'Categories category imported successfully (time: '.wpadept_clc().')<br><br>';
 	}
 
 	//importing courses
 	$url = $adept_api_url_value . 'courses?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	$result = $adept->import_course($url);
-	echo 'Course imported successfully  (time: '.adept_clc().')<br><br>';
+	echo 'Course imported successfully  (time: '.wpadept_clc().')<br><br>';
 
 
 	//importing instructors
 	$url = $adept_api_url_value . 'team_members?access_token=' . $adept_access_token_value . '&account_id=' . $adept_account_id_value;
 	$result = $adept->import_instructors($url);
 	$success = $result;
-	echo 'instructor updated successfully  (time: '.adept_clc().')<br><br>';
+	echo 'instructor updated successfully  (time: '.wpadept_clc().')<br><br>';
 
-
+	exit;
 }
 
 function wpadept_cron_meetings() {
@@ -53,6 +53,7 @@ function wpadept_cron_meetings() {
 	set_time_limit(300); 
 
 	global $wpdb; 
+	$adept = new Wpadept_Lib();
 
 	$post_table = $wpdb->prefix . "posts";
 	$postmeta_table = $wpdb->prefix . "postmeta";
@@ -74,7 +75,7 @@ function wpadept_cron_meetings() {
 	$result = $adept->import_meeting($url);
 	$success = $result;
 	echo 'class meeting imported successfully <br><br>';
-
+	exit;
 }
 
 

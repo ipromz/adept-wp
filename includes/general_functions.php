@@ -162,7 +162,7 @@ function wpadept_insert_post($postarr) {
 	);
 	$ints = array('menu_order','post_parent' , 'comment_count' );
 	if ( ! empty( $postarr['ID'] ) ) {
-		
+		//echo " -  yeah will update <br>";
 		$postarr = sanitize_post($postarr, 'db');
 		unset($postarr["filter"]);
 		
@@ -206,4 +206,9 @@ function wpadept_insert_post($postarr) {
 		$wpdb->query($query);
 		return $wpdb->insert_id;
 	}
+}
+
+function wpadept_clc(){
+    global $itime;
+    return time() - $itime;
 }

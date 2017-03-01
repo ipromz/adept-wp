@@ -138,7 +138,3 @@ function wpadept_sync_ajax() {
 	wp_die();
 }
 
-function wpadept_clc(){
-    global $itime;
-    return time() - $itime;
-}

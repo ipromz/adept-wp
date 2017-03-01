@@ -178,9 +178,8 @@ Class Wpadept_Lib {
            
             foreach ($all_courses_list->data as $k => $v) {
                 if($this->should_skip_category($v->course_category_id)) {
-                   continue; 
+                    continue; 
                 }
-                
 
                 $adept_author_value = get_option('adept_author');
                 if ($v->teaser == '') {
@@ -198,7 +197,6 @@ Class Wpadept_Lib {
                 }
                 else {
 
-                    //echo "promzyaha <br>";
                     if (trim($get_existing_post_id) == "") {
                         echo "-ok1- ";     
                         $my_post = array(
@@ -351,8 +349,9 @@ Class Wpadept_Lib {
 
         global $wpdb;
 
-        $qry = $wpdb->prepare("SELECT term_id FROM " . $wpdb->prefix . "terms" . " WHERE slug LIKE 'cat-%s-%'" , $data->course_category_id);
-
+        //$qry = $wpdb->prepare("SELECT term_id FROM " . $wpdb->prefix . "terms  WHERE slug LIKE 'cat-%s-%'" , $data->course_category_id);
+        $qry = "SELECT term_id FROM " . $wpdb->prefix . "terms  WHERE slug LIKE 'cat-".$data->course_category_id."-%'";
+        //echo $qry."<br>";
         $term_id = $wpdb->get_var($qry);                              
         if(!empty($term_id)) {
             wp_set_object_terms($post_id, (int)$term_id, 'genre' , false); //false to append
@@ -428,6 +427,7 @@ Class Wpadept_Lib {
             }
 
             $post_exists = $this->does_post_exists($course->id , $locale->locale , "courses");
+        
             $post = array(  
                             "post_title" =>  $locale->course_title,
                             "post_content" => $locale->description,
@@ -437,16 +437,17 @@ Class Wpadept_Lib {
 
             if($post_exists) {
                 //if post exists then it will be updated only
+                echo " - post exists - $post_exists ";
                 $post["ID"] = $post_exists; 
                 $post_id = wpadept_insert_post($post);
             }
             else {
-
-                $trigid = wpml_get_content_trid('post_' . $post_type, $old_post); // Find Transalation ID function from WPML API. 
+                echo "--doesnt exists-- ".$course->id."<br>";
+                /*$trigid = wpml_get_content_trid('post_' . $post_type, $old_post); // Find Transalation ID function from WPML API. 
                 $_POST['icl_post_language'] = $locale->locale; // Set another language
                 $post_id = wpadept_insert_post($post);
                 $sitepress->set_element_language_details($post_id, 'post_' . $post_type, $trigid, $locale->locale); // Change this post 
-                
+                */
 
             }
             if($post_id) {
@@ -461,11 +462,12 @@ Class Wpadept_Lib {
         //echo "$id, $locale"; exit;
         global $wpdb;
         $qry = $wpdb->prepare("select post_id from {$wpdb->prefix}postmeta m, {$wpdb->prefix}posts p where p.ID = m.post_id and p.post_type='%s' and meta_key='_adept_api_id' and meta_value='%s'  " , $type , $id);
+        //echo $qry; exit;
         $post_ids = $wpdb->get_col($qry);
         if(is_array($post_ids) && count($post_ids)>0 ) {
             $post_ids = implode(",", $post_ids);
             
-            $qry = $wpdb->prepare("select element_id from {$wpdb->prefix}icl_translations where language_code='%s' and element_id in(%s) " , $locale , $post_ids );
+            $qry = $wpdb->prepare("select element_id from {$wpdb->prefix}icl_translations where language_code='%s' and element_id in($post_ids) " , $locale   );
             return $wpdb->get_var($qry);
 
         }
@@ -564,9 +566,10 @@ Class Wpadept_Lib {
         //else create new queue
         if($splitHelper->has_incomplete_batch()) {
             $next = $splitHelper->get_next_batch();
-            //echo "incomplee";
+            echo "old batch";
         }
         else {
+            echo "new batch";
             $splitHelper->new_batch($meetings_flat_data);
             $next = $splitHelper->get_next_batch();
         }

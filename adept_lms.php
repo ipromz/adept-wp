@@ -9,8 +9,8 @@
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-error_reporting(E_ALL); 
-ini_set('display_errors', 1);
+/*error_reporting(E_ALL); 
+ini_set('display_errors', 1);*/
 
 define('WPADEPT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define("WPADEPT_PLUGIN_FILE" , __FILE__);
