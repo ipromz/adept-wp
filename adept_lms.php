@@ -932,6 +932,7 @@ function wpadept_create_groups() {
             'not_found_in_trash' => __('No Group found in Trash.', 'Group')
         ),
         'public' => true,
+        'publicly_queryable' => false,
         'has_archive' => true,
         'supports' => array('title', 'editor'),
         'register_meta_box_cb' => 'wpadept_add_group_metaboxes'
