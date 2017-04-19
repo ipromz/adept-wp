@@ -499,7 +499,7 @@ Class Wpadept_Lib {
         if(!empty($adept_ids)) {
 
 
-            $qry = $wpdb->prepare("select p.ID from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where p.post_type='%s' and m.post_id = p.ID and m.meta_key='_adept_api_id' and m.meta_value in (%s) " , $post_type , $adept_ids);
+            $qry = $wpdb->prepare("select p.ID from {$wpdb->prefix}posts p, {$wpdb->prefix}postmeta m where p.post_type='%s' and m.post_id = p.ID and m.meta_key='_adept_api_id' and m.meta_value in ($adept_ids) " , $post_type );
             $active_ids = $wpdb->get_col($qry);
 
             $qry = $wpdb->prepare( "select ID from {$wpdb->prefix}posts where post_type='%s'" , $post_type );
@@ -509,7 +509,7 @@ Class Wpadept_Lib {
 
             $to_be_drafted = implode(",", $to_be_drafted);
             if(!empty($to_be_drafted)) {
-                $qry = $wpdb->prepare("update {$wpdb->prefix}posts set post_status='draft' where ID in (%s)" , $to_be_drafted);
+                $qry = "update {$wpdb->prefix}posts set post_status='draft' where ID in ($to_be_drafted)" ;
                 $wpdb->query($qry);
             }
 
@@ -530,7 +530,7 @@ Class Wpadept_Lib {
         $to_be_published =  array_intersect($active_ids, $all_draft_ids);
         if(count($to_be_published)>0) {
             $to_be_published = implode(",", $to_be_published);
-            $qry = $wpdb->prepare("update {$wpdb->prefix}posts set post_status='publish' where ID in (%s)" , $to_be_published );
+            $qry = "update {$wpdb->prefix}posts set post_status='publish' where ID in ($to_be_published)";
             $wpdb->query( $qry );
         }
     }
@@ -597,6 +597,7 @@ Class Wpadept_Lib {
     }
 
     function update_meeting($meetings) {
+
         global $wpdb,$sitepress;
         //$wpdb->show_errors();
         $adept_author_value = get_option('adept_author');
@@ -634,6 +635,7 @@ Class Wpadept_Lib {
             update_post_meta($post_id, '_adept_api_id', $meeting->id);
             
             $gmt_offset = get_option('gmt_offset');
+            //echo "asd".$gmt_offset; exit;
             $starttime_ts = strtotime($meeting->start_time);
             $starttime_ts_local = $starttime_ts + ($gmt_offset*3600);
             $date = date("d/m/Y" , $starttime_ts_local );
