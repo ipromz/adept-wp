@@ -5,7 +5,7 @@
   Plugin URI: http://adeptlms.com/
   Description: Plugin for Adept LMS
   Author: promz
-  Version: 1.0
+  Version: 1.0.1
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -527,7 +527,7 @@ function wpadept_meeting_fields() {
     
     // Get the group_id data if its already been entered
     $meeting_id = get_post_meta($post->ID, '_meeting_id', true);
-    $meeting_id = esc_attr($meeting_i);
+    $meeting_id = esc_attr($meeting_id);
     // Echo out the field
     echo '<input type="hidden" name="_meeting_id" value="' . $meeting_id . '" class="widefat" /><br/><br/>';
 
@@ -603,6 +603,10 @@ function wpadept_meeting_fields() {
     echo '<b>Category :</b> <input type="text" name="_category" class="widefat" value="'.$category.'" /><br/><br/>';
 
 
+    $meta = get_post_meta($post->ID);
+    $meetings_url = get_post_meta($post->ID, '_meeting_url', true);
+    $str = esc_attr($meetings_url);
+    echo '<b>Meeting\'s Url:</b> <input type="text" name="_meeting_url" value="' . $str . '" class="widefat" /><br/><br/>';
 
     $group_id_wp = get_post_meta($post->ID, '_group_id', true);
     $str = $adeptlib->unstringify($group_id_wp);
@@ -639,6 +643,7 @@ function wpadept_save_meeting_meta($post_id, $post) {
     $end_time = sanitize_text_field($_POST['_end_time']);
     //$web_conference = $_POST['_web_conference'];
     $address = sanitize_text_field($_POST['_address']);
+    $meeting_url = sanitize_text_field($_POST['_meeting_url']);
     $meeting_id = sanitize_text_field($_POST['_meeting_id']);
     $status = sanitize_text_field($_POST['_status']);
     $group_id = sanitize_text_field($_POST['_group_id']);
@@ -693,6 +698,7 @@ function wpadept_save_meeting_meta($post_id, $post) {
     $meeting_meta['_start_time'] = sanitize_text_field($_POST['_start_time']);
     $meeting_meta['_end_time'] = sanitize_text_field($_POST['_end_time']);
     $meeting_meta['_address'] = sanitize_text_field($_POST['_address']);
+    $meeting_meta['_meeting_url'] = sanitize_text_field($_POST['_meeting_url']);
     $meeting_meta['_meeting_id'] = sanitize_text_field($_POST['_meeting_id']);
     $meeting_meta['_status'] = sanitize_text_field($_POST['_status']);
     $meeting_meta['_group_id'] = sanitize_text_field($_POST['_group_id']);
