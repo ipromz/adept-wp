@@ -163,6 +163,9 @@ function wpadept_insert_post($postarr) {
 	$ints = array('menu_order','post_parent' , 'comment_count' );
 	if ( ! empty( $postarr['ID'] ) ) {
 		//echo " -  yeah will update <br>";
+		//$postarr["post_content"] = "post'content";
+		$postarr["post_title"] =  esc_sql( $postarr["post_title"] );
+		$postarr["post_content"] =  esc_sql( $postarr["post_content"] );
 		$postarr = sanitize_post($postarr, 'db');
 		unset($postarr["filter"]);
 		
@@ -182,17 +185,24 @@ function wpadept_insert_post($postarr) {
 		$query = rtrim($query , ",");
 		$query .= " where ID = $post_ID";
 		$wpdb->query($query);
+		//echo $query; exit;
 		return $post_ID;
 	} 
 	else {
 		
 		$postarr = wp_parse_args($postarr, $defaults);
+		
+		$postarr["post_title"] =  esc_sql( $postarr["post_title"] );
+		$postarr["post_content"] =  esc_sql( $postarr["post_content"] );
+
 		$postarr = sanitize_post($postarr, 'db');
 		unset($postarr["filter"]);
 		$query = " insert into {$wpdb->prefix}posts set ";
 		foreach($postarr as $key=>$val) {
 			
 			if($key == "ID") continue;
+
+
 			if(in_array($key, $ints)) {
 				$query .= " `$key` = $val,";
 				
@@ -202,6 +212,7 @@ function wpadept_insert_post($postarr) {
 				
 			}
 		}
+		//echo $query; exit;
 		$query = rtrim($query , ",");
 		$wpdb->query($query);
 		return $wpdb->insert_id;
