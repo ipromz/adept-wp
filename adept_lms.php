@@ -5,7 +5,7 @@
   Plugin URI: http://adeptlms.com/
   Description: Plugin for Adept LMS
   Author: promz
-  Version: 1.0.1
+  Version: 1.0.2
  */
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
